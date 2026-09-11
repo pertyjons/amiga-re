@@ -6,7 +6,7 @@
 //! Reading a routine's Q split otherwise means inferring it by hand. The
 //! analysis flags those arithmetic idioms, recognises common compare/branch
 //! saturation clamps, and conservatively propagates known Q scales through
-//! register copies and explicit scaling shifts in straight-line code.
+//! register copies and explicit scaling shifts along the control-flow graph.
 
 use std::collections::{BTreeMap, BTreeSet};
 
@@ -14,7 +14,9 @@ use m68000::addressing_modes::AddressingMode;
 use m68000::instruction::{Direction, Operands, Size};
 use m68000::isa::Isa;
 
-use crate::control_flow::{ControlFlowAnalysis, DecodedInstruction};
+use crate::constants::{RegisterKind, owner_has_invalidating_unresolved_flow, writes_register};
+use crate::control_flow::{ControlFlowAnalysis, DecodedInstruction, FlowKind};
+use crate::dataflow::{self, Domain};
 
 /// How many instructions apart a multiply/divide and its normalising shift may
 /// sit and still be paired.
@@ -95,66 +97,81 @@ struct ShiftInfo {
 /// Scan `analysis` for fixed-point multiply/divide idioms, in address order.
 #[must_use]
 pub fn fixed_point_hints(analysis: &ControlFlowAnalysis) -> Vec<FixedPointHint> {
-    let instructions: Vec<(u32, Isa, Operands)> = analysis
-        .instructions
-        .iter()
-        .map(|(address, decoded)| {
-            (
-                *address,
-                Isa::from(decoded.instruction.opcode),
-                decoded.instruction.operands,
-            )
-        })
-        .collect();
-
+    let instructions: Vec<_> = analysis.instructions.values().collect();
+    // A pair must stay inside one basic block. Count incoming edges globally:
+    // a second function or a call into the middle also breaks the pairing.
+    let mut incoming = BTreeMap::<u32, BTreeSet<(u32, FlowKind)>>::new();
+    let mut outgoing = BTreeMap::<u32, BTreeSet<(u32, FlowKind)>>::new();
+    for flow in &analysis.flows {
+        incoming
+            .entry(flow.target)
+            .or_default()
+            .insert((flow.site, flow.kind));
+        outgoing
+            .entry(flow.site)
+            .or_default()
+            .insert((flow.target, flow.kind));
+    }
+    let follows = |previous: &DecodedInstruction, next: &DecodedInstruction| {
+        previous.end == next.address
+            && previous.owners == next.owners
+            && previous.owner_total == previous.owners.len()
+            && next.owner_total == next.owners.len()
+            && !analysis.functions.contains(&next.address)
+            && incoming.get(&next.address).is_some_and(|edges| {
+                edges.len() == 1 && edges.contains(&(previous.address, FlowKind::Fallthrough))
+            })
+            && outgoing.get(&previous.address).is_some_and(|edges| {
+                edges.len() == 1 && edges.contains(&(next.address, FlowKind::Fallthrough))
+            })
+    };
     let mut hints = Vec::new();
-    for index in 0..instructions.len() {
-        let (address, isa, operands) = instructions[index];
-
-        // MULS/MULU renormalised by a following right shift on the product.
-        if let Some(register) = mul_register(isa, operands) {
-            let end = (index + 1 + WINDOW).min(instructions.len());
-            for (shift_site, shift_isa, shift_operands) in &instructions[index + 1..end] {
-                if let Some(shift) = scaling_shift(*shift_isa, *shift_operands)
-                    && shift.register == register
-                    && shift.right
-                    && !analysis.instructions[&address]
-                        .owners
-                        .is_disjoint(&analysis.instructions[shift_site].owners)
-                {
-                    hints.push(FixedPointHint {
-                        site: address,
-                        shift_site: *shift_site,
-                        kind: FixedPointKind::ScaledMultiply,
-                        register,
-                        fractional_bits: shift.amount,
-                    });
-                    break;
-                }
+    for (index, decoded) in instructions.iter().enumerate() {
+        let isa = Isa::from(decoded.instruction.opcode);
+        let operands = decoded.instruction.operands;
+        let (register, kind, backwards) = if let Some(register) = mul_register(isa, operands) {
+            (register, FixedPointKind::ScaledMultiply, false)
+        } else if let Some(register) = div_register(isa, operands) {
+            (register, FixedPointKind::ScaledDivide, true)
+        } else {
+            continue;
+        };
+        let mut previous = *decoded;
+        for distance in 1..=WINDOW {
+            let candidate = if backwards {
+                index.checked_sub(distance)
+            } else {
+                index.checked_add(distance)
             }
-        }
-
-        // DIVS/DIVU whose dividend was pre-scaled by a preceding left shift.
-        if let Some(register) = div_register(isa, operands) {
-            let start = index.saturating_sub(WINDOW);
-            for (shift_site, shift_isa, shift_operands) in instructions[start..index].iter().rev() {
-                if let Some(shift) = scaling_shift(*shift_isa, *shift_operands)
-                    && shift.register == register
-                    && !shift.right
-                    && !analysis.instructions[&address]
-                        .owners
-                        .is_disjoint(&analysis.instructions[shift_site].owners)
-                {
-                    hints.push(FixedPointHint {
-                        site: address,
-                        shift_site: *shift_site,
-                        kind: FixedPointKind::ScaledDivide,
-                        register,
-                        fractional_bits: shift.amount,
-                    });
-                    break;
-                }
+            .and_then(|index| instructions.get(index))
+            .copied();
+            let Some(candidate) = candidate else { break };
+            if !(if backwards {
+                follows(candidate, previous)
+            } else {
+                follows(previous, candidate)
+            }) {
+                break;
             }
+            if let Some(shift) = scaling_shift(
+                Isa::from(candidate.instruction.opcode),
+                candidate.instruction.operands,
+            ) && shift.register == register
+                && shift.right != backwards
+            {
+                hints.push(FixedPointHint {
+                    site: decoded.address,
+                    shift_site: candidate.address,
+                    kind,
+                    register,
+                    fractional_bits: shift.amount,
+                });
+                break;
+            }
+            if writes_register(candidate, RegisterKind::Data, register, analysis) {
+                break;
+            }
+            previous = candidate;
         }
     }
     hints
@@ -238,39 +255,87 @@ pub fn fixed_point_scales(analysis: &ControlFlowAnalysis) -> Vec<FixedPointScale
             })
         })
         .collect::<BTreeMap<_, _>>();
-    let mut found = BTreeSet::new();
+    let mut found = BTreeMap::<(u32, u8), Option<u8>>::new();
+    let transfer = |decoded: &DecodedInstruction, state: &mut Scales| {
+        update_scales(&mut state.0, decoded);
+        for register in 0_u8..8 {
+            if let Some(&bits) = seeds.get(&(decoded.address, register)) {
+                state.0[usize::from(register)] = Some(bits);
+            }
+        }
+    };
     for &owner in &analysis.functions {
-        let mut scales = [None; 8];
-        let mut previous_end = None;
+        let walked = (!owner_has_invalidating_unresolved_flow(analysis, owner)).then(|| {
+            dataflow::forward(
+                analysis,
+                owner,
+                Scales::default(),
+                |owner, decoded, state| {
+                    if decoded.address != owner && analysis.functions.contains(&decoded.address) {
+                        *state = Scales::default();
+                    }
+                },
+                transfer,
+            )
+        });
+        // Collect only after convergence. Intermediate worklist states must
+        // never leave records behind when a later predecessor erases a scale.
         for decoded in analysis
             .instructions
             .values()
             .filter(|decoded| decoded.owners.contains(&owner))
         {
-            if previous_end.is_some_and(|end| end != decoded.address) {
-                scales = [None; 8];
+            let before = walked
+                .as_ref()
+                .filter(|walked| !walked.exhausted)
+                .and_then(|walked| walked.before.get(&decoded.address));
+            let mut after = before.cloned().unwrap_or_default();
+            if before.is_some() && decoded.owner_total == decoded.owners.len() {
+                transfer(decoded, &mut after);
+            } else {
+                after = Scales::default();
             }
-            let before = scales;
-            update_scales(&mut scales, decoded);
             for register in 0_u8..8 {
-                if let Some(&seed) = seeds.get(&(decoded.address, register)) {
-                    scales[usize::from(register)] = Some(seed);
-                }
-                let after = scales[usize::from(register)];
-                if after != before[usize::from(register)]
-                    && let Some(fractional_bits) = after
-                {
-                    found.insert(FixedPointScale {
-                        site: decoded.address,
-                        register,
-                        fractional_bits,
-                    });
-                }
+                let index = usize::from(register);
+                let bits = after.0[index]
+                    .filter(|_| before.is_some_and(|before| before.0[index] != after.0[index]));
+                found
+                    .entry((decoded.address, register))
+                    .and_modify(|existing| {
+                        if *existing != bits {
+                            *existing = None;
+                        }
+                    })
+                    .or_insert(bits);
             }
-            previous_end = Some(decoded.end);
         }
     }
-    found.into_iter().collect()
+    found
+        .into_iter()
+        .filter_map(|((site, register), bits)| {
+            bits.map(|fractional_bits| FixedPointScale {
+                site,
+                register,
+                fractional_bits,
+            })
+        })
+        .collect()
+}
+
+#[derive(Clone, Default, Eq, PartialEq)]
+struct Scales([Option<u8>; 8]);
+
+impl Domain for Scales {
+    fn join(&mut self, incoming: &Self) -> bool {
+        let mut changed = false;
+        for (held, next) in self.0.iter_mut().zip(incoming.0) {
+            if held.is_some() && *held != next {
+                *held = None;
+                changed = true;
+            }
+        }
+        changed
+    }
 }
 
 fn immediate_compare(isa: Isa, operands: Operands) -> Option<(Size, u8, u32)> {
@@ -401,12 +466,10 @@ fn update_scales(scales: &mut [Option<u8>; 8], decoded: &DecodedInstruction) {
     }
     let isa = Isa::from(decoded.instruction.opcode);
     let operands = decoded.instruction.operands;
-    // A call scratches D0/D1 by ABI; an unnameable word may have written them
-    // and no arm below would notice. TRAP is a call to a handler this walk
-    // cannot see, so it is one too.
+    // No calling convention is proved here: a callee or trap handler may
+    // replace any register, including those outside the usual scratch set.
     if matches!(isa, Isa::Jsr | Isa::Bsr | Isa::Trap | Isa::Unknown) {
-        scales[0] = None;
-        scales[1] = None;
+        scales.fill(None);
         return;
     }
     match operands {
@@ -664,6 +727,148 @@ mod tests {
         // MULS.W D1,D3 ; ASR.L #8,D2 ; RTS  (shift renormalises D2, not the product D3)
         let code = [0xc7, 0xc1, 0xe0, 0x82, 0x4e, 0x75];
         assert!(fixed_point_hints(&analyze(&code, 0)).is_empty());
+    }
+
+    #[test]
+    fn idioms_refuse_intervening_register_writes_in_both_directions() {
+        for clobber in [
+            &[0x76, 0x00][..],         // MOVEQ #0,D3
+            &[0x48, 0xc3],             // EXT.L D3 (scale-preserving, but changes the value)
+            &[0xd6, 0x43],             // ADD.W D3,D3
+            &[0x4c, 0xd8, 0x00, 0x08], // MOVEM.L (A0)+,D3
+            &[0x4e, 0x7a, 0x38, 0x01], // MOVEC VBR,D3
+            &[0x4e, 0x40],             // TRAP #0
+        ] {
+            for (first, last) in [
+                ([0xc7, 0xc1], [0xe0, 0x83]), // MULS ; ASR
+                ([0xe9, 0x83], [0x87, 0xc1]), // ASL ; DIVS
+            ] {
+                let mut code = first.to_vec();
+                code.extend_from_slice(clobber);
+                code.extend_from_slice(&last);
+                code.extend_from_slice(&[0x4e, 0x75]);
+                assert!(
+                    fixed_point_hints(&analyze(&code, 0)).is_empty(),
+                    "{code:02x?}"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn idioms_allow_unrelated_writes_and_read_only_intermediates() {
+        // MULS D1,D3 ; MOVEQ #0,D2 ; TST.L D3 ; ASR.L #8,D3 ; RTS
+        let code = [0xc7, 0xc1, 0x74, 0x00, 0x4a, 0x83, 0xe0, 0x83, 0x4e, 0x75];
+        assert_eq!(fixed_point_hints(&analyze(&code, 0)).len(), 1);
+    }
+
+    #[test]
+    fn idioms_do_not_cross_branches_gaps_joins_or_function_entries() {
+        for code in [
+            // MULS ; BEQ shift ; NOP ; shift: ASR ; RTS
+            &[0xc7, 0xc1, 0x67, 0x02, 0x4e, 0x71, 0xe0, 0x83, 0x4e, 0x75][..],
+            // MULS ; BRA shift ; data ; shift: ASR ; RTS
+            &[0xc7, 0xc1, 0x60, 0x02, 0xff, 0xff, 0xe0, 0x83, 0x4e, 0x75],
+            // BEQ shift ; MULS ; shift: ASR ; RTS
+            &[0x67, 0x02, 0xc7, 0xc1, 0xe0, 0x83, 0x4e, 0x75],
+            // ASL ; BEQ divide ; NOP ; divide: DIVS ; RTS
+            &[0xe9, 0x83, 0x67, 0x02, 0x4e, 0x71, 0x87, 0xc1, 0x4e, 0x75],
+        ] {
+            assert!(
+                fixed_point_hints(&analyze(code, 0)).is_empty(),
+                "{code:02x?}"
+            );
+        }
+        let code = [0xc7, 0xc1, 0xe0, 0x83, 0x4e, 0x75];
+        assert!(fixed_point_hints(&crate::analyze_entries(&code, &[0, 2])).is_empty());
+    }
+
+    #[test]
+    fn scales_follow_non_linear_blocks_including_backward_edges() {
+        // BRA seed ; copy: MOVE.L D3,D2 ; RTS ; seed: MULS ; ASR ; BRA copy
+        let code = [
+            0x60, 0x04, 0x24, 0x03, 0x4e, 0x75, 0xc7, 0xc1, 0xe0, 0x83, 0x60, 0xf6,
+        ];
+        assert!(
+            fixed_point_scales(&analyze(&code, 0)).contains(&FixedPointScale {
+                site: 2,
+                register: 2,
+                fractional_bits: 8,
+            })
+        );
+    }
+
+    #[test]
+    fn scale_joins_require_agreement_from_every_predecessor() {
+        for (right_shift, expected) in [(0xe0, Some(8)), (0xe2, None)] {
+            // BEQ right ; MULS ; ASR #8 ; BRA join ;
+            // right: MULS ; ASR #8/#1 ; join: MOVE.L D3,D2 ; RTS
+            let code = [
+                0x67,
+                0x06,
+                0xc7,
+                0xc1,
+                0xe0,
+                0x83,
+                0x60,
+                0x04,
+                0xc7,
+                0xc1,
+                right_shift,
+                0x83,
+                0x24,
+                0x03,
+                0x4e,
+                0x75,
+            ];
+            let scales = fixed_point_scales(&analyze(&code, 0));
+            assert_eq!(
+                scales
+                    .iter()
+                    .find(|scale| scale.site == 12)
+                    .map(|scale| scale.fractional_bits),
+                expected
+            );
+        }
+        // BEQ join ; MULS ; ASR ; join: MOVE.L D3,D2 ; RTS
+        let code = [0x67, 0x04, 0xc7, 0xc1, 0xe0, 0x83, 0x24, 0x03, 0x4e, 0x75];
+        assert!(
+            !fixed_point_scales(&analyze(&code, 0))
+                .iter()
+                .any(|scale| scale.site == 6)
+        );
+    }
+
+    #[test]
+    fn loop_backedges_erase_stale_worklist_results() {
+        // MULS ; ASR ; loop: MOVE.L D3,D2 ; ASL.L #1,D3 ; BNE loop ; RTS
+        let code = [
+            0xc7, 0xc1, 0xe0, 0x83, 0x24, 0x03, 0xe3, 0x83, 0x66, 0xfa, 0x4e, 0x75,
+        ];
+        let scales = fixed_point_scales(&analyze(&code, 0));
+        assert!(scales.iter().any(|scale| scale.site == 2));
+        assert!(!scales.iter().any(|scale| matches!(scale.site, 4 | 6)));
+    }
+
+    #[test]
+    fn calls_clear_scales_even_in_non_scratch_registers() {
+        // MULS ; ASR ; JSR (A0) ; MOVE.L D3,D2 ; RTS
+        let code = [0xc7, 0xc1, 0xe0, 0x83, 0x4e, 0x90, 0x24, 0x03, 0x4e, 0x75];
+        let scales = fixed_point_scales(&analyze(&code, 0));
+        assert!(scales.iter().any(|scale| scale.site == 2));
+        assert!(!scales.iter().any(|scale| scale.site == 6));
+    }
+
+    #[test]
+    fn unresolved_jumps_and_shared_entries_cannot_invent_scales() {
+        let code = [0xc7, 0xc1, 0xe0, 0x83, 0x24, 0x03, 0x4e, 0xd0];
+        assert!(fixed_point_scales(&analyze(&code, 0)).is_empty());
+        let code = [0xc7, 0xc1, 0xe0, 0x83, 0x24, 0x03, 0x4e, 0x75];
+        assert!(
+            !fixed_point_scales(&crate::analyze_entries(&code, &[0, 4]))
+                .iter()
+                .any(|scale| scale.site == 4)
+        );
     }
 
     #[test]

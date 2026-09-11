@@ -615,26 +615,6 @@
       "subject": 54
     },
     {
-      "anchor": "h0-insn-00000038",
-      "confidence": "probable",
-      "evidence": [
-        {
-          "site": 56,
-          "type": "instruction"
-        }
-      ],
-      "fractional_bits": 8,
-      "kind": "q_scale",
-      "location": {
-        "file": 88,
-        "hunk": 0,
-        "offset": 56
-      },
-      "producer": "fixed_point_scan",
-      "register": 3,
-      "subject": 56
-    },
-    {
       "anchor": "h0-insn-0000003a",
       "callee": 66,
       "confidence": "certain",

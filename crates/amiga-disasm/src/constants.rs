@@ -453,7 +453,10 @@ impl ConstantAnalysis {
 /// owner adds no state the owner-local walk lacks. Jumps and opaque/missing
 /// instructions have no such return edge and still invalidate the entire owner.
 ///
-fn owner_has_invalidating_unresolved_flow(analysis: &ControlFlowAnalysis, owner: u32) -> bool {
+pub(crate) fn owner_has_invalidating_unresolved_flow(
+    analysis: &ControlFlowAnalysis,
+    owner: u32,
+) -> bool {
     // `UnresolvedFlow` orders by `(owner, address)`, so one owner's entries are
     // a contiguous range. Scanning the whole set once per owner would be
     // quadratic in a program with many entry points and many unresolved exits.
@@ -864,6 +867,30 @@ fn is_call(decoded: &DecodedInstruction) -> bool {
         Isa::from(decoded.instruction.opcode),
         Isa::Jsr | Isa::Bsr | Isa::Unknown
     )
+}
+
+/// Whether an instruction may replace any part of the named register.
+pub(crate) fn writes_register(
+    decoded: &DecodedInstruction,
+    kind: RegisterKind,
+    register: u8,
+    analysis: &ControlFlowAnalysis,
+) -> bool {
+    if decoded.is_opaque_fallthrough() {
+        return decoded.movec_destination() == Some((kind == RegisterKind::Address, register));
+    }
+    is_call(decoded)
+        || Isa::from(decoded.instruction.opcode) == Isa::Trap
+        || register_write(
+            decoded,
+            kind,
+            register,
+            OperandOptions {
+                image_origin: None,
+                analysis,
+            },
+        )
+        .is_some()
 }
 
 /// What `decoded` writes to `(kind, register)`.

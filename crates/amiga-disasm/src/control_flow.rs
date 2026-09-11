@@ -3,8 +3,8 @@
 //! Instruction decoding comes from the external `m68000` crate; this module adds
 //! the reverse-engineering layer on top: recursive-descent traversal that follows
 //! branches, `BSR`/`JSR` calls, `DBcc`, direct `JMP`/`JSR` targets, and
-//! PC-indexed branch/call tables of `BRA.W` stubs, recording a call graph and any
-//! control flow it could not resolve.
+//! PC-indexed branch/call tables of `BRA.W` stubs and range-checked data jump
+//! tables, recording a call graph and any control flow it could not resolve.
 
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
 
@@ -13,6 +13,8 @@ use m68000::instruction::{Direction, Instruction, Operands, Size};
 use m68000::isa::Isa;
 use m68000::memory_access::MemoryAccess;
 use serde::Serialize;
+
+mod jump_tables;
 
 /// How many owners one instruction records before propagation stops.
 ///
@@ -615,7 +617,7 @@ pub fn analyze_entries_cancellable(
     options: &FlowOptions,
     cancel: &impl amiga_core::Cancel,
 ) -> amiga_core::Cancellable<ControlFlowAnalysis> {
-    let analysis = analyze_entries_once(code, entries, options, cancel)?;
+    let analysis = analyze_with_data_tables(code, entries, options, cancel)?;
     let promoted = promotable_tail_targets(&analysis);
     if promoted.is_empty() {
         return Ok(analysis);
@@ -624,13 +626,71 @@ pub fn analyze_entries_cancellable(
     augmented.extend(promoted);
     augmented.sort_unstable();
     augmented.dedup();
-    analyze_entries_once(code, &augmented, options, cancel)
+    analyze_with_data_tables(code, &augmented, options, cancel)
+}
+
+/// Rebuild ownership after discovering data tables, then check their guards
+/// against the expanded graph. A newly reached branch can bypass a guard that
+/// looked exclusive in the first traversal. Refused sites stay refused for
+/// this analysis; the bounded loop falls back to explicit unresolved jumps if
+/// nested discovery and validation do not settle.
+fn analyze_with_data_tables(
+    code: &[u8],
+    entries: &[u32],
+    options: &FlowOptions,
+    cancel: &impl amiga_core::Cancel,
+) -> amiga_core::Cancellable<ControlFlowAnalysis> {
+    let mut tables = BTreeMap::new();
+    let mut rejected = BTreeSet::new();
+    let mut analysis = analyze_entries_once(code, entries, options, &tables, cancel)?;
+    for _ in 0..8 {
+        amiga_core::checkpoint!(cancel);
+        let candidates: BTreeSet<u32> = analysis
+            .unresolved
+            .iter()
+            .map(|flow| flow.address)
+            .filter(|site| !rejected.contains(site))
+            .filter(|site| {
+                analysis
+                    .instructions
+                    .get(site)
+                    .is_some_and(|decoded| Isa::from(decoded.instruction.opcode) == Isa::Jmp)
+            })
+            .collect();
+        if tables.is_empty() && candidates.is_empty() {
+            return Ok(analysis);
+        }
+        let index = FlowIndex::new(&analysis.flows);
+        let mut next = tables.clone();
+        for (&site, targets) in &tables {
+            amiga_core::checkpoint!(cancel);
+            if jump_tables::targets(code, &analysis, &index, site).as_ref() != Some(targets) {
+                next.remove(&site);
+                rejected.insert(site);
+            }
+        }
+        for site in candidates {
+            amiga_core::checkpoint!(cancel);
+            if !next.contains_key(&site)
+                && let Some(targets) = jump_tables::targets(code, &analysis, &index, site)
+            {
+                next.insert(site, targets);
+            }
+        }
+        if next == tables {
+            return Ok(analysis);
+        }
+        tables = next;
+        analysis = analyze_entries_once(code, entries, options, &tables, cancel)?;
+    }
+    analyze_entries_once(code, entries, options, &BTreeMap::new(), cancel)
 }
 
 fn analyze_entries_once(
     code: &[u8],
     entries: &[u32],
     options: &FlowOptions,
+    tables: &BTreeMap<u32, Vec<u32>>,
     cancel: &impl amiga_core::Cancel,
 ) -> amiga_core::Cancellable<ControlFlowAnalysis> {
     let mut analysis = ControlFlowAnalysis {
@@ -789,7 +849,16 @@ fn analyze_entries_once(
             }
             if isa == Isa::Jmp {
                 if let Operands::EffectiveAddress(mode) = operands {
-                    match resolve_direct(code, options, mode, address, end) {
+                    match tables.get(&address).map_or_else(
+                        || {
+                            if jump_tables::loads_target(&analysis, address) {
+                                DirectTarget::Unresolved
+                            } else {
+                                resolve_direct(code, options, mode, address, end)
+                            }
+                        },
+                        |targets| DirectTarget::Table(targets.clone()),
+                    ) {
                         DirectTarget::Offset(target) => {
                             add_flow(&mut analysis, owner, address, target, FlowKind::Branch);
                             enqueue_valid(code, &mut queue, target, owner);
@@ -1106,7 +1175,7 @@ fn relative_target(address: u32, displacement: i16) -> u32 {
 enum DirectTarget {
     /// A hunk offset this traversal can continue into.
     Offset(u32),
-    /// Several offsets, from a PC-indexed table of `BRA.W` stubs.
+    /// Several offsets, from an instruction or data dispatch table.
     Table(Vec<u32>),
     /// Another hunk, proved by the relocation patching the operand.
     External(Relocation),

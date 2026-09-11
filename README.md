@@ -179,6 +179,24 @@ header still counts it, and a bounded listing names the calls that leave the
 selection and the unresolved flow inside it, so the lines it removed take nothing
 with them. An address that is not a function entry is refused rather than
 printing an empty listing.
+
+Control-flow analysis recognizes range-checked data jump tables as well as
+`BRA.W` stub tables. Supported data dispatches use an unsigned `CMP[I]`/`BHI`
+guard, explicit word/long index scaling (`ADD` or immediate left shifts), and
+either a relative-word load followed by an indexed `JMP`, or a longword pointer
+load into an address register followed by `JMP (An)`. Table bases can be
+PC-relative or established by `LEA`; absolute pointers respect the supplied
+rebase and relocations. Recognition is bounded to 256 entries and a 12-instruction
+dispatch suffix, with at most eight discovery/validation rounds. Every entry
+must name valid code in the analyzed image, and newly discovered paths must not
+bypass the guard. Missing bounds, malformed entries, cross-hunk pointers, and
+unsettled discovery retain an unresolved-flow warning instead of partial targets.
+
+Fixed-point idiom hints require an uninterrupted basic-block path with no
+intervening write to the value register. Q scales propagate along the control-flow
+graph and survive joins only when every incoming path agrees; calls discard
+unproved register scales. Unresolved intraprocedural flow prevents propagation.
+
 Sandbox commands map the selected hunk at `[base].origin` and start at
 `[base].entry` when configured; additional relocation
 targets require `--hunk-base HUNK=ADDR` so their real runtime addresses are

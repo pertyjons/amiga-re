@@ -19,7 +19,7 @@ L0000002A:  NOP                          ; 4e71
 L0000002C:  JSR (-30, A6)                ; 4eaeffe2  ; ?lvo -30: exec.library|graphics.library
 L00000030:  MOVE.W (0xDFF01C).L, D0      ; 303900dff01c  ; read INTENAR
 L00000036:  MULS.W D1, D3                ; c7c1  ; ?Q8 scaled multiply
-L00000038:  ASR.L #8, D3                 ; e083  ; ?D3 = Q8
+L00000038:  ASR.L #8, D3                 ; e083
 L0000003A:  BSR 6 <0x42>                 ; 6106  ; call helper
 L0000003C:  JMP (A0)                     ; 4ed0  ; !unresolved flow
 helper:

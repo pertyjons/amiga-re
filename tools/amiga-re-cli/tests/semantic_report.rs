@@ -1791,6 +1791,9 @@ fn annotate_agrees_with_standalone_commands() {
         .unwrap_or_else(|| panic!("no fixed_point fact"));
     assert_eq!(fixed_fact["subject"], 0x36);
     assert_eq!(fixed_fact["fractional_bits"], 8);
+    // The local idiom remains a hint, but the unresolved JMP can introduce
+    // unknown predecessors, so no propagated Q scale is trustworthy.
+    assert!(!facts.iter().any(|fact| fact["kind"] == "q_scale"));
 
     let _ = fs::remove_dir_all(&base);
 }
