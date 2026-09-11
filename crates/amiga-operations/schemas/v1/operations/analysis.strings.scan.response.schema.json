@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/analysis.strings.scan.response.schema.json",
+  "title": "analysis.strings.scan result",
+  "description": "Every matching run and its offset, with the true total beside a capped list.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "source",
+    "scanned_bytes",
+    "strings",
+    "string_total",
+    "strings_truncated"
+  ],
+  "properties": {
+    "source": {
+      "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourcePin"
+    },
+    "hunk": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "scanned_bytes": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "strings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "offset",
+          "text"
+        ],
+        "properties": {
+          "offset": {
+            "description": "Byte offset within what was scanned — the file, or the hunk when the request named one.",
+            "type": "integer",
+            "minimum": 0
+          },
+          "text": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "string_total": {
+      "description": "Strings matching the request before the cap. Always the true total.",
+      "type": "integer",
+      "minimum": 0
+    },
+    "strings_truncated": {
+      "type": "boolean"
+    }
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/source.read.response.schema.json",
+  "title": "source.read result",
+  "description": "The window, and where relocations sit inside it. A window running past the end is reported short rather than refused: a reader looking at the tail of a file is asking an ordinary question, and refusing would make the last screen of every file unviewable.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["source", "offset", "length", "bytes", "relocation_sites"],
+  "properties": {
+    "source": {
+      "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourcePin"
+    },
+    "hunk": { "type": "integer", "minimum": 0 },
+    "offset": { "type": "integer", "minimum": 0, "maximum": 4294967295 },
+    "length": {
+      "description": "Bytes actually returned: the shorter of the request's length and what the source holds from `offset`.",
+      "type": "integer",
+      "minimum": 0
+    },
+    "bytes": {
+      "description": "Lowercase hex, two characters per byte.",
+      "type": "string",
+      "pattern": "^([0-9a-f]{2})*$"
+    },
+    "relocation_sites": {
+      "description": "Offsets within the window at which a relocation sits, when the window came from a hunk. A fact about the image rather than a rendering choice, and what makes a hex view of code readable.",
+      "type": "array",
+      "items": { "type": "integer", "minimum": 0, "maximum": 4294967295 }
+    }
+  }
+}

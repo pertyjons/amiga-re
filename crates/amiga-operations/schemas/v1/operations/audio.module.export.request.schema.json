@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/audio.module.export.request.schema.json",
+  "title": "audio.module.export request",
+  "description": "Read a tracker module exactly as `audio.module.decode` does, then write it out as its own file. `prepared_output`: accepts only `prepare` and `commit_reviewed`.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "operation",
+    "arguments"
+  ],
+  "properties": {
+    "operation": {
+      "const": "audio.module.export"
+    },
+    "arguments": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source",
+        "destination"
+      ],
+      "properties": {
+        "source": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourceLocator"
+        },
+        "offset": {
+          "description": "Byte offset of the module's first byte.",
+          "type": "integer",
+          "minimum": 0,
+          "default": 0
+        },
+        "maximum_input_bytes": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/maximumInputBytes",
+          "default": 67108864
+        },
+        "destination": {
+          "description": "Directory the file goes in, as an identity the adapter resolves against its own output root. Relative, normal components only.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024,
+          "pattern": "^(?!/)(?!.*(^|/)\\.\\.(/|$)).+$"
+        },
+        "file_name": {
+          "description": "File name within the destination: one relative path component.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255,
+          "pattern": "^[^/]+$",
+          "default": "module.mod"
+        },
+        "policy": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/outputPolicy",
+          "default": "create_only"
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "operation": "audio.module.export",
+      "arguments": {
+        "source": {
+          "kind": "file",
+          "path": "extracted/game.bin"
+        },
+        "offset": 65536,
+        "destination": "music",
+        "file_name": "title.mod"
+      }
+    }
+  ]
+}

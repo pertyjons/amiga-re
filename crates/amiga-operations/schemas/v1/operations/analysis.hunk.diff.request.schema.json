@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/analysis.hunk.diff.request.schema.json",
+  "title": "analysis.hunk.diff request",
+  "description": "Compare two HUNK executables hunk by hunk. `read_only`: accepts only the `read` execution mode.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "operation",
+    "arguments"
+  ],
+  "properties": {
+    "operation": {
+      "const": "analysis.hunk.diff"
+    },
+    "arguments": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "a",
+        "b"
+      ],
+      "properties": {
+        "a": {
+          "description": "The first image, reported as the `a` side.",
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourceLocator"
+        },
+        "b": {
+          "description": "The second image, reported as the `b` side.",
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourceLocator"
+        },
+        "maximum_input_bytes": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/maximumInputBytes",
+          "default": 67108864
+        },
+        "maximum_changed_ranges": {
+          "description": "Cap on the changed ranges reported per hunk. The true count is always reported, so a capped comparison can never be read as a complete one.",
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/resultCap",
+          "default": 10000
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "operation": "analysis.hunk.diff",
+      "arguments": {
+        "a": {
+          "kind": "file",
+          "path": "original/game.exe"
+        },
+        "b": {
+          "kind": "file",
+          "path": "original/game-modified.exe"
+        }
+      }
+    }
+  ]
+}

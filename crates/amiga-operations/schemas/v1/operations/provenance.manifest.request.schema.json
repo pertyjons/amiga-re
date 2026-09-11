@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/provenance.manifest.request.schema.json",
+  "title": "provenance.manifest request",
+  "description": "Report the name, size, and SHA-256 a provenance manifest would record, writing nothing. `read_only`.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "operation",
+    "arguments"
+  ],
+  "properties": {
+    "operation": {
+      "const": "provenance.manifest"
+    },
+    "arguments": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source"
+      ],
+      "properties": {
+        "source": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourceLocator"
+        },
+        "maximum_input_bytes": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/maximumInputBytes",
+          "default": 67108864
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "operation": "provenance.manifest",
+      "arguments": {
+        "source": {
+          "kind": "file",
+          "path": "original/disk1.adf"
+        }
+      }
+    }
+  ]
+}

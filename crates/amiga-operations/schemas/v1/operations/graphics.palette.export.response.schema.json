@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/graphics.palette.export.response.schema.json",
+  "title": "graphics.palette.export result",
+  "description": "The swatch PNG that would be written, and whether it was, beside the palette it draws.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "palette",
+    "plan",
+    "committed"
+  ],
+  "properties": {
+    "palette": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source",
+        "offset",
+        "colors_rgb4",
+        "colors_rgb8",
+        "invalid_words"
+      ],
+      "properties": {
+        "source": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourcePin"
+        },
+        "offset": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "colors_rgb4": {
+          "description": "The $0RGB words as stored.",
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 65535
+          }
+        },
+        "colors_rgb8": {
+          "description": "The same colours as [r, g, b] triples. Both encodings travel together because deriving one from the other separately in each frontend is how two of them end up showing different colours.",
+          "type": "array",
+          "items": {
+            "type": "array",
+            "minItems": 3,
+            "maxItems": 3,
+            "items": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 255
+            }
+          }
+        },
+        "invalid_words": {
+          "description": "Words whose high nibble is not zero, so are not $0RGB at all. Counted rather than refused: a table with one stray entry is still the table, and the count is what tells a caller guessing at an offset whether the guess was good.",
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "plan": {
+      "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/writePlan"
+    },
+    "committed": {
+      "type": "boolean"
+    }
+  }
+}

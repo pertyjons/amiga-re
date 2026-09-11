@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/provenance.manifest.export.request.schema.json",
+  "title": "provenance.manifest.export request",
+  "description": "Pin the source exactly as `provenance.manifest` does, then write the manifest. `prepared_output`: accepts only `prepare` and `commit_reviewed`.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "operation",
+    "arguments"
+  ],
+  "properties": {
+    "operation": {
+      "const": "provenance.manifest.export"
+    },
+    "arguments": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source",
+        "destination"
+      ],
+      "properties": {
+        "source": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourceLocator"
+        },
+        "maximum_input_bytes": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/maximumInputBytes",
+          "default": 67108864
+        },
+        "destination": {
+          "description": "Directory the file goes in, as an identity the adapter resolves against its own output root. Relative, normal components only.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024,
+          "pattern": "^(?!/)(?!.*(^|/)\\.\\.(/|$)).+$"
+        },
+        "file_name": {
+          "description": "File name within the destination: one relative path component.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255,
+          "pattern": "^[^/]+$",
+          "default": "manifest.json"
+        },
+        "policy": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/outputPolicy",
+          "default": "create_only"
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "operation": "provenance.manifest.export",
+      "arguments": {
+        "source": {
+          "kind": "file",
+          "path": "original/disk1.adf"
+        },
+        "destination": "reports",
+        "file_name": "disk1.manifest.json"
+      }
+    }
+  ]
+}

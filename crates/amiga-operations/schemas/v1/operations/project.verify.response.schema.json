@@ -1,0 +1,117 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/project.verify.response.schema.json",
+  "title": "project.verify result",
+  "description": "Verify every source and object against the bytes on disk, writing nothing. Absent media is not a contradiction: `verified` and `contradicted` are separate because an unbound source is neither.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "verified_sources",
+    "verified_objects",
+    "sources",
+    "objects"
+  ],
+  "properties": {
+    "verified_sources": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "verified_objects": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "sources": {
+      "$ref": "#/$defs/entities"
+    },
+    "objects": {
+      "$ref": "#/$defs/entities"
+    },
+    "artifacts": {
+      "description": "Every recorded artifact, checked against the bytes on disk. The three answers carry different weights on purpose: a missing file is not a failure, because an artifact records what was made so it can be remade, and deleting a generated directory must stay safe; a stale recipe key is the expected state after editing a resource, and is what an export surface renders as \"needs re-export\"; only a digest that disagrees is a contradiction, because the document asserts bytes the file does not have.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "resource_id",
+          "path",
+          "status",
+          "present",
+          "current",
+          "contradicted",
+          "detail"
+        ],
+        "properties": {
+          "id": { "type": "string" },
+          "resource_id": { "type": "string" },
+          "path": { "type": "string" },
+          "status": {
+            "type": "string",
+            "enum": ["current", "stale", "missing", "mismatch", "unreadable", "refused"]
+          },
+          "present": {
+            "description": "Whether the file is there with the digest the record pins.",
+            "type": "boolean"
+          },
+          "current": {
+            "description": "Whether the recipe that made it is still the project's recipe.",
+            "type": "boolean"
+          },
+          "contradicted": { "type": "boolean" },
+          "detail": {
+            "description": "A sentence for a person. Never parse this; match on `status`.",
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "entities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "status",
+          "verified",
+          "contradicted",
+          "detail"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "status": {
+            "description": "What verification found, as a stable code. This is the machine contract; `detail` is prose for a person and may be reworded in any release.",
+            "type": "string",
+            "enum": [
+              "verified",
+              "unbound",
+              "missing",
+              "unreadable",
+              "mismatch",
+              "size_mismatch",
+              "parent_unavailable",
+              "selector_out_of_range",
+              "unrecoverable"
+            ]
+          },
+          "verified": {
+            "type": "boolean"
+          },
+          "contradicted": {
+            "description": "Separate from `verified` because they are not opposites: an unbound source is neither.",
+            "type": "boolean"
+          },
+          "detail": {
+            "description": "A sentence for a person. Never parse this; match on `status`.",
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,423 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/project/v1/types.schema.json",
+  "title": "Types used by annotations and resource layouts",
+  "description": "Byte order is always explicit. Amiga data is big-endian, but a format that inferred it from the host would silently produce different results on different machines, so every integer says so.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "document_kind",
+    "format_version",
+    "types"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "document_kind": {
+      "const": "types"
+    },
+    "format_version": {
+      "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/formatVersion"
+    },
+    "types": {
+      "type": "array",
+      "maxItems": 262144,
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "kind",
+              "name",
+              "size",
+              "signed",
+              "byte_order"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/id"
+              },
+              "kind": {
+                "const": "integer"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "notes": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/notes"
+              },
+              "size": {
+                "type": "integer",
+                "enum": [
+                  1,
+                  2,
+                  4,
+                  8
+                ]
+              },
+              "signed": {
+                "type": "boolean"
+              },
+              "byte_order": {
+                "type": "string",
+                "enum": [
+                  "big",
+                  "little"
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "kind",
+              "name",
+              "pointee_id",
+              "address_space"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/id"
+              },
+              "kind": {
+                "const": "pointer"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "notes": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/notes"
+              },
+              "pointee_id": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/id"
+              },
+              "address_space": {
+                "description": "Which frame the stored value is in. A pointer whose space is unknown resolves to nothing rather than to a plausible-looking address.",
+                "type": "string",
+                "enum": [
+                  "object",
+                  "hunk",
+                  "runtime"
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "kind",
+              "name",
+              "element_id",
+              "count"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/id"
+              },
+              "kind": {
+                "const": "array"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "notes": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/notes"
+              },
+              "element_id": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/id"
+              },
+              "count": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 16777216
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "kind",
+              "name",
+              "size",
+              "fields"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/id"
+              },
+              "kind": {
+                "const": "struct"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "notes": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/notes"
+              },
+              "size": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/size"
+              },
+              "fields": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 4096,
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "name",
+                    "offset",
+                    "type_id"
+                  ],
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 256
+                    },
+                    "offset": {
+                      "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/size"
+                    },
+                    "type_id": {
+                      "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/id"
+                    },
+                    "notes": {
+                      "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/notes"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "kind",
+              "name",
+              "base_id",
+              "members"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/id"
+              },
+              "kind": {
+                "const": "enum"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "notes": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/notes"
+              },
+              "base_id": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/id"
+              },
+              "members": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 4096,
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "name",
+                    "value"
+                  ],
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 256
+                    },
+                    "value": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "kind",
+              "name",
+              "aliased_id"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/id"
+              },
+              "kind": {
+                "const": "alias"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "notes": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/notes"
+              },
+              "aliased_id": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/id"
+              }
+            }
+          },
+          {
+            "description": "A callable signature: what a routine is passed, what it hands back, and where each of those lives. Every location is explicit because an Amiga game has no ABI to fall back on — a compiler's calling convention is a rule a reader may assume, while a hand-written routine's register assignment is an observation, and inferring one from the other would put a confident wrong answer where a reviewer recorded nothing. A function has no size: code is not storage, and a variable holding a routine's address is a pointer whose `pointee_id` names this.",
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "kind",
+              "name"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/id"
+              },
+              "kind": {
+                "const": "function"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "notes": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/notes"
+              },
+              "parameters": {
+                "description": "In call order, which is the order a reader writes the arguments — not an order the locations imply, since registers have none. An empty or absent list is a claim that the routine takes nothing; a signature is written by somebody who worked the contract out, and what is still unknown belongs in `notes`.",
+                "type": "array",
+                "maxItems": 64,
+                "items": {
+                  "$ref": "https://amiga-re.invalid/schemas/project/v1/types.schema.json#/$defs/parameter"
+                }
+              },
+              "results": {
+                "description": "Several, because a 68000 routine routinely returns two — a value in D0 and a pointer in A0 — and folding that into one would lose whichever the caller happened not to ask about.",
+                "type": "array",
+                "maxItems": 64,
+                "items": {
+                  "$ref": "https://amiga-re.invalid/schemas/project/v1/types.schema.json#/$defs/parameter"
+                }
+              },
+              "clobbers": {
+                "description": "Registers a call may leave holding something else. Absent means unknown and an empty list means none, and the difference is why this is optional: a caller that treated an unreviewed routine as clobbering nothing would keep a value across a call that destroyed it.",
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/types.schema.json#/$defs/registerSet"
+              },
+              "preserves": {
+                "description": "Registers a call is known to leave untouched. Absent means unknown, as for `clobbers`. A register recorded in both is a contradiction and is refused.",
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/types.schema.json#/$defs/registerSet"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "extensions": {
+      "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/extensions"
+    }
+  },
+  "$defs": {
+    "abiRegister": {
+      "description": "A data or address register a value may be passed in. `a7` is not one: it is the stack pointer, and a routine taking an argument \"in A7\" is taking it on the stack, which is the other location kind and says where.",
+      "type": "string",
+      "pattern": "^(d[0-7]|a[0-6])$"
+    },
+    "registerSet": {
+      "type": "array",
+      "maxItems": 15,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "https://amiga-re.invalid/schemas/project/v1/types.schema.json#/$defs/abiRegister"
+      }
+    },
+    "parameter": {
+      "description": "One argument or result: what it is, and where the machine keeps it. Width, signedness and pointer address space all come from `type_id` rather than being restated, so a parameter cannot describe a different integer from the type it names.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "type_id",
+        "location"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "type_id": {
+          "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/id"
+        },
+        "notes": {
+          "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/notes"
+        },
+        "location": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "kind",
+                "register"
+              ],
+              "properties": {
+                "kind": {
+                  "const": "register"
+                },
+                "register": {
+                  "$ref": "https://amiga-re.invalid/schemas/project/v1/types.schema.json#/$defs/abiRegister"
+                }
+              }
+            },
+            {
+              "description": "A byte offset from the stack pointer as the callee sees it on entry. Stated from entry rather than from a frame pointer the routine may never establish: every 68000 routine has a return address at (a7) whether or not it builds a frame, so entry is the one reference point that always exists.",
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "kind",
+                "offset"
+              ],
+              "properties": {
+                "kind": {
+                  "const": "stack"
+                },
+                "offset": {
+                  "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/size"
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}

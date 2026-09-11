@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/project.verify.request.schema.json",
+  "title": "project.verify request",
+  "description": "Verify every source and object against the bytes on disk, writing nothing. Absent media is not a contradiction: `verified` and `contradicted` are separate because an unbound source is neither. The project is named by the envelope's `project` locator, not by an argument, so every project-backed operation spells it the same way.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "operation",
+    "arguments"
+  ],
+  "properties": {
+    "operation": {
+      "const": "project.verify"
+    },
+    "arguments": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {}
+    }
+  },
+  "examples": [
+    {
+      "operation": "project.verify",
+      "arguments": {}
+    }
+  ]
+}

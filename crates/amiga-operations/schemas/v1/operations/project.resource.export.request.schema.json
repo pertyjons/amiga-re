@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/project.resource.export.request.schema.json",
+  "title": "project.resource.export request",
+  "description": "Turn one resource back into a file, from the project alone. `prepared_output`: `prepare` reports the plan and writes nothing, `commit_reviewed` re-derives it and writes only if the digest still matches. The project is named by the envelope's `project` locator.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["operation", "arguments"],
+  "properties": {
+    "operation": { "const": "project.resource.export" },
+    "arguments": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["resource"],
+      "properties": {
+        "resource": {
+          "description": "The resource to produce. Deliberately the only argument: the bytes, the recipe, the encoding and the destination are all already in the project, and a caller that could pass a width or an extension could produce a file the record claiming to reproduce it does not describe.",
+          "type": "string",
+          "minLength": 1
+        },
+        "policy": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/outputPolicy"
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "operation": "project.resource.export",
+      "arguments": { "resource": "resource:title-logo" }
+    }
+  ]
+}

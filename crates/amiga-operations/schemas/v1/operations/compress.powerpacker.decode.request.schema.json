@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/compress.powerpacker.decode.request.schema.json",
+  "title": "compress.powerpacker.decode request",
+  "description": "Decompress a headerless PowerPacker stream and report what it holds, writing nothing. `read_only`.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "operation",
+    "arguments"
+  ],
+  "properties": {
+    "operation": {
+      "const": "compress.powerpacker.decode"
+    },
+    "arguments": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source",
+        "modes"
+      ],
+      "properties": {
+        "source": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourceLocator"
+        },
+        "modes": {
+          "description": "The four PowerPacker offset widths in bits, most significant first. Required and never guessed: a headerless stream stores them outside the data, so a wrong table decodes to plausible rubbish instead of failing.",
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 255
+          }
+        },
+        "offset": {
+          "description": "Byte offset the packed stream starts at, for a stream embedded in a larger file.",
+          "type": "integer",
+          "minimum": 0,
+          "default": 0
+        },
+        "maximum_input_bytes": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/maximumInputBytes",
+          "default": 67108864
+        },
+        "maximum_output_bytes": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/maximumOutputBytes",
+          "default": 67108864
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "operation": "compress.powerpacker.decode",
+      "arguments": {
+        "source": {
+          "kind": "file",
+          "path": "extracted/level1.pp"
+        },
+        "modes": [
+          9,
+          10,
+          12,
+          13
+        ]
+      }
+    }
+  ]
+}

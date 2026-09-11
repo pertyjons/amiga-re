@@ -1,0 +1,198 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/hardware.copper.references.response.schema.json",
+  "title": "hardware.copper.references result",
+  "description": "The template as it sits in the file, the writes that edit its runtime copy, and — when asked — what the list becomes once they are applied. The template in the file is not what the Copper executes; that is the whole reason for this operation.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "source",
+    "hunk",
+    "entries",
+    "pointer_register",
+    "template_source",
+    "template_offset",
+    "template",
+    "template_total",
+    "template_truncated",
+    "list_bytes",
+    "writes",
+    "write_total",
+    "writes_truncated",
+    "writes_in_list"
+  ],
+  "$defs": {
+    "offset": { "type": "integer", "minimum": 0, "maximum": 4294967295 },
+    "instruction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["offset", "op"],
+      "properties": {
+        "offset": { "$ref": "#/$defs/offset" },
+        "op": { "enum": ["move", "wait", "skip"] },
+        "register": { "type": "integer", "minimum": 0, "maximum": 65535 },
+        "value": { "type": "integer", "minimum": 0, "maximum": 65535 },
+        "name": { "type": "string" },
+        "rgb8": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": { "type": "integer", "minimum": 0, "maximum": 255 }
+        },
+        "vpos": { "type": "integer", "minimum": 0, "maximum": 255 },
+        "hpos": { "type": "integer", "minimum": 0, "maximum": 255 },
+        "vmask": { "type": "integer", "minimum": 0, "maximum": 255 },
+        "hmask": { "type": "integer", "minimum": 0, "maximum": 255 },
+        "blitter_finish_disable": { "type": "boolean" },
+        "terminator": { "type": "boolean" }
+      }
+    },
+    "op": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["op"],
+      "properties": {
+        "op": { "enum": ["move", "wait", "skip"] },
+        "register": { "type": "integer", "minimum": 0, "maximum": 65535 },
+        "value": { "type": "integer", "minimum": 0, "maximum": 65535 },
+        "name": { "type": "string" },
+        "rgb8": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": { "type": "integer", "minimum": 0, "maximum": 255 }
+        },
+        "vpos": { "type": "integer", "minimum": 0, "maximum": 255 },
+        "hpos": { "type": "integer", "minimum": 0, "maximum": 255 },
+        "vmask": { "type": "integer", "minimum": 0, "maximum": 255 },
+        "hmask": { "type": "integer", "minimum": 0, "maximum": 255 },
+        "blitter_finish_disable": { "type": "boolean" },
+        "terminator": { "type": "boolean" }
+      }
+    }
+  },
+  "properties": {
+    "source": {
+      "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourcePin"
+    },
+    "hunk": { "type": "integer", "minimum": 0 },
+    "origin": { "$ref": "#/$defs/offset" },
+    "entries": { "type": "array", "items": { "$ref": "#/$defs/offset" } },
+    "pointer_register": { "type": "integer", "minimum": 0, "maximum": 7 },
+    "template_source": {
+      "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourcePin"
+    },
+    "template_offset": { "$ref": "#/$defs/offset" },
+    "template_address": {
+      "description": "Where the list runs, when the request said so — the address a constant load inside the routine is matched against.",
+      "$ref": "#/$defs/offset"
+    },
+    "template": {
+      "description": "Decoded from the template's own bytes, so the offsets are list-relative and comparable with the write offsets.",
+      "type": "array",
+      "items": { "$ref": "#/$defs/instruction" }
+    },
+    "template_total": { "type": "integer", "minimum": 0 },
+    "template_truncated": { "type": "boolean" },
+    "list_bytes": { "type": "integer", "minimum": 0 },
+    "writes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["site", "offset"],
+        "properties": {
+          "site": {
+            "description": "Hunk offset of the storing instruction.",
+            "$ref": "#/$defs/offset"
+          },
+          "address": { "$ref": "#/$defs/offset" },
+          "offset": {
+            "description": "Byte offset of the store from the pointer register's value at the entry.",
+            "$ref": "#/$defs/offset"
+          },
+          "size": { "type": "integer", "minimum": 1, "maximum": 255 },
+          "value": { "$ref": "#/$defs/offset" },
+          "base_site": {
+            "description": "Hunk offset of the instruction that loaded the list's address, when the base was established inside the routine. Absent means the offset is measured from the value the caller asserted the pointer register held at the entry — one is a fact about the code and the other an assumption, and an offset is only as trustworthy as its base.",
+            "$ref": "#/$defs/offset"
+          },
+          "patches": {
+            "description": "Where the write lands in the list. Absent when it lands outside — a write through the pointer that misses the copied list is still a fact about the routine, and omitting it would read as \"this routine only touches the Copper list\".",
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["instruction_offset", "word", "description"],
+            "properties": {
+              "instruction_offset": { "$ref": "#/$defs/offset" },
+              "word": {
+                "description": "`control` is a MOVE's register selector or a WAIT/SKIP position; `data` is the value or mask.",
+                "enum": ["control", "data"]
+              },
+              "description": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "write_total": { "type": "integer", "minimum": 0 },
+    "writes_truncated": { "type": "boolean" },
+    "writes_in_list": {
+      "description": "Writes that land inside the list. The others are still reported.",
+      "type": "integer",
+      "minimum": 0
+    },
+    "effective": {
+      "description": "Present only when the request asked for the writes to be applied.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "applied",
+        "instructions",
+        "instruction_total",
+        "instructions_truncated",
+        "changes",
+        "palette_rgb12",
+        "palette_rgb8"
+      ],
+      "properties": {
+        "applied": {
+          "description": "Writes that were applied — those with an immediate value that lands inside the list.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "instructions": { "type": "array", "items": { "$ref": "#/$defs/instruction" } },
+        "instruction_total": { "type": "integer", "minimum": 0 },
+        "instructions_truncated": { "type": "boolean" },
+        "changes": {
+          "description": "Every instruction whose decode differs from the template's. Applying immediates only rewrites words, so the structure is unchanged and the two lists zip.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["offset", "before", "after"],
+            "properties": {
+              "offset": { "$ref": "#/$defs/offset" },
+              "before": { "$ref": "#/$defs/op" },
+              "after": { "$ref": "#/$defs/op" }
+            }
+          }
+        },
+        "palette_rgb12": {
+          "description": "The palette the effective list installs, as $0RGB words.",
+          "type": "array",
+          "items": { "type": "integer", "minimum": 0, "maximum": 65535 }
+        },
+        "palette_rgb8": {
+          "description": "The same colours expanded to 8 bits per channel.",
+          "type": "array",
+          "items": {
+            "type": "array",
+            "minItems": 3,
+            "maxItems": 3,
+            "items": { "type": "integer", "minimum": 0, "maximum": 255 }
+          }
+        }
+      }
+    }
+  }
+}

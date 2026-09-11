@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/audio.sample.export.request.schema.json",
+  "title": "audio.sample.export request",
+  "description": "Read an IFF 8SVX sample exactly as `audio.sample.decode` does, then write it as WAV. `prepared_output`: accepts only `prepare` and `commit_reviewed`.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "operation",
+    "arguments"
+  ],
+  "properties": {
+    "operation": {
+      "const": "audio.sample.export"
+    },
+    "arguments": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source",
+        "destination"
+      ],
+      "properties": {
+        "source": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourceLocator"
+        },
+        "offset": {
+          "description": "Byte offset of the IFF FORM within the source, for a sample carved out of a larger file.",
+          "type": "integer",
+          "minimum": 0,
+          "default": 0
+        },
+        "maximum_buckets": {
+          "description": "How many min/max pairs the waveform envelope is reduced to. A few hundred is what a waveform is actually drawn at; more transfers detail nobody can see.",
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/resultCap",
+          "default": 512
+        },
+        "maximum_input_bytes": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/maximumInputBytes",
+          "default": 67108864
+        },
+        "destination": {
+          "description": "Directory the WAV goes in, as an identity the adapter resolves against its own output root. Relative, normal components only.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024,
+          "pattern": "^(?!/)(?!.*(^|/)\\.\\.(/|$)).+$"
+        },
+        "file_name": {
+          "description": "File name within the destination: one relative path component.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255,
+          "pattern": "^[^/]+$",
+          "default": "sample.wav"
+        },
+        "policy": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/outputPolicy",
+          "default": "create_only"
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "operation": "audio.sample.export",
+      "arguments": {
+        "source": {
+          "kind": "file",
+          "path": "extracted/beep.8svx"
+        },
+        "destination": "audio",
+        "file_name": "beep.wav"
+      }
+    }
+  ]
+}

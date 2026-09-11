@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/compress.rle-xor.decode.request.schema.json",
+  "title": "compress.rle-xor.decode request",
+  "description": "Decompress a position-XOR + marker-RLE stream and report what it holds, writing nothing. `read_only`.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "operation",
+    "arguments"
+  ],
+  "properties": {
+    "operation": {
+      "const": "compress.rle-xor.decode"
+    },
+    "arguments": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source",
+        "marker"
+      ],
+      "properties": {
+        "source": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourceLocator"
+        },
+        "marker": {
+          "description": "The escape byte that introduces a run. Stated even when `inline_marker` is set, where it becomes a cross-check: a recipe whose marker the stream contradicts is not the recipe that produced these bytes.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 255
+        },
+        "xor": {
+          "description": "Whether literal bytes are XOR-ed with their output position.",
+          "type": "boolean",
+          "default": true
+        },
+        "inline_marker": {
+          "description": "Whether the stream carries its marker in its own first byte, with the size field and body after it. Two streams differing only in this decode to different bytes without either failing, which is why it is stated rather than sniffed.",
+          "type": "boolean",
+          "default": false
+        },
+        "size_bytes": {
+          "description": "Width of the leading big-endian decoded-size field. Zero means the stream has none; the format uses no other widths.",
+          "type": "integer",
+          "enum": [
+            0,
+            2,
+            4
+          ],
+          "default": 0
+        },
+        "size_includes_field": {
+          "description": "Whether that size field counts its own bytes as well as the output. Refused when `size_bytes` is zero: it would describe a field the request says is absent.",
+          "type": "boolean",
+          "default": false
+        },
+        "offset": {
+          "description": "Byte offset the packed stream starts at, for a stream embedded in a larger file.",
+          "type": "integer",
+          "minimum": 0,
+          "default": 0
+        },
+        "maximum_input_bytes": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/maximumInputBytes",
+          "default": 67108864
+        },
+        "maximum_output_bytes": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/maximumOutputBytes",
+          "default": 67108864
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "operation": "compress.rle-xor.decode",
+      "arguments": {
+        "source": {
+          "kind": "file",
+          "path": "extracted/map.rle"
+        },
+        "marker": 254,
+        "size_bytes": 4
+      }
+    }
+  ]
+}

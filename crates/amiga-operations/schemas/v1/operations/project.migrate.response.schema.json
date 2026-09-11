@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/project.migrate.response.schema.json",
+  "title": "project.migrate plan",
+  "description": "The documents the import produced, what the legacy config said ambiguously, and the plan that authorizes writing them.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["source", "ambiguities", "plan", "committed"],
+  "properties": {
+    "source": {
+      "description": "The config the import read, pinned. An import is a derivation, and a derivation names what it derived from.",
+      "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourcePin"
+    },
+    "ambiguities": {
+      "description": "Things the legacy config said that the project format has no single place for. First-class rather than diagnostics only: a caller deciding whether to commit an import is deciding about exactly these.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["field", "message"],
+        "properties": {
+          "field": { "type": "string" },
+          "message": { "type": "string" }
+        }
+      }
+    },
+    "plan": {
+      "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/writePlan"
+    },
+    "committed": { "type": "boolean" }
+  }
+}

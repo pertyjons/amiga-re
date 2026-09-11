@@ -1,0 +1,518 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/project/v1/sources.schema.json",
+  "title": "Sources, source sets, and derived byte objects",
+  "description": "What the project was given, how those inputs group, and how every logical byte stream is recovered from them. The graph describes bytes whether or not a copy exists on disk: extraction is a cache, not the authority.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "document_kind",
+    "format_version",
+    "sources"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "document_kind": {
+      "const": "sources"
+    },
+    "format_version": {
+      "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/formatVersion"
+    },
+    "sources": {
+      "type": "array",
+      "maxItems": 65536,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "kind",
+          "display_name"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/id"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "file",
+              "directory"
+            ]
+          },
+          "media_type": {
+            "type": "string",
+            "enum": [
+              "adf",
+              "lha",
+              "hunk",
+              "iff",
+              "binary",
+              "directory",
+              "unknown"
+            ]
+          },
+          "display_name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "size": {
+            "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/size"
+          },
+          "sha256": {
+            "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/sha256"
+          },
+          "inventory": {
+            "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/relativePath"
+          },
+          "tree_sha256": {
+            "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/sha256"
+          },
+          "locations": {
+            "description": "Where this source has been seen, as project-relative paths. A hint, never the identity: the identity is the digest, and a machine-specific location belongs in `.amiga-re/local.json`.",
+            "type": "array",
+            "maxItems": 64,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "kind",
+                "path"
+              ],
+              "properties": {
+                "kind": {
+                  "const": "project_relative"
+                },
+                "path": {
+                  "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/relativePath"
+                }
+              }
+            }
+          },
+          "provenance": {
+            "description": "Where these bytes came from, and therefore what verifying them proves. `media` is the default and every source written before this field existed: something somebody still has a copy of. `captured` is bytes that exist because a capture produced them \u2014 a trackloader's output read out of RAM, the memory a routine changed under a sandbox call. A capture is pinned and verifiable against itself and cannot be re-derived by anything in this format, which is why `notes` is required on one and has to say what produced it.",
+            "type": "string",
+            "enum": [
+              "media",
+              "captured"
+            ],
+            "default": "media"
+          },
+          "notes": {
+            "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/notes"
+          }
+        },
+        "allOf": [
+          {
+            "description": "A file source is pinned by content; a directory source by its inventory's tree hash.",
+            "if": {
+              "properties": {
+                "kind": {
+                  "const": "file"
+                }
+              },
+              "required": [
+                "kind"
+              ]
+            },
+            "then": {
+              "required": [
+                "size",
+                "sha256"
+              ]
+            },
+            "else": {
+              "required": [
+                "inventory",
+                "tree_sha256"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "source_sets": {
+      "description": "Related inputs, such as an ordered three-disk release. `slot` orders members whose order matters; a support directory has none.",
+      "type": "array",
+      "maxItems": 4096,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "members"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/id"
+          },
+          "display_name": {
+            "type": "string",
+            "maxLength": 256
+          },
+          "members": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 4096,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "source_id",
+                "role"
+              ],
+              "properties": {
+                "source_id": {
+                  "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/id"
+                },
+                "role": {
+                  "type": "string",
+                  "enum": [
+                    "disk",
+                    "support-files",
+                    "executable",
+                    "data"
+                  ]
+                },
+                "slot": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 65535
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "objects": {
+      "description": "Reproducible byte streams, forming an acyclic derivation graph. Every object records the size and digest it must have, so `project verify` can rebuild it in memory from its pinned source and compare.",
+      "type": "array",
+      "maxItems": 262144,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "kind",
+          "parent_id",
+          "size",
+          "sha256"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/id"
+          },
+          "parent_id": {
+            "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/id"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "whole_source",
+              "container_member",
+              "decompressed",
+              "byte_range",
+              "sandbox_export"
+            ]
+          },
+          "size": {
+            "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/size"
+          },
+          "sha256": {
+            "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/sha256"
+          },
+          "selector": {
+            "description": "How the object is recovered from its parent \u2014 located inside it, or derived from the whole of it \u2014 carrying format-specific identity where the format offers it: an ADF header block, an LHA method and CRC, a codec and its parameters. So a recovery that silently found different bytes is detectable, and a derivation is a recipe rather than prose in another document.",
+            "type": "object",
+            "oneOf": [
+              {
+                "additionalProperties": false,
+                "required": [
+                  "container",
+                  "path"
+                ],
+                "properties": {
+                  "container": {
+                    "const": "adf"
+                  },
+                  "path": {
+                    "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/relativePath"
+                  },
+                  "header_block": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 4294967295
+                  }
+                }
+              },
+              {
+                "additionalProperties": false,
+                "required": [
+                  "container",
+                  "member"
+                ],
+                "properties": {
+                  "container": {
+                    "const": "lha"
+                  },
+                  "member": {
+                    "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/relativePath"
+                  },
+                  "method": {
+                    "type": "string",
+                    "pattern": "^-lh[0-7d]-$"
+                  },
+                  "crc16": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 65535
+                  }
+                }
+              },
+              {
+                "additionalProperties": false,
+                "required": [
+                  "container",
+                  "offset",
+                  "length"
+                ],
+                "properties": {
+                  "container": {
+                    "const": "range"
+                  },
+                  "offset": {
+                    "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/size"
+                  },
+                  "length": {
+                    "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/size"
+                  }
+                }
+              },
+              {
+                "description": "Decompressed from the whole of its parent. The codec and its parameters are the recipe: parent bytes plus this record reproduce the object, so a project whose intermediate files were deleted is recoverable rather than merely unverifiable.",
+                "additionalProperties": false,
+                "required": [
+                  "container",
+                  "codec"
+                ],
+                "properties": {
+                  "container": {
+                    "const": "decompressed"
+                  },
+                  "codec": {
+                    "description": "The decoder and every parameter it requires, drawn from what `amiga-compress` implements. A codec this build does not implement is refused by name rather than accepted as an unlabelled digest.",
+                    "type": "object",
+                    "oneOf": [
+                      {
+                        "description": "Headerless PowerPacker, whose four-entry mode table lives in the loader rather than in a `PP20` file header.",
+                        "additionalProperties": false,
+                        "required": [
+                          "name",
+                          "mode_bits"
+                        ],
+                        "properties": {
+                          "name": {
+                            "const": "powerpacker"
+                          },
+                          "mode_bits": {
+                            "description": "The loader's four mode-table bit widths.",
+                            "type": "array",
+                            "minItems": 4,
+                            "maxItems": 4,
+                            "items": {
+                              "type": "integer",
+                              "minimum": 1,
+                              "maximum": 31
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "description": "IFF ByteRun1 / PackBits run-length decoding. Wholly described by its stream, so it takes no parameters.",
+                        "additionalProperties": false,
+                        "required": [
+                          "name"
+                        ],
+                        "properties": {
+                          "name": {
+                            "const": "byte_run1"
+                          }
+                        }
+                      },
+                      {
+                        "description": "Position-XOR + escape-marker run-length. Every parameter is title-specific and all five are therefore stated rather than defaulted: a recipe that omitted the marker would decode to different bytes on a build whose default differed, and one that omitted the layout would decode a stream carrying its marker inline into bytes that were never in the original, without error.",
+                        "additionalProperties": false,
+                        "required": [
+                          "name",
+                          "marker",
+                          "xor",
+                          "inline_marker",
+                          "size_bytes",
+                          "size_includes_field"
+                        ],
+                        "properties": {
+                          "name": {
+                            "const": "rle_xor"
+                          },
+                          "marker": {
+                            "description": "The escape byte that introduces a run.",
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 255
+                          },
+                          "xor": {
+                            "description": "Whether the position-XOR layer is present.",
+                            "type": "boolean"
+                          },
+                          "inline_marker": {
+                            "description": "Whether the stream's first byte is the escape marker, with the size field (if any) and then the body following it. The marker is stated as well, as a cross-check: a stream whose first byte is a different escape byte is not the stream this recipe describes.",
+                            "type": "boolean"
+                          },
+                          "size_bytes": {
+                            "description": "Width of the leading big-endian size field, read after an inline marker where there is one.",
+                            "enum": [
+                              0,
+                              2,
+                              4
+                            ]
+                          },
+                          "size_includes_field": {
+                            "description": "Whether the size field counts its own bytes as well as the output, so the declared output is the field minus its own width. Recorded because a cross-check that assumed otherwise would reject a correct stream.",
+                            "type": "boolean"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "declared_size": {
+                    "description": "The output size the stream itself declares, where it carries one. Recorded so a decoder can cross-check what it produced against what the stream promised; absent for a codec whose stream declares nothing, since a size with no source would be an assertion rather than a pin.",
+                    "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/size"
+                  }
+                }
+              },
+              {
+                "description": "One named export from the pinned recipe held by the parent. Inputs are additional derivation graph edges.",
+                "additionalProperties": false,
+                "required": [
+                  "container",
+                  "export",
+                  "inputs"
+                ],
+                "properties": {
+                  "container": {
+                    "const": "sandbox"
+                  },
+                  "export": {
+                    "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/relativePath"
+                  },
+                  "inputs": {
+                    "type": "object",
+                    "minProperties": 1,
+                    "maxProperties": 16,
+                    "propertyNames": {
+                      "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/relativePath"
+                    },
+                    "additionalProperties": {
+                      "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/id"
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "notes": {
+            "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/notes"
+          }
+        },
+        "allOf": [
+          {
+            "description": "A decompressed object states how it was decompressed, and only a decompressed object may. The `kind` and the selector are two spellings of one fact: nothing can slice a decompressed object out of its packed parent, so a document where they disagree describes bytes nothing can reproduce.",
+            "if": {
+              "properties": {
+                "kind": {
+                  "const": "decompressed"
+                }
+              },
+              "required": [
+                "kind"
+              ]
+            },
+            "then": {
+              "required": [
+                "selector"
+              ],
+              "properties": {
+                "selector": {
+                  "required": [
+                    "container"
+                  ],
+                  "properties": {
+                    "container": {
+                      "const": "decompressed"
+                    }
+                  }
+                }
+              }
+            },
+            "else": {
+              "properties": {
+                "selector": {
+                  "properties": {
+                    "container": {
+                      "not": {
+                        "const": "decompressed"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "kind": {
+                  "const": "sandbox_export"
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "selector"
+              ],
+              "properties": {
+                "selector": {
+                  "properties": {
+                    "container": {
+                      "const": "sandbox"
+                    }
+                  }
+                }
+              }
+            },
+            "else": {
+              "properties": {
+                "selector": {
+                  "properties": {
+                    "container": {
+                      "not": {
+                        "const": "sandbox"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "extensions": {
+      "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/extensions"
+    }
+  }
+}

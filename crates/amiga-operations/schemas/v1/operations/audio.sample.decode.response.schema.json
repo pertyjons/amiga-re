@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/audio.sample.decode.response.schema.json",
+  "title": "audio.sample.decode result",
+  "description": "What the sample declares, and a bounded envelope of what it contains.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "source",
+    "name",
+    "sample_rate",
+    "frames",
+    "one_shot_frames",
+    "loop_frames",
+    "volume",
+    "envelope",
+    "bucket_frames",
+    "form_bytes"
+  ],
+  "properties": {
+    "source": {
+      "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourcePin"
+    },
+    "name": {
+      "description": "The NAME chunk, empty when the file carries none.",
+      "type": "string"
+    },
+    "sample_rate": {
+      "description": "Frames per second, as the VHDR declares it. Zero is reported rather than corrected: the file says what it says.",
+      "type": "integer",
+      "minimum": 0
+    },
+    "frames": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "one_shot_frames": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "loop_frames": {
+      "description": "Frames of the repeating part; zero when the sample does not loop.",
+      "type": "integer",
+      "minimum": 0
+    },
+    "volume": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "bucket_frames": {
+      "description": "Frames each envelope bucket summarizes.",
+      "type": "integer",
+      "minimum": 0
+    },
+    "form_bytes": {
+      "description": "Bytes the whole FORM occupies from the requested offset, header included, as its own length field declares it. What a caller recording where this sample is needs, without re-parsing the container to find out.",
+      "type": "integer",
+      "minimum": 0
+    },
+    "envelope": {
+      "description": "One min/max pair per waveform column. Both extremes, not an average: averaging a waveform toward zero is how a loud sample ends up looking like silence.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "minimum",
+          "maximum"
+        ],
+        "properties": {
+          "minimum": {
+            "type": "integer",
+            "minimum": -128,
+            "maximum": 127
+          },
+          "maximum": {
+            "type": "integer",
+            "minimum": -128,
+            "maximum": 127
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/graphics.ilbm.decode.response.schema.json",
+  "title": "graphics.ilbm.decode result",
+  "description": "What the form is, not what it holds. The indices are `graphics.bitmap.export`'s to write, and sending a megapixel buffer back through a response envelope would make the cheap question as expensive as the export. HAM, HAM8 and Extra-Halfbrite are refused by name rather than described as flat indices.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "source",
+    "width",
+    "height",
+    "planes",
+    "indexable_colours",
+    "masking",
+    "transparent_colour",
+    "has_mask",
+    "aspect",
+    "palette"
+  ],
+  "properties": {
+    "source": {
+      "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourcePin"
+    },
+    "width": { "type": "integer", "minimum": 0 },
+    "height": { "type": "integer", "minimum": 0 },
+    "planes": { "type": "integer", "minimum": 0, "maximum": 8 },
+    "indexable_colours": {
+      "description": "Palette indices the plane count can express, `1 << planes`.",
+      "type": "integer",
+      "minimum": 0
+    },
+    "masking": {
+      "enum": ["none", "mask_plane", "transparent_colour", "lasso"]
+    },
+    "transparent_colour": {
+      "description": "The transparent index, meaningful only for `transparent_colour` masking.",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 65535
+    },
+    "has_mask": {
+      "description": "Whether the form interleaves a mask plane, which the decode consumes either way rather than letting it shift the data planes.",
+      "type": "boolean"
+    },
+    "viewport_mode": {
+      "description": "The raw CAMG viewport mode word, when the form carries one. Absent rather than zero: no CAMG and a CAMG of zero are different claims.",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 4294967295
+    },
+    "aspect": {
+      "description": "Pixel aspect, as BMHD states it.",
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": { "type": "integer", "minimum": 0, "maximum": 255 }
+    },
+    "palette": {
+      "description": "CMAP entries as RGB8, in order. Empty when the form carries none — never filled with invented colours.",
+      "type": "array",
+      "items": {
+        "type": "array",
+        "minItems": 3,
+        "maxItems": 3,
+        "items": { "type": "integer", "minimum": 0, "maximum": 255 }
+      }
+    }
+  }
+}

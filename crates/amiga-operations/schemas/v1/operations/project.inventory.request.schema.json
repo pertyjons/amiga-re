@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/project.inventory.request.schema.json",
+  "title": "project.inventory request",
+  "description": "Walk a directory and report the inventory a directory source would pin, following no symbolic link. Writes nothing. `read_only`.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["operation", "arguments"],
+  "properties": {
+    "operation": { "const": "project.inventory" },
+    "arguments": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["directory"],
+      "properties": {
+        "directory": {
+          "description": "Resolver-relative identity of the directory to walk. An argument rather than the envelope's project locator, because the thing being inventoried is media — the tree a directory source would pin — and not a project.",
+          "type": "string",
+          "minLength": 1
+        },
+        "maximum_files": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/resultCap"
+        }
+      }
+    }
+  },
+  "examples": [
+    { "operation": "project.inventory", "arguments": { "directory": "installed" } }
+  ]
+}

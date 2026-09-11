@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/analysis.state.compare.request.schema.json",
+  "title": "analysis.state.compare request",
+  "description": "Compare two or more state snapshots field by field, writing nothing. `read_only`. Alignment is by field path, not by address, so a port that lays the same state out differently still compares. A document this build does not fully understand is refused rather than diffed: an unknown or a missing field would still produce a plausible-looking answer.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "operation",
+    "arguments"
+  ],
+  "properties": {
+    "operation": {
+      "const": "analysis.state.compare"
+    },
+    "arguments": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "snapshots"
+      ],
+      "properties": {
+        "snapshots": {
+          "description": "The snapshot documents to compare, in the order they are reported. At least two: comparing one against nothing has no answer. One of them may have been written by something other than this toolkit — a clean-room implementation stating its own state in the same shape is the case this exists for.",
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourceLocator"
+          }
+        },
+        "maximum_differences": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/resultCap",
+          "default": 256
+        },
+        "maximum_input_bytes": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/maximumInputBytes",
+          "default": 67108864
+        }
+      }
+    }
+  }
+}

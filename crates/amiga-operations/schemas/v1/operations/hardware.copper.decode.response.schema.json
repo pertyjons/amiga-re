@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/hardware.copper.decode.response.schema.json",
+  "title": "hardware.copper.decode result",
+  "description": "Every decoded instruction with its offset. Register names are in the answer rather than in whichever frontend renders it: a name is hardware knowledge, not configuration.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["source", "offset", "instructions", "instruction_total", "instructions_truncated"],
+  "$defs": {
+    "beam": { "type": "integer", "minimum": 0, "maximum": 255 }
+  },
+  "properties": {
+    "source": {
+      "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourcePin"
+    },
+    "offset": {
+      "description": "The offset the decode started from, echoed because nothing in an image marks a Copper stream.",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 4294967295
+    },
+    "instructions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["offset", "op"],
+        "properties": {
+          "offset": { "type": "integer", "minimum": 0, "maximum": 4294967295 },
+          "op": { "enum": ["move", "wait", "skip"] },
+          "register": { "type": "integer", "minimum": 0, "maximum": 65535 },
+          "value": { "type": "integer", "minimum": 0, "maximum": 65535 },
+          "name": {
+            "description": "The register's name, when this build's map knows it.",
+            "type": "string"
+          },
+          "rgb8": {
+            "description": "The value read as an $0RGB colour, for a COLORnn write. Absent otherwise: expanding an arbitrary write would claim every MOVE writes a colour.",
+            "type": "array",
+            "minItems": 3,
+            "maxItems": 3,
+            "items": { "type": "integer", "minimum": 0, "maximum": 255 }
+          },
+          "vpos": { "$ref": "#/$defs/beam" },
+          "hpos": { "$ref": "#/$defs/beam" },
+          "vmask": { "$ref": "#/$defs/beam" },
+          "hmask": { "$ref": "#/$defs/beam" },
+          "blitter_finish_disable": { "type": "boolean" },
+          "terminator": {
+            "description": "The $fffe wait every Copper list ends with. A hardware fact rather than a rendering, so a consumer need not know the magic position to tell \"wait for a beam that never comes\" from an ordinary wait.",
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "instruction_total": { "type": "integer", "minimum": 0 },
+    "instructions_truncated": { "type": "boolean" }
+  }
+}

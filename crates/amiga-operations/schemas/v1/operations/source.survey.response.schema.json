@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/source.survey.response.schema.json",
+  "title": "source.survey result",
+  "description": "The regions a survey found, in source-offset order, covering the input without overlap.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "source",
+    "regions",
+    "region_total",
+    "regions_truncated",
+    "copper_lists"
+  ],
+  "properties": {
+    "source": {
+      "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourcePin"
+    },
+    "regions": {
+      "description": "Possibly capped. `region_total` is always the true count, so a truncated result can never be mistaken for a complete one.",
+      "type": "array",
+      "maxItems": 16777216,
+      "items": { "$ref": "#/$defs/region" }
+    },
+    "region_total": { "type": "integer", "minimum": 0 },
+    "regions_truncated": { "type": "boolean" },
+    "copper_lists": {
+      "description": "Copper lists located during the same pass, retained for callers that render them.",
+      "type": "array",
+      "maxItems": 65536,
+      "items": { "type": "object" }
+    }
+  },
+  "$defs": {
+    "region": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["start", "end", "kind", "detail", "entropy", "palette"],
+      "properties": {
+        "start": { "type": "integer", "minimum": 0 },
+        "end": { "type": "integer", "minimum": 0 },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "strings",
+            "copper",
+            "palette",
+            "module",
+            "sparse",
+            "code-or-bitmap",
+            "packed"
+          ]
+        },
+        "detail": { "type": "string", "maxLength": 4096 },
+        "entropy": {
+          "description": "Bits per byte, for a region classified by entropy rather than located. Emitted as null when it does not apply, so a consumer sees the field was considered.",
+          "type": ["number", "null"]
+        },
+        "palette": {
+          "description": "RGB4 words, for a standalone palette table. Null when it does not apply.",
+          "type": ["array", "null"],
+          "maxItems": 65536,
+          "items": { "type": "integer", "minimum": 0, "maximum": 65535 }
+        }
+      }
+    }
+  }
+}

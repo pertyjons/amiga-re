@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/project.check.response.schema.json",
+  "title": "project.check result",
+  "description": "Load a versioned project and report every problem by stable code. A project that opened with problems is a success: the problems are the answer, not a failure to give one.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "name",
+    "sources",
+    "objects",
+    "annotations",
+    "problems"
+  ],
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "sources": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "objects": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "annotations": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "problems": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "description": "The stable code `amiga-project` assigned. A consumer acts on this, never on the message.",
+            "type": "string"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

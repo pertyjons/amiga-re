@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/audio.module.decode.request.schema.json",
+  "title": "audio.module.decode request",
+  "description": "Read a ProTracker/SoundTracker module and report its layout, writing nothing. `read_only`.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "operation",
+    "arguments"
+  ],
+  "properties": {
+    "operation": {
+      "const": "audio.module.decode"
+    },
+    "arguments": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source"
+      ],
+      "properties": {
+        "source": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourceLocator"
+        },
+        "offset": {
+          "description": "Byte offset of the module's first byte.",
+          "type": "integer",
+          "minimum": 0,
+          "default": 0
+        },
+        "maximum_input_bytes": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/maximumInputBytes",
+          "default": 67108864
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "operation": "audio.module.decode",
+      "arguments": {
+        "source": {
+          "kind": "file",
+          "path": "extracted/game.bin"
+        },
+        "offset": 65536
+      }
+    }
+  ]
+}

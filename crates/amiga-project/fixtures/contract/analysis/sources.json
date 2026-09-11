@@ -1,0 +1,180 @@
+{
+  "$schema": "./schema/sources.schema.json",
+  "document_kind": "sources",
+  "format_version": 1,
+  "objects": [
+    {
+      "id": "object:assets/jingle",
+      "kind": "byte_range",
+      "parent_id": "source:assets",
+      "selector": {
+        "container": "range",
+        "length": 64,
+        "offset": 24
+      },
+      "sha256": "d8bc63b4fc1156e5e7d95a418b9bf54cd3174bedbc2db40f74895349b229b3c0",
+      "size": 64
+    },
+    {
+      "id": "object:assets/palette",
+      "kind": "byte_range",
+      "parent_id": "source:assets",
+      "selector": {
+        "container": "range",
+        "length": 8,
+        "offset": 0
+      },
+      "sha256": "7e8f5554b6a2ebe8bafa19df1290bdd3cb539422f1b678132b7373462a399376",
+      "size": 8
+    },
+    {
+      "id": "object:assets/title-pixels",
+      "kind": "byte_range",
+      "parent_id": "source:assets",
+      "selector": {
+        "container": "range",
+        "length": 16,
+        "offset": 8
+      },
+      "sha256": "9047f384250347de3a519258915b4a5fca6d5ce7070a3023fccc2f04205bbb85",
+      "size": 16
+    },
+    {
+      "id": "object:disk-1/s/main",
+      "kind": "container_member",
+      "notes": "The main executable. Recovered by range rather than by ADF path because the fixture's disks are structurally minimal; a real project uses an `adf` selector with its header block.",
+      "parent_id": "source:disk-1",
+      "selector": {
+        "container": "range",
+        "length": 112,
+        "offset": 1024
+      },
+      "sha256": "9d26d8c87c29dfbc789e05602a497b9b771889df0030a8e07dd7219e3039a7e8",
+      "size": 112
+    },
+    {
+      "id": "object:disk-2/s/loader",
+      "kind": "container_member",
+      "parent_id": "source:disk-2",
+      "selector": {
+        "container": "range",
+        "length": 68,
+        "offset": 1024
+      },
+      "sha256": "b497012a50f969d557e9b7ad4b981571b18c76223272ef11ec43d787a1b33a83",
+      "size": 68
+    },
+    {
+      "id": "object:installed/levels",
+      "kind": "container_member",
+      "notes": "A file inside the directory source, addressed as a whole-file range of it.",
+      "parent_id": "source:installed-tree",
+      "selector": {
+        "container": "range",
+        "length": 32,
+        "offset": 0
+      },
+      "sha256": "630dcd2966c4336691125448bbb25b4ff412a49c732db2c8abc1b8581bd710dd",
+      "size": 32
+    }
+  ],
+  "source_sets": [
+    {
+      "display_name": "Retail three-disk release",
+      "id": "set:retail-release",
+      "members": [
+        {
+          "role": "support-files",
+          "source_id": "source:installed-tree"
+        },
+        {
+          "role": "disk",
+          "slot": 1,
+          "source_id": "source:disk-1"
+        },
+        {
+          "role": "disk",
+          "slot": 2,
+          "source_id": "source:disk-2"
+        },
+        {
+          "role": "disk",
+          "slot": 3,
+          "source_id": "source:disk-3"
+        }
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "display_name": "Loose asset blob",
+      "id": "source:assets",
+      "kind": "file",
+      "locations": [
+        {
+          "kind": "project_relative",
+          "path": "original/assets.bin"
+        }
+      ],
+      "media_type": "binary",
+      "notes": "A palette, then planar pixels, then raw Paula PCM — three resources in one file, which is why a resource targets a range rather than a whole source.",
+      "sha256": "7d597053487e08593c0388e576800cc511a244429c03a2e89fae36a9d554c3c3",
+      "size": 88
+    },
+    {
+      "display_name": "Disk 1",
+      "id": "source:disk-1",
+      "kind": "file",
+      "locations": [
+        {
+          "kind": "project_relative",
+          "path": "original/disk1.adf"
+        }
+      ],
+      "media_type": "adf",
+      "sha256": "ab91a327cdbe4533b9868594ceec847a58d980ba590b84e0aa2430ffcdc4b898",
+      "size": 40960
+    },
+    {
+      "display_name": "Disk 2",
+      "id": "source:disk-2",
+      "kind": "file",
+      "locations": [
+        {
+          "kind": "project_relative",
+          "path": "original/disk2.adf"
+        }
+      ],
+      "media_type": "adf",
+      "sha256": "1f9add73cb76a20a66f51c1df446d559974ae5c01dfa6e336f94be734a0552fc",
+      "size": 40960
+    },
+    {
+      "display_name": "Disk 3",
+      "id": "source:disk-3",
+      "kind": "file",
+      "locations": [
+        {
+          "kind": "project_relative",
+          "path": "original/disk3.adf"
+        }
+      ],
+      "media_type": "adf",
+      "sha256": "4121ba95a9a815f108123a6ae8d6fb30278d09f21e4b78253d842fa86849290b",
+      "size": 40960
+    },
+    {
+      "display_name": "Installed support files",
+      "id": "source:installed-tree",
+      "inventory": "analysis/source-inventories/installed-tree.json",
+      "kind": "directory",
+      "locations": [
+        {
+          "kind": "project_relative",
+          "path": "original/installed"
+        }
+      ],
+      "tree_sha256": "164b13898198eb056f0de7f8f526a7b00c69c439e648bbc7c1949673f63616ec"
+    }
+  ]
+}

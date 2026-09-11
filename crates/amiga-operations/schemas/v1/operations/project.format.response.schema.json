@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/project.format.response.schema.json",
+  "title": "project.format plan",
+  "description": "Every document the project names and whether it is already canonical. A `--check` run and a fixing run are the same computation, which is what makes them provably agree rather than agree by habit.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["documents", "unformatted", "plan_sha256", "committed", "written"],
+  "properties": {
+    "documents": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path", "size", "sha256", "canonical"],
+        "properties": {
+          "path": { "type": "string" },
+          "size": {
+            "description": "Bytes canonical form occupies.",
+            "type": "integer",
+            "minimum": 0
+          },
+          "sha256": {
+            "description": "Digest of the canonical bytes. Present for every document, formatted or not: it is what says two runs of the formatter produced the same answer.",
+            "type": "string"
+          },
+          "canonical": {
+            "description": "Whether the file on disk already is canonical form.",
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "unformatted": { "type": "integer", "minimum": 0 },
+    "plan_sha256": { "type": "string" },
+    "committed": { "type": "boolean" },
+    "written": {
+      "description": "Documents actually rewritten. Empty for a prepared plan, and empty for a commit that found everything already canonical.",
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}

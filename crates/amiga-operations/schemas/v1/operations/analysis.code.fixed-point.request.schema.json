@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/analysis.code.fixed-point.request.schema.json",
+  "title": "analysis.code.fixed-point request",
+  "description": "Report fixed-point multiply and divide idioms, saturating clamps, and Q scales, writing nothing. `read_only`.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "operation",
+    "arguments"
+  ],
+  "properties": {
+    "operation": {
+      "const": "analysis.code.fixed-point"
+    },
+    "arguments": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source"
+      ],
+      "properties": {
+        "source": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourceLocator"
+        },
+        "hunk": {
+          "description": "CODE hunk to analyze.",
+          "type": "integer",
+          "minimum": 0,
+          "default": 0
+        },
+        "entries": {
+          "description": "Where the traversal starts, as hunk offsets. Defaults to offset 0.",
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4294967295
+          }
+        },
+        "origin": {
+          "description": "The address the hunk is mapped at.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "maximum_hints": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/resultCap"
+        },
+        "maximum_input_bytes": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/maximumInputBytes",
+          "default": 67108864
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "operation": "analysis.code.fixed-point",
+      "arguments": {
+        "source": {
+          "kind": "file",
+          "path": "extracted/game"
+        },
+        "origin": 65536
+      }
+    }
+  ]
+}

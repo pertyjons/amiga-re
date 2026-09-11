@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/project/v1/local.schema.json",
+  "title": "One machine's source bindings",
+  "description": "Where this machine keeps the project's sources, at `.amiga-re/local.json`. Deliberately outside the project's document set: the root document does not index it, no digest covers it, and it is git-ignored, because a host path that is true on one machine is noise on every other. It exists because a project document never contains a host path — `locations` is a hint and the identity is the digest — so a project whose media lives elsewhere needs somewhere to say where. A binding wins over the project's own hint.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "document_kind",
+    "format_version"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "document_kind": {
+      "const": "local"
+    },
+    "format_version": {
+      "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/formatVersion"
+    },
+    "bindings": {
+      "type": "object",
+      "description": "Source ID to host path. A relative path resolves against the project root, so a binding stays meaningful when the project and its media move together. A path reached through a symbolic link is refused rather than followed.",
+      "propertyNames": {
+        "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/id"
+      },
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  }
+}

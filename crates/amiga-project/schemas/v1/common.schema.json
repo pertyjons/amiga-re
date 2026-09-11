@@ -1,0 +1,263 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/project/v1/common.schema.json",
+  "title": "Shapes the amiga-re project documents share",
+  "description": "Identities, digests, addresses, and path safety. Every other project schema references these rather than restating them, so one rule cannot be tightened in one document and left loose in another.",
+  "$defs": {
+    "formatVersion": {
+      "description": "The contract version this document is written against. All documents in a project must use the same supported format version.",
+      "type": "integer",
+      "const": 1
+    },
+    "id": {
+      "description": "A project-wide identity: a required kind prefix, a colon, then a readable name. Never a path, a display name, an array index, an address, or a content hash \u2014 it must survive renaming the file and improving the label.",
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 256,
+      "pattern": "^(project|source|set|object|program|image|loadmap|function|symbol|variable|type|resource|annotation|artifact):[a-z0-9][a-z0-9._/-]*$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "size": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 1099511627776
+    },
+    "relativePath": {
+      "description": "A project-relative path: UTF-8, `/`-separated, never absolute, never containing `.` or `..` as a component. The only spelling a document may use, so a project describes the same thing on every host.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024,
+      "pattern": "^(?!/)(?!.*(^|/)\\.\\.?(/|$)).+$"
+    },
+    "hexAddress": {
+      "description": "A runtime address as fixed-form lowercase hexadecimal. A string because JSON has no hex integer syntax and addresses are reviewed as hex; parsers range-check every conversion.",
+      "type": "string",
+      "pattern": "^0x[0-9a-f]{8}$"
+    },
+    "notes": {
+      "type": "string",
+      "maxLength": 65536
+    },
+    "origin": {
+      "description": "Where a piece of knowledge came from. Only `user` and `reviewed_analysis` are durable claims; `imported` records that another tool asserted it.",
+      "type": "string",
+      "enum": [
+        "user",
+        "imported",
+        "reviewed_analysis"
+      ]
+    },
+    "confidence": {
+      "description": "The same vocabulary the semantic fact report uses, so a promoted fact keeps its meaning.",
+      "type": "string",
+      "enum": [
+        "certain",
+        "inferred",
+        "probable",
+        "observed",
+        "user"
+      ]
+    },
+    "extensions": {
+      "description": "Project-specific data the toolkit neither validates nor interprets. The one place unknown keys are allowed; everything else is closed.",
+      "type": "object"
+    },
+    "objectRange": {
+      "description": "A byte range in an object's own offsets.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "space",
+        "object_id",
+        "offset",
+        "length",
+        "object_sha256"
+      ],
+      "properties": {
+        "space": {
+          "const": "object"
+        },
+        "object_id": {
+          "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/id"
+        },
+        "offset": {
+          "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/size"
+        },
+        "length": {
+          "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/size"
+        },
+        "object_sha256": {
+          "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/sha256"
+        }
+      }
+    },
+    "hunkRange": {
+      "description": "A byte range within one hunk of a parsed image.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "space",
+        "image_id",
+        "hunk",
+        "offset",
+        "length",
+        "object_sha256"
+      ],
+      "properties": {
+        "space": {
+          "const": "hunk"
+        },
+        "image_id": {
+          "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/id"
+        },
+        "hunk": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 65535
+        },
+        "offset": {
+          "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/size"
+        },
+        "length": {
+          "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/size"
+        },
+        "object_sha256": {
+          "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/sha256"
+        }
+      }
+    },
+    "runtimeRange": {
+      "description": "An address range under one named load map. Meaningless without the map, which is why it is named rather than assumed.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "space",
+        "image_id",
+        "load_map_id",
+        "address",
+        "length",
+        "object_sha256"
+      ],
+      "properties": {
+        "space": {
+          "const": "runtime"
+        },
+        "image_id": {
+          "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/id"
+        },
+        "load_map_id": {
+          "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/id"
+        },
+        "address": {
+          "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/hexAddress"
+        },
+        "length": {
+          "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/size"
+        },
+        "object_sha256": {
+          "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/sha256"
+        }
+      }
+    },
+    "entityTarget": {
+      "description": "Attaches to another annotation rather than to bytes, so renaming or rebasing that annotation carries this one with it.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "space",
+        "entity_id"
+      ],
+      "properties": {
+        "space": {
+          "const": "entity"
+        },
+        "entity_id": {
+          "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/id"
+        }
+      }
+    },
+    "baseRegisterSlot": {
+      "description": "A small-data global at a base-register displacement — the shape `disasm globals` reports and nothing could previously name. It is a location in the loaded program rather than a range in the file, so it carries no offset or length; the access width is the size of the slot itself. The image and the object digest are carried like every other byte target, so a global goes stale when the bytes it was established against change.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "space",
+        "image_id",
+        "base_register",
+        "displacement",
+        "width",
+        "object_sha256"
+      ],
+      "properties": {
+        "space": {
+          "const": "base_register"
+        },
+        "image_id": {
+          "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/id"
+        },
+        "base_register": {
+          "description": "The address register the displacement is taken from — A4 or A5 by convention, but stated rather than assumed.",
+          "type": "string",
+          "pattern": "^a[0-7]$"
+        },
+        "displacement": {
+          "description": "The signed 16-bit displacement, as the addressing mode encodes it.",
+          "type": "integer",
+          "minimum": -32768,
+          "maximum": 32767
+        },
+        "width": {
+          "description": "The access width in bytes: a byte, word, or longword slot.",
+          "enum": [
+            1,
+            2,
+            4
+          ]
+        },
+        "object_sha256": {
+          "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/sha256"
+        }
+      }
+    },
+    "storageTarget": {
+      "description": "Where a value lives: the four spaces that name bytes, and not `entity`. A variable's storage has to be somewhere a width can be measured, and an entity target deliberately covers no bytes of its own — it attaches to another annotation, whose bytes are that annotation's. A global at an absolute address is a `runtime` or `hunk` target here; the base-register slot is one shape of shared state rather than the only one.",
+      "oneOf": [
+        {
+          "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/objectRange"
+        },
+        {
+          "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/hunkRange"
+        },
+        {
+          "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/runtimeRange"
+        },
+        {
+          "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/baseRegisterSlot"
+        }
+      ]
+    },
+    "target": {
+      "description": "Where an annotation applies. Tagged by `space` so a file offset, a hunk offset, a runtime address, and a base-register slot can never be confused for one another. Every byte target carries the object digest it was established against: if the bytes change the annotation is stale and must be rebased explicitly, never silently reapplied to the same number.",
+      "oneOf": [
+        {
+          "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/objectRange"
+        },
+        {
+          "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/hunkRange"
+        },
+        {
+          "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/runtimeRange"
+        },
+        {
+          "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/baseRegisterSlot"
+        },
+        {
+          "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/entityTarget"
+        }
+      ]
+    }
+  }
+}

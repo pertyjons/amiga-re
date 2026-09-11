@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/source.survey.request.schema.json",
+  "title": "source.survey request",
+  "description": "Classify a source into one ordered, non-overlapping map of typed regions.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["operation", "arguments"],
+  "properties": {
+    "operation": { "const": "source.survey" },
+    "arguments": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source"],
+      "properties": {
+        "source": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourceLocator"
+        },
+        "minimum_string_length": {
+          "description": "Minimum printable-run length the string locator reports. Deliberately higher by default than a plain string dump uses: a survey weighs string runs against Copper, palette, and module locators, and short runs cost it accuracy.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1024,
+          "default": 6
+        },
+        "maximum_input_bytes": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/maximumInputBytes",
+          "default": 67108864
+        },
+        "maximum_regions": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/resultCap",
+          "default": 65536
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "operation": "source.survey",
+      "arguments": {
+        "source": { "kind": "file", "path": "fixtures/sample.bin" },
+        "minimum_string_length": 6
+      }
+    }
+  ]
+}

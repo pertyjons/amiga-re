@@ -1,0 +1,19 @@
+{
+  "$schema": "../schema/inventory.schema.json",
+  "document_kind": "inventory",
+  "format_version": 1,
+  "source_id": "source:installed-tree",
+  "tree_sha256": "164b13898198eb056f0de7f8f526a7b00c69c439e648bbc7c1949673f63616ec",
+  "files": [
+    {
+      "path": "data/levels.tbl",
+      "size": 32,
+      "sha256": "630dcd2966c4336691125448bbb25b4ff412a49c732db2c8abc1b8581bd710dd"
+    },
+    {
+      "path": "startup",
+      "size": 17,
+      "sha256": "a52a31472466524931a57619ab5a193b1b1fc84d7e8bc934b8c839f7c0c4f636"
+    }
+  ]
+}

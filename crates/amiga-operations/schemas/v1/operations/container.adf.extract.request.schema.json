@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/container.adf.extract.request.schema.json",
+  "title": "container.adf.extract request",
+  "description": "Recover an AmigaDOS volume's files through a reviewed write plan. This operation is `prepared_output`: it accepts only the `prepare` and `commit_reviewed` execution modes. `prepare` reports the complete plan and writes nothing; `commit_reviewed` re-derives the plan and writes only if it still matches the digest the caller approved.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["operation", "arguments"],
+  "properties": {
+    "operation": { "const": "container.adf.extract" },
+    "arguments": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "destination"],
+      "properties": {
+        "source": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourceLocator"
+        },
+        "destination": {
+          "description": "Where the recovered files go, as an identity the adapter resolves against its own output root. Obeys the same rules as a source path: relative, normal components only, so a request cannot reach outside the root its adapter chose.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024,
+          "pattern": "^(?!/)(?!.*(^|/)\\.\\.(/|$)).+$"
+        },
+        "policy": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/outputPolicy",
+          "default": "create_only"
+        },
+        "maximum_input_bytes": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/maximumInputBytes",
+          "default": 67108864
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "operation": "container.adf.extract",
+      "arguments": {
+        "source": { "kind": "file", "path": "fixtures/volume.adf" },
+        "destination": "recovered"
+      }
+    }
+  ]
+}

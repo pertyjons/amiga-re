@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/project.init.request.schema.json",
+  "title": "project.init request",
+  "description": "Create a project document set from chosen source files. `prepared_output`: `prepare` reports the plan and writes nothing, `commit_reviewed` re-derives it and writes only if the digest still matches. Refuses outright when a project already exists at the destination — there is no replace, because the root-last write ordering that makes an interrupted init safe only holds for a fresh set. The destination is named here rather than by the envelope's `project` locator, because the project does not exist yet.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["operation", "arguments"],
+  "properties": {
+    "operation": { "const": "project.init" },
+    "arguments": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "destination", "sources"],
+      "properties": {
+        "name": {
+          "description": "The project's display name. Its id is derived from this.",
+          "type": "string",
+          "minLength": 1
+        },
+        "destination": {
+          "description": "Where the project is created, as an identity the adapter resolves against its own output root. Never a host path.",
+          "type": "string",
+          "minLength": 1
+        },
+        "sources": {
+          "description": "The files to register, as identities the resolver resolves. Each becomes a source with its size and digest pinned, and a whole-file object — an object with no selector would verify as unrecoverable.",
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "media": {
+          "description": "`copy` puts each source under the project's `original/` directory, making the project self-contained. `in_place` leaves it where it is: under the root it gets a project-relative location, outside it a `.amiga-re/local.json` binding that is true on this machine only. There is no third option, because a source with neither verifies as unbound next session.",
+          "enum": ["copy", "in_place"],
+          "default": "copy"
+        },
+        "maximum_input_bytes": {
+          "description": "Per-source ceiling. The aggregate ceilings — source count, total input bytes — are the context's and are not request-settable, because they exist to bound what a caller asks for.",
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "operation": "project.init",
+      "arguments": {
+        "name": "Disk set",
+        "destination": "my-project",
+        "sources": ["disk1.adf", "disk2.adf"],
+        "media": "copy"
+      }
+    }
+  ]
+}

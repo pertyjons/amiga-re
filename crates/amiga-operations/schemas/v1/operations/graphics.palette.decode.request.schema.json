@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/graphics.palette.decode.request.schema.json",
+  "title": "graphics.palette.decode request",
+  "description": "Read a run of Amiga $0RGB colour words and report both encodings of each, writing nothing. `read_only`.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "operation",
+    "arguments"
+  ],
+  "properties": {
+    "operation": {
+      "const": "graphics.palette.decode"
+    },
+    "arguments": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source",
+        "count"
+      ],
+      "properties": {
+        "source": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourceLocator"
+        },
+        "offset": {
+          "description": "Byte offset of the first colour word.",
+          "type": "integer",
+          "minimum": 0,
+          "default": 0
+        },
+        "count": {
+          "description": "How many colour words to read. Capped at 256, which is the indexed-PNG format's ceiling.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 256
+        },
+        "maximum_input_bytes": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/maximumInputBytes",
+          "default": 67108864
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "operation": "graphics.palette.decode",
+      "arguments": {
+        "source": {
+          "kind": "file",
+          "path": "extracted/game.bin"
+        },
+        "offset": 8192,
+        "count": 32
+      }
+    }
+  ]
+}

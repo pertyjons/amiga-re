@@ -1,0 +1,700 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json",
+  "title": "Shapes shared by the amiga-re operation request and response envelopes",
+  "description": "Nothing is ever fetched from this host. The `.invalid` domain is reserved by RFC 2606; these identifiers exist only so bundled documents can reference each other offline.",
+  "$defs": {
+    "protocolVersion": {
+      "description": "The contract version a document is written against.",
+      "type": "integer",
+      "const": 1
+    },
+    "requestId": {
+      "description": "Caller-chosen correlation id, echoed on the response. Never part of the request digest.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "sha256": {
+      "description": "A lowercase hexadecimal SHA-256 digest.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "sourceName": {
+      "description": "The identity of one source, relative and `/`-separated. Never a host path: a request document must mean the same thing on another machine. Structural only \u2014 a resolver additionally refuses `.` and `..` components, which this pattern deliberately does not try to express.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024,
+      "pattern": "^[^/\\\\]+(/[^/\\\\]+)*$"
+    },
+    "sourceLocator": {
+      "description": "How a caller names one input source: a whole file, or bytes recovered from inside one. A `member` names its container as a locator of its own, so a chain \u2014 a PowerPacked file inside an LHA member inside an ADF \u2014 is three selectors rather than a special case. The pin an operation reports covers the recovered bytes, not the container's: that is what it read.",
+      "type": "object",
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "path"
+          ],
+          "properties": {
+            "kind": {
+              "const": "file"
+            },
+            "path": {
+              "$ref": "#/$defs/sourceName"
+            }
+          }
+        },
+        {
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "parent",
+            "selector"
+          ],
+          "properties": {
+            "kind": {
+              "const": "member"
+            },
+            "parent": {
+              "$ref": "#/$defs/sourceLocator"
+            },
+            "selector": {
+              "$ref": "#/$defs/memberSelector"
+            }
+          }
+        }
+      ]
+    },
+    "memberSelector": {
+      "description": "Which member of a container, in the project format's own vocabulary \u2014 the same `selector` an `Object` carries, because a selector names a member and carries no project-derived digest. `range` is deliberately absent: a byte range is arithmetic, not a container, and every operation that reads part of a source already takes an offset and a length.",
+      "type": "object",
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "required": [
+            "container",
+            "path"
+          ],
+          "properties": {
+            "container": {
+              "const": "adf"
+            },
+            "path": {
+              "description": "The volume-relative path of the file, without the volume name.",
+              "type": "string",
+              "minLength": 1
+            },
+            "header_block": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        {
+          "additionalProperties": false,
+          "required": [
+            "container",
+            "member"
+          ],
+          "properties": {
+            "container": {
+              "const": "lha"
+            },
+            "member": {
+              "type": "string",
+              "minLength": 1
+            },
+            "method": {
+              "type": "string"
+            },
+            "crc16": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 65535
+            }
+          }
+        },
+        {
+          "additionalProperties": false,
+          "required": [
+            "container",
+            "codec"
+          ],
+          "properties": {
+            "container": {
+              "const": "decompressed"
+            },
+            "codec": {
+              "type": "object",
+              "required": [
+                "name"
+              ]
+            },
+            "declared_size": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        }
+      ]
+    },
+    "sourcePin": {
+      "description": "The bytes an operation actually read, pinned so its result is reproducible.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "size",
+        "sha256"
+      ],
+      "properties": {
+        "size": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    },
+    "maximumInputBytes": {
+      "description": "Refuse the source outright when it is larger than this. A prefix is never surveyed in place of the whole.",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 68719476736
+    },
+    "maximumOutputBytes": {
+      "description": "Refuse a decompression before its decoded output would grow beyond this many bytes.",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 68719476736
+    },
+    "resultCap": {
+      "description": "Cap a reported collection at this many entries. The response always reports the true total beside the capped list.",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 16777216
+    },
+    "outputPolicy": {
+      "description": "What may happen to a destination that already exists. `create_only` is the default and the only one under which no existing bytes can be lost.",
+      "type": "string",
+      "enum": [
+        "create_only",
+        "replace_matching_provenance",
+        "replace_explicit_generated"
+      ]
+    },
+    "sandboxStep": {
+      "description": "One executed instruction, with what it changed. Shared by every sandbox operation that can return a trace: a row that meant different things in `run` and in `call` would make a trace unreadable without knowing which produced it.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "index",
+        "address",
+        "text",
+        "register_deltas",
+        "writes",
+        "watch_hits"
+      ],
+      "properties": {
+        "index": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "address": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "text": {
+          "type": "string"
+        },
+        "writes": {
+          "description": "Memory writes this instruction performed, as far as the run's bounded write log retained them. Read it together with `writes_truncated`: an empty list means the instruction wrote nothing only when that flag is absent.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "address",
+              "size",
+              "value"
+            ],
+            "properties": {
+              "address": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 4294967295
+              },
+              "size": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 4
+              },
+              "value": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 4294967295
+              }
+            }
+          }
+        },
+        "writes_truncated": {
+          "description": "Present and true when this instruction wrote more than `writes` lists, because the write log had reached its retention cap. The cap is what bounds a run's memory, so a long run reaches it and every row after it would otherwise assert that an instruction which wrote sixty bytes wrote nothing. The row straddling the boundary carries it too, listing part of what it wrote.",
+          "type": "boolean"
+        },
+        "watch_hits": {
+          "description": "Watched accesses, with both sides. A read has before == after; a write does not, and what a watch is usually for is seeing what a value became.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "address",
+              "access",
+              "size",
+              "before",
+              "after"
+            ],
+            "properties": {
+              "address": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 4294967295
+              },
+              "access": {
+                "type": "string",
+                "enum": [
+                  "read",
+                  "write"
+                ]
+              },
+              "size": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 4
+              },
+              "before": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 4294967295
+              },
+              "after": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 4294967295
+              }
+            }
+          }
+        },
+        "trap": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 255
+        },
+        "register_deltas": {
+          "description": "Registers this instruction changed. The program counter is excluded: the next row's address already says where it went.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "register",
+              "before",
+              "after"
+            ],
+            "properties": {
+              "register": {
+                "description": "The register's name as the disassembler spells it, e.g. d0 or a6.",
+                "type": "string"
+              },
+              "before": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 4294967295
+              },
+              "after": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 4294967295
+              }
+            }
+          }
+        }
+      }
+    },
+    "writePlan": {
+      "description": "Everything one reviewed write would do, and the digest that authorizes it. Shared by every `prepared_output` operation: a plan that meant different things in different responses would make the digest a caller approves ambiguous.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "destination",
+        "destination_kind",
+        "policy",
+        "files",
+        "directories",
+        "plan_sha256"
+      ],
+      "properties": {
+        "destination": {
+          "type": "string",
+          "minLength": 1
+        },
+        "destination_kind": {
+          "description": "Whether `destination` is one file or a directory. A file destination's policy governs that file and its sibling manifest alone; a directory destination's governs the whole tree, which is why replacing one needs a manifest accounting for everything already there. `directory` is a tree this toolkit owns entirely; `directory_contents` is one it writes named files into without owning what else is there.",
+          "type": "string",
+          "enum": [
+            "file",
+            "directory",
+            "directory_contents"
+          ]
+        },
+        "policy": {
+          "$ref": "#/$defs/outputPolicy"
+        },
+        "files": {
+          "description": "Every file the commit would write, in path order. Sorted so that two runs producing the same files in a different order share a plan digest.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "path",
+              "size",
+              "sha256"
+            ],
+            "properties": {
+              "path": {
+                "type": "string",
+                "minLength": 1
+              },
+              "size": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "sha256": {
+                "$ref": "#/$defs/sha256"
+              }
+            }
+          }
+        },
+        "directories": {
+          "description": "Directories the commit would create for their own sake, in path order.",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "plan_sha256": {
+          "description": "The digest a `commit_reviewed` request must name to authorize this plan. Covers the destination, the policy, and every path with its size and content hash \u2014 everything that decides what exists afterwards.",
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    },
+    "memorySeed": {
+      "description": "One range of bytes written into the sandbox before entry. Exactly one of `hex`, `from` or `artifact` says where the bytes come from: a seed naming two would have two answers to what it seeds, and one naming none would seed nothing while looking like it seeded something.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "address"
+      ],
+      "oneOf": [
+        {
+          "required": [
+            "hex"
+          ]
+        },
+        {
+          "required": [
+            "from"
+          ]
+        },
+        {
+          "required": [
+            "artifact"
+          ]
+        }
+      ],
+      "properties": {
+        "address": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "hex": {
+          "description": "Lowercase hex. A JSON document cannot carry raw bytes, and a seed is part of the record a caller diffs, so it has to be spellable.",
+          "type": "string",
+          "pattern": "^([0-9a-f]{2})+$"
+        },
+        "from": {
+          "description": "A range of a source to copy, instead of hex a caller had to convert. A self-relocating loader installing a resident helper copies part of its own image to low memory; recording the range is what lets the copy be checked against the image.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "offset",
+            "length"
+          ],
+          "properties": {
+            "source": {
+              "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourceLocator"
+            },
+            "hunk": {
+              "description": "Copy from this hunk's loaded bytes rather than from the file. A hunk offset is what a disassembly shows, and converting it to a file offset by hand is the arithmetic this avoids. A BSS hunk holds no bytes in the file and is refused rather than read as zeros.",
+              "type": "integer",
+              "minimum": 0
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 4294967295
+            },
+            "length": {
+              "description": "At least one byte: a zero-length seed writes nothing while looking like it wrote something.",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 4294967295
+            }
+          }
+        },
+        "artifact": {
+          "description": "A file an earlier run produced, replayed under its own digest \u2014 the other end of `memory_exports`. `call --save` preserves a decoded runtime table so a later stage can be run against it, and replaying it used to mean converting the whole file to a hexadecimal seed outside the toolkit, which loses the one thing that made it evidence: which file it was. The digest is required and is compared before the routine runs, so a stale artifact is a refused request rather than a completed run whose outputs mean nothing.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "source",
+            "sha256"
+          ],
+          "properties": {
+            "source": {
+              "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourceLocator"
+            },
+            "sha256": {
+              "description": "SHA-256 of the whole file, lowercase hex, as the run that wrote it reported. The whole file rather than the replayed range, so a caller pastes the number the earlier record carries instead of computing a new one over a slice.",
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "offset": {
+              "description": "Where the replayed range starts in the file. Omitted means the start.",
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 4294967295
+            },
+            "length": {
+              "description": "How many bytes to replay. Omitted means the rest of the file, which the digest makes exact rather than a guess. The record reports the resolved length either way.",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 4294967295
+            }
+          }
+        }
+      }
+    },
+    "memoryExport": {
+      "description": "One range of the sandbox's final memory a recipe names as an artifact. The record digests it and the `.export` operations write its bytes; a range not fully mapped is refused rather than exported short.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "address",
+        "length",
+        "name"
+      ],
+      "properties": {
+        "address": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "length": {
+          "description": "At least one byte: a zero-length range would write an empty file that looks like a successful export.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4294967295
+        },
+        "name": {
+          "description": "What the range is called, as a file name. A single component: the destination names the directory, and a name that could contain a separator would be deciding a second one.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255,
+          "pattern": "^[^/\\\\]+$"
+        }
+      }
+    },
+    "scheduledInterrupt": {
+      "description": "One interrupt delivered on a deterministic instruction schedule. The schedule counts instructions rather than beam position or wall-clock time, because that is the one clock a sandbox reproduces exactly.",
+      "type": "object",
+      "additionalProperties": false,
+      "oneOf": [
+        {
+          "required": [
+            "vector"
+          ]
+        },
+        {
+          "required": [
+            "address"
+          ]
+        }
+      ],
+      "properties": {
+        "vector": {
+          "description": "The 68000 vector whose longword holds the handler \u2014 27 for level 3, the Amiga's vertical-blank and Copper level. Read at delivery, not at setup, so the handler the program installed is the one that runs; a vector still holding zero delays the delivery to the next period rather than faulting.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 255
+        },
+        "address": {
+          "description": "A fixed handler address, for a recipe that knows where the handler is.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "after_steps": {
+          "description": "Instructions to execute before the first delivery.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295,
+          "default": 0
+        },
+        "every_steps": {
+          "description": "Instructions between deliveries. Omitted, it delivers once. A delivery never nests: the schedule waits until the stack has unwound past the frame it pushed, because interrupting a handler that has not returned would build a state no schedule describes.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4294967295
+        },
+        "deliveries": {
+          "description": "How many deliveries at most. Omitted, as many as the step budget allows, which is already finite.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4294967295
+        },
+        "frame": {
+          "description": "How the handler returns. `rte` pushes the 68000 exception frame \u2014 status register at SP, program counter at SP+2 \u2014 which is what a hardware vector holds. `rts` pushes a plain return address, the shape an exec interrupt server has.",
+          "type": "string",
+          "enum": [
+            "rte",
+            "rts"
+          ],
+          "default": "rte"
+        }
+      }
+    },
+    "customChips": {
+      "description": "Model the custom chips at $DFF000 rather than leaving that range to be whatever mapped_regions made of it. An empty object means an emulating OCS blitter with the defaults, so one request cannot be spelled two ways that mean two things. Naming this refuses any mapping that overlaps $DFF000..$DFF200: RAM and the chips cannot both answer an address.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "chipset": {
+          "description": "The chipset modelled. OCS is the only value: 'OCS with some ECS registers observed but ignored' is not a coherent machine, so the chipset is the extension point rather than a hole in the middle of the model.",
+          "type": "string",
+          "enum": [
+            "ocs"
+          ],
+          "default": "ocs"
+        },
+        "blitter": {
+          "description": "How the blitter behaves.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "mode": {
+              "description": "emulate performs blits and changes memory; shadow keeps register cells only, as the page behaved before a blitter existed. Under shadow, dma and maximum_words have no effect and are dropped from both the canonical request and the reported configuration.",
+              "type": "string",
+              "enum": [
+                "emulate",
+                "shadow"
+              ],
+              "default": "emulate"
+            },
+            "dma": {
+              "description": "What to do when a blit starts with DMACON saying blitter DMA is off. assume_enabled blits anyway and says so, because a call starts in the middle of a program after an initialization the sandbox never ran, so DMACON holding zero says nothing about what the program intended. require_enabled refuses the blit, for a recipe that did run the initialization.",
+              "type": "string",
+              "enum": [
+                "assume_enabled",
+                "require_enabled"
+              ],
+              "default": "assume_enabled"
+            },
+            "maximum_words": {
+              "description": "Datapath words this run's blits may perform, refused blits included: the preflight that refuses one is itself proportional to the blit, so a refusal that cost nothing would leave the expensive half unbounded. Clamped to what the executing context allows, with a reduction reported as LIMIT_REDUCED.",
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        }
+      }
+    },
+    "watchRange": {
+      "description": "One absolute range whose accesses are attached to trace rows, and which kinds of access count as a hit.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "start",
+        "length"
+      ],
+      "properties": {
+        "start": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "length": {
+          "description": "At least one byte: a zero-length range watches nothing and would silently never match.",
+          "type": "integer",
+          "minimum": 1
+        },
+        "access": {
+          "type": "string",
+          "enum": [
+            "read",
+            "write",
+            "both"
+          ],
+          "default": "both"
+        }
+      }
+    },
+    "hunkBase": {
+      "description": "One additional hunk to map, and the address to map it at, for relocations that target it.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "hunk",
+        "address"
+      ],
+      "properties": {
+        "hunk": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "address": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        }
+      }
+    },
+    "stackRegion": {
+      "description": "Where the stack lives. Omitted, it is placed above the hunk with an unmapped gap, so a runaway stack faults instead of quietly overwriting the code being run.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "base",
+        "size"
+      ],
+      "properties": {
+        "base": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "size": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4294967295
+        }
+      }
+    }
+  }
+}

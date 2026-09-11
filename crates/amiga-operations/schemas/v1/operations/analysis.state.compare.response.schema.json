@@ -1,0 +1,140 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/analysis.state.compare.response.schema.json",
+  "title": "analysis.state.compare result",
+  "description": "Which fields the snapshots disagree about, and each one's value. The totals are exact whatever the report cap, because a capped count would be a fact about the request rather than about the machines.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "snapshots",
+    "identical",
+    "paths_total",
+    "differences",
+    "differences_total",
+    "differences_truncated"
+  ],
+  "properties": {
+    "snapshots": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "sha256",
+          "image_id",
+          "fields_total",
+          "fields_truncated"
+        ],
+        "properties": {
+          "name": {
+            "description": "The locator the request named it by, so a difference's positional values can be read back to a file.",
+            "type": "string"
+          },
+          "sha256": {
+            "description": "The digest of the snapshot document, which is what pins the comparison.",
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "image_id": {
+            "type": "string"
+          },
+          "fields_total": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "fields_truncated": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "identical": {
+      "description": "Whether every path present in any snapshot holds the same value in all of them.",
+      "type": "boolean"
+    },
+    "paths_total": {
+      "description": "Paths compared across all snapshots, whether or not they differ.",
+      "type": "integer",
+      "minimum": 0
+    },
+    "differences": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "values"
+        ],
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "values": {
+            "description": "Each snapshot's value, in the order the request named them. `null` is the field being absent from that snapshot, which is a difference of its own kind and is named rather than rendered as a value.",
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "description": "What one leaf holds. Tagged, and deliberately not collapsed into a number: a pointer that compared equal to an integer of the same bit pattern would let a relocated address read as an unchanged value.",
+                  "type": "object",
+                  "required": [
+                    "kind"
+                  ],
+                  "properties": {
+                    "kind": {
+                      "type": "string",
+                      "enum": [
+                        "integer",
+                        "pointer",
+                        "enum",
+                        "bytes"
+                      ]
+                    },
+                    "value": {
+                      "type": "integer"
+                    },
+                    "signed": {
+                      "type": "boolean"
+                    },
+                    "byte_order": {
+                      "type": "string"
+                    },
+                    "address": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 4294967295
+                    },
+                    "address_space": {
+                      "type": "string"
+                    },
+                    "member": {
+                      "description": "The name the project gives this value, when it names one. Absent means the stored number is not one the project enumerates, which is a finding rather than an error.",
+                      "type": "string"
+                    },
+                    "hex": {
+                      "description": "Bytes, for a leaf whose type states a width this build cannot read as a scalar. Reported rather than skipped, so the field still appears in a comparison and still says it changed.",
+                      "type": "string",
+                      "pattern": "^([0-9a-f]{2})*$"
+                    }
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "differences_total": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "differences_truncated": {
+      "type": "boolean"
+    }
+  }
+}

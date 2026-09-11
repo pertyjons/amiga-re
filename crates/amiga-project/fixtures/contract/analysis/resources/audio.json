@@ -1,0 +1,23 @@
+{
+  "$schema": "../schema/resources.schema.json",
+  "document_kind": "resources",
+  "format_version": 1,
+  "resources": [
+    {
+      "channels": 1,
+      "encoding": "raw_pcm8",
+      "id": "resource:menu-jingle",
+      "kind": "audio",
+      "name": "Menu jingle",
+      "notes": "Raw Paula PCM carries no rate in the bytes, so the project records the one that was chosen. An 8SVX resource would omit it, because the container has it.",
+      "sample_rate": 8363,
+      "target": {
+        "length": 64,
+        "object_id": "object:assets/jingle",
+        "object_sha256": "d8bc63b4fc1156e5e7d95a418b9bf54cd3174bedbc2db40f74895349b229b3c0",
+        "offset": 0,
+        "space": "object"
+      }
+    }
+  ]
+}

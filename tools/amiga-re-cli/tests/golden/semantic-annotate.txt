@@ -1,0 +1,26 @@
+; Unified annotated MC68000 listing by amiga-re
+; Source SHA-256: 6f5550b914d75e92e03c9a80833e260ee6569046290a542e6f6b706eff4c695d
+; Annotations: ~ inferred, ? probable, ^ observed; unmarked annotations are exact or user-supplied.
+
+sub_0:
+L00000000:  MOVEA.L (0x4).W, A6          ; 2c780004  ; -> abs 0x4
+L00000004:  BRA 38 <0x2C>                ; 60000026
+init_gfx:
+L00000008:  MOVEA.L (0x4).W, A6          ; 2c780004  ; -> abs 0x4
+L0000000C:  LEA (54, PC), A1             ; 43fa0036  ; -> hunk0+0x44
+L00000010:  JSR (-552, A6)               ; 4eaefdd8  ; ~exec.library/OpenLibrary
+L00000014:  MOVE.L D0, (8, A5)           ; 2b400008  ; write A5+0x8
+L00000018:  MOVEA.L D0, A6               ; 2c40
+L0000001A:  LEA (0xDFF000).L, A4         ; 49f900dff000  ; -> abs 0xdff000
+L00000020:  MOVE.W #32800, (150, A4)     ; 397c80200096  ; ~write DMACON
+L00000026:  TST.W D1                     ; 4a41
+L00000028:  BEQ 2 <0x2C>                 ; 6702
+L0000002A:  NOP                          ; 4e71
+L0000002C:  JSR (-30, A6)                ; 4eaeffe2  ; ?lvo -30: exec.library|graphics.library
+L00000030:  MOVE.W (0xDFF01C).L, D0      ; 303900dff01c  ; read INTENAR
+L00000036:  MULS.W D1, D3                ; c7c1  ; ?Q8 scaled multiply
+L00000038:  ASR.L #8, D3                 ; e083  ; ?D3 = Q8
+L0000003A:  BSR 6 <0x42>                 ; 6106  ; call helper
+L0000003C:  JMP (A0)                     ; 4ed0  ; !unresolved flow
+helper:
+L00000042:  RTS                          ; 4e75

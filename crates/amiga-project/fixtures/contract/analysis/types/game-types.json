@@ -1,0 +1,161 @@
+{
+  "$schema": "../schema/types.schema.json",
+  "document_kind": "types",
+  "format_version": 1,
+  "types": [
+    {
+      "base_id": "type:u16",
+      "id": "type:level-flags",
+      "kind": "enum",
+      "members": [
+        {
+          "name": "None",
+          "value": 0
+        },
+        {
+          "name": "Scrolling",
+          "value": 1
+        },
+        {
+          "name": "Boss",
+          "value": 2
+        }
+      ],
+      "name": "LevelFlags"
+    },
+    {
+      "fields": [
+        {
+          "name": "id",
+          "offset": 0,
+          "type_id": "type:u16"
+        },
+        {
+          "name": "width",
+          "offset": 2,
+          "type_id": "type:u16"
+        },
+        {
+          "name": "height",
+          "offset": 4,
+          "type_id": "type:u16"
+        },
+        {
+          "name": "flags",
+          "offset": 6,
+          "type_id": "type:level-flags"
+        }
+      ],
+      "id": "type:level-header",
+      "kind": "struct",
+      "name": "LevelHeader",
+      "notes": "Offsets and total size are explicit and checked; nothing is inferred from field order or host alignment.",
+      "size": 8
+    },
+    {
+      "address_space": "runtime",
+      "id": "type:level-ptr",
+      "kind": "pointer",
+      "name": "LevelPtr",
+      "notes": "A pointer says which frame its value is in. Without that it resolves to nothing rather than to a plausible-looking address.",
+      "pointee_id": "type:level-header"
+    },
+    {
+      "count": 4,
+      "element_id": "type:level-header",
+      "id": "type:level-table",
+      "kind": "array",
+      "name": "LevelTable"
+    },
+    {
+      "clobbers": [
+        "d0",
+        "d1",
+        "a0",
+        "a1"
+      ],
+      "id": "type:load-level-signature",
+      "kind": "function",
+      "name": "LoadLevelSignature",
+      "notes": "Nothing here is a convention. The routine takes its selector in D1 and a destination in A2 because that is what it was observed to read; a C compiler would have used neither. `preserves` is absent rather than empty, which says the rest of the register file has not been reviewed — not that it survives.",
+      "parameters": [
+        {
+          "location": {
+            "kind": "register",
+            "register": "d1"
+          },
+          "name": "level",
+          "type_id": "type:u16"
+        },
+        {
+          "location": {
+            "kind": "register",
+            "register": "a2"
+          },
+          "name": "destination",
+          "type_id": "type:level-ptr"
+        },
+        {
+          "location": {
+            "kind": "stack",
+            "offset": 4
+          },
+          "name": "flags",
+          "notes": "Pushed by the caller, so it is at 4 rather than 0: the return address is at (a7) on entry.",
+          "type_id": "type:level-flags"
+        }
+      ],
+      "results": [
+        {
+          "location": {
+            "kind": "register",
+            "register": "d0"
+          },
+          "name": "status",
+          "type_id": "type:s16"
+        },
+        {
+          "location": {
+            "kind": "register",
+            "register": "a0"
+          },
+          "name": "header",
+          "notes": "The second result. A signature with one would have lost it.",
+          "type_id": "type:level-ptr"
+        }
+      ]
+    },
+    {
+      "byte_order": "big",
+      "id": "type:s16",
+      "kind": "integer",
+      "name": "s16",
+      "signed": true,
+      "size": 2
+    },
+    {
+      "byte_order": "big",
+      "id": "type:u16",
+      "kind": "integer",
+      "name": "u16",
+      "signed": false,
+      "size": 2
+    },
+    {
+      "byte_order": "big",
+      "id": "type:u32",
+      "kind": "integer",
+      "name": "u32",
+      "signed": false,
+      "size": 4
+    },
+    {
+      "byte_order": "big",
+      "id": "type:u8",
+      "kind": "integer",
+      "name": "u8",
+      "signed": false,
+      "size": 1
+    }
+  ]
+}

@@ -1,0 +1,178 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/project.annotations.response.schema.json",
+  "title": "project.annotations result",
+  "description": "Names a person recorded, the comments they wrote, the regions they classified, and the locals and base-register globals they identified. Image scope resolves through `amiga_project::Index`, so its locations are the index's answer rather than a second traversal that could disagree with it; object scope lists the annotations targeting an object's bytes, in file order, each with the digest it was established against.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "images",
+    "objects",
+    "locations",
+    "location_total",
+    "locations_truncated",
+    "ranges",
+    "range_total",
+    "ranges_truncated",
+    "locals",
+    "globals",
+    "stale"
+  ],
+  "properties": {
+    "image": {
+      "description": "The image this answer is about, when the request named one.",
+      "type": "string"
+    },
+    "object": {
+      "description": "The object this answer is about, when the request named one.",
+      "type": "string"
+    },
+    "objects": {
+      "description": "Every object the project derives, so a caller that named the wrong one can be told which are right without asking a second question.",
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "images": {
+      "description": "Every image the project describes, so a caller that named the wrong one can be told which are right without asking a second question.",
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "locations": {
+      "description": "Locations in offset order, each carrying everything the project says there.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["hunk", "offset", "symbols", "regions", "bookmarks", "comments"],
+        "properties": {
+          "hunk": { "type": "integer", "minimum": 0 },
+          "offset": { "type": "integer", "minimum": 0 },
+          "function": {
+            "description": "The function whose entry is exactly here, if any.",
+            "type": "string"
+          },
+          "symbols": { "type": "array", "items": { "type": "string" } },
+          "regions": { "type": "array", "items": { "type": "string" } },
+          "bookmarks": { "type": "array", "items": { "type": "string" } },
+          "comments": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["placement", "text"],
+              "properties": {
+                "placement": { "type": "string" },
+                "text": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "location_total": { "type": "integer", "minimum": 0 },
+    "locations_truncated": { "type": "boolean" },
+    "ranges": {
+      "description": "Annotations targeting the object's bytes, in file order. Object scope only; empty under image scope, because an image's knowledge lives in hunk space and mixing the two address spaces in one answer is what the scope split exists to prevent.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "kind",
+          "origin",
+          "offset",
+          "length",
+          "label",
+          "marked_stale",
+          "established"
+        ],
+        "properties": {
+          "id": { "type": "string" },
+          "kind": {
+            "enum": ["function", "symbol", "comment", "variable", "region", "bookmark"]
+          },
+          "origin": { "enum": ["user", "imported", "reviewed_analysis"] },
+          "offset": { "type": "integer", "minimum": 0 },
+          "length": { "type": "integer", "minimum": 0 },
+          "label": {
+            "description": "What it says: a name, a region's classification, or a comment's text.",
+            "type": "string"
+          },
+          "placement": { "type": "string" },
+          "notes": { "type": "string" },
+          "confidence": { "type": "string" },
+          "marked_stale": {
+            "description": "Whether the document marks it stale. Only `function` and `symbol` carry the flag, so this is not the general staleness answer — `established` is.",
+            "type": "boolean"
+          },
+          "established": {
+            "description": "Whether the digest it was established against is still the object's. False means the bytes moved under it, so it is knowledge to rebase or remove rather than knowledge to trust.",
+            "type": "boolean"
+          },
+          "about": {
+            "description": "Comments written about this annotation rather than about bytes. The format has both comment forms because they are different acts, and this is the one that survives a rename or a rebase: it names the annotation, not an offset. Reported under what it is about, and carrying no offset of its own — giving it the range of the thing it comments on would make two different claims look alike. Absent when there are none.",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["id", "origin", "placement", "text"],
+              "properties": {
+                "id": { "type": "string" },
+                "origin": { "enum": ["user", "imported", "reviewed_analysis"] },
+                "placement": { "type": "string" },
+                "text": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "range_total": { "type": "integer", "minimum": 0 },
+    "ranges_truncated": { "type": "boolean" },
+    "locals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["function_id", "function_name", "name", "storage"],
+        "properties": {
+          "function_id": { "type": "string" },
+          "function_name": { "type": "string" },
+          "name": { "type": "string" },
+          "storage": { "enum": ["register", "stack"] },
+          "register": { "type": "string" },
+          "base": { "type": "string" },
+          "displacement": { "type": "integer" },
+          "lifetime": {
+            "description": "The hunk offsets the variable is live across, when the project records them. Absent means the whole function — weaker knowledge, presented as such rather than as a range that covers everything.",
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": { "type": "integer", "minimum": 0 }
+          }
+        }
+      }
+    },
+    "globals": {
+      "description": "Named small-data globals. Each belongs to no function and therefore to no offset: a location in the loaded program rather than a place in the file, so reporting one under a hunk offset would invent one.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "base", "displacement", "width"],
+        "properties": {
+          "name": { "type": "string" },
+          "base": { "type": "string" },
+          "displacement": { "type": "integer" },
+          "width": { "type": "integer", "minimum": 0, "maximum": 255 }
+        }
+      }
+    },
+    "stale": {
+      "description": "Annotations excluded from every lookup above because they no longer resolve. Project-wide rather than per image: the index excludes them before it knows which image asked, and a stale annotation is not knowledge about anywhere.",
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}

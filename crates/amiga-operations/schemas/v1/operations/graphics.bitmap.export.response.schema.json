@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/graphics.bitmap.export.response.schema.json",
+  "title": "graphics.bitmap.export result",
+  "description": "The PNG that would be written, and whether it was. Carries the palette it used, not only the plan: an export with no palette argument still committed to specific colors, and a reviewer who cannot see which ones has not really reviewed the image.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "source",
+    "width",
+    "height",
+    "palette",
+    "plan",
+    "committed"
+  ],
+  "properties": {
+    "source": {
+      "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourcePin"
+    },
+    "width": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "height": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "palette": {
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 4095
+      }
+    },
+    "committed": {
+      "type": "boolean"
+    },
+    "plan": {
+      "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/writePlan"
+    }
+  }
+}

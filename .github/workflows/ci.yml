@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: 1.98.1
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+      - name: Reproducible fixtures and publication inventory
+        run: python3 -m unittest discover -s scripts
+      - run: cargo fmt --all -- --check
+      - name: Build workspace
+        run: cargo build --workspace
+      - run: cargo clippy --workspace --all-targets -- -D warnings
+      - run: cargo test --workspace
+      # The fifth command of the gate in AGENTS.md. A broken intra-doc link
+      # renders as plain text, so nothing but this run reports one.
+      - name: Documentation (intra-doc links must resolve)
+        run: cargo doc --workspace --no-deps
+        env:
+          RUSTDOCFLAGS: -D warnings
+
+  independent_ffs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: 1.98.1
+      - uses: Swatinem/rust-cache@v2
+      - name: Install pinned independent filesystem tool
+        run: |
+          python3 -m venv "${{ runner.temp }}/ffs-tools"
+          "${{ runner.temp }}/ffs-tools/bin/pip" install --require-hashes -r scripts/ffs-requirements.txt
+      - name: Write and independently recover a complete DOS1 volume
+        run: '"${{ runner.temp }}/ffs-tools/bin/python" scripts/ffs_reference.py "${{ runner.temp }}/ffs-reference"'
+      - name: Compare recovered files, including extension chains
+        run: cargo test -p amiga-adf --test real_images -- --nocapture
+        env:
+          AMIGA_RE_FFS_IMAGES: ${{ runner.temp }}/ffs-reference/reference.adf

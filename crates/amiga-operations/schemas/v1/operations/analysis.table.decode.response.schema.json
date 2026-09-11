@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/analysis.table.decode.response.schema.json",
+  "title": "analysis.table.decode result",
+  "description": "The rows that fit, and how many the region actually holds. The second number is what makes a guessed layout falsifiable: a request for 40 rows answered with 37 has learned something about the table.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "source",
+    "offset",
+    "record_size",
+    "rows",
+    "row_total"
+  ],
+  "properties": {
+    "source": {
+      "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourcePin"
+    },
+    "offset": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "record_size": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "row_total": {
+      "description": "Whole rows the region holds from `offset` onwards, whether or not they were all reported.",
+      "type": "integer",
+      "minimum": 0
+    },
+    "rows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "offset",
+          "fields"
+        ],
+        "properties": {
+          "offset": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "kind",
+                "value"
+              ],
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "enum": [
+                    "unsigned",
+                    "signed",
+                    "pointer",
+                    "text",
+                    "bytes"
+                  ]
+                },
+                "value": {
+                  "description": "A number for the scalar kinds, a string for `text`, and an array of byte values for `bytes`."
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/analysis.code.facts.response.schema.json",
+  "title": "analysis.code.facts result",
+  "description": "The fact model, with the instructions it is about. The facts are `amiga-disasm`'s own model, versioned by `schema_version` rather than re-described here — re-typing a wire shape `disasm report --format json` has published since it landed would be a second definition of one contract. The instructions travel beside them because every renderer needs both, and one request is what stops the two coming from different traversals.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "source",
+    "region",
+    "code_offset",
+    "code_bytes",
+    "entries",
+    "schema_version",
+    "facts",
+    "fact_total",
+    "facts_truncated",
+    "instructions",
+    "instruction_total",
+    "instructions_truncated"
+  ],
+  "properties": {
+    "source": {
+      "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourcePin"
+    },
+    "region": { "enum": ["hunk", "boot_block", "raw"] },
+    "hunk": { "type": "integer", "minimum": 0 },
+    "code_offset": {
+      "description": "Where the analyzed code starts in the file, so a fact's offset can be named in the frame a reader has open.",
+      "type": "integer",
+      "minimum": 0
+    },
+    "code_bytes": { "type": "integer", "minimum": 0 },
+    "origin": { "type": "integer", "minimum": 0, "maximum": 4294967295 },
+    "entries": {
+      "type": "array",
+      "items": { "type": "integer", "minimum": 0, "maximum": 4294967295 }
+    },
+    "schema_version": {
+      "description": "The fact model's own version, which is what a consumer pins against.",
+      "type": "integer",
+      "minimum": 0
+    },
+    "facts": {
+      "description": "Each fact carries a `subject` offset, a `kind` and its payload, a `confidence`, a `producer`, and its `evidence`. The payload shapes are the fact model's, versioned by `schema_version` — pinning them here would be the second definition this response exists to avoid.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["subject", "kind", "confidence", "producer", "evidence"],
+        "properties": {
+          "subject": { "type": "integer", "minimum": 0, "maximum": 4294967295 },
+          "kind": { "type": "string" },
+          "confidence": { "type": "string" },
+          "producer": { "type": "string" },
+          "evidence": { "type": "array" }
+        }
+      }
+    },
+    "fact_total": { "type": "integer", "minimum": 0 },
+    "facts_truncated": { "type": "boolean" },
+    "instructions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["offset", "bytes", "text", "owner_total"],
+        "properties": {
+          "offset": { "type": "integer", "minimum": 0, "maximum": 4294967295 },
+          "address": { "type": "integer", "minimum": 0, "maximum": 4294967295 },
+          "bytes": { "type": "string", "pattern": "^([0-9a-f]{2})*$" },
+          "text": { "type": "string" },
+          "owners": {
+            "type": "array",
+            "items": { "type": "integer", "minimum": 0, "maximum": 4294967295 }
+          },
+          "owner_total": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+    "instruction_total": { "type": "integer", "minimum": 0 },
+    "instructions_truncated": { "type": "boolean" }
+  }
+}

@@ -1,0 +1,419 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/project.describe.response.schema.json",
+  "title": "project.describe result",
+  "description": "Every id, digest, and count a reader needs to decide whether this is the right project and what it covers, without loading five documents to find out.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "name",
+    "sources",
+    "source_sets",
+    "objects",
+    "programs",
+    "annotation_count",
+    "resource_count",
+    "resources",
+    "type_count",
+    "types",
+    "problems"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "kind",
+          "display_name",
+          "tree",
+          "locations",
+          "reproducible"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "display_name": {
+            "description": "The project-authored name shown to a person. Unlike a location, this is stable when the project moves.",
+            "type": "string"
+          },
+          "size": {
+            "description": "File size when this source is a file.",
+            "type": "integer",
+            "minimum": 0
+          },
+          "sha256": {
+            "description": "The digest the project pins it by. Absent when the project pins none, which is a fact about the project rather than a hole to fill in.",
+            "type": "string"
+          },
+          "tree": {
+            "description": "Whether that digest covers a directory tree rather than one file. A tree digest answers a different question from a file's, so which it is travels beside it.",
+            "type": "boolean"
+          },
+          "locations": {
+            "description": "Project-relative location hints recorded in the project document. They are not identity and do not include machine-local bindings.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "reproducible": {
+            "description": "Whether these bytes could be obtained again from outside the project. False for a *captured* source: bytes that exist because a capture produced them \u2014 a trackloader's output read out of RAM, the memory a routine changed under a sandbox call. Such a source is pinned and verifiable against itself, and nothing in this format can re-derive it. Reported rather than inferred, so a reader is told instead of assuming the stronger reading.",
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "source_sets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "member_count"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "member_count": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "objects": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "parent_id",
+          "size",
+          "sha256"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "parent_id": {
+            "type": "string"
+          },
+          "size": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "sha256": {
+            "description": "What the object's bytes are pinned at. The fact that lets a caller holding bytes say which object it has, rather than only listing what the project describes.",
+            "type": "string"
+          },
+          "derivation": {
+            "description": "How it is derived, not only from what: a decompressed object and a byte range of the same parent are different claims, and showing them identically would hide the one that needs a decoder to check.",
+            "type": "string"
+          }
+        }
+      }
+    },
+    "programs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "images"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "images": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "id",
+                "object_id",
+                "load_maps"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "object_id": {
+                  "type": "string"
+                },
+                "load_maps": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "id",
+                      "segments"
+                    ],
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "segments": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "hunk",
+                            "runtime_base"
+                          ],
+                          "properties": {
+                            "hunk": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "runtime_base": {
+                              "description": "The address as the document spells it, kept verbatim: the project format defines the spelling, and reformatting it would no longer quote the document.",
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "annotation_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "resource_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "resources": {
+      "description": "Every resource the project records \u2014 how a range of bytes decodes \u2014 with the artifacts it has produced. The recipe, not the output.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "kind",
+          "name",
+          "target",
+          "target_resolved",
+          "export_media_type",
+          "artifacts"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "image",
+              "palette",
+              "audio",
+              "table",
+              "text",
+              "code",
+              "copper",
+              "data",
+              "opaque"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "target": {
+            "description": "The resource's complete address-space-qualified locator. No variant is translated into another space.",
+            "oneOf": [
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["space", "object_id", "offset", "length", "object_sha256"],
+                "properties": {
+                  "space": { "const": "object" },
+                  "object_id": { "type": "string" },
+                  "offset": { "type": "integer", "minimum": 0 },
+                  "length": { "type": "integer", "minimum": 0 },
+                  "object_sha256": { "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sha256" }
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["space", "image_id", "hunk", "offset", "length", "object_sha256"],
+                "properties": {
+                  "space": { "const": "hunk" },
+                  "image_id": { "type": "string" },
+                  "hunk": { "type": "integer", "minimum": 0 },
+                  "offset": { "type": "integer", "minimum": 0 },
+                  "length": { "type": "integer", "minimum": 0 },
+                  "object_sha256": { "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sha256" }
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["space", "image_id", "load_map_id", "address", "length", "object_sha256"],
+                "properties": {
+                  "space": { "const": "runtime" },
+                  "image_id": { "type": "string" },
+                  "load_map_id": { "type": "string" },
+                  "address": { "type": "string" },
+                  "length": { "type": "integer", "minimum": 0 },
+                  "object_sha256": { "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sha256" }
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["space", "image_id", "base_register", "displacement", "width", "object_sha256"],
+                "properties": {
+                  "space": { "const": "base_register" },
+                  "image_id": { "type": "string" },
+                  "base_register": { "type": "string" },
+                  "displacement": { "type": "integer", "minimum": -2147483648, "maximum": 2147483647 },
+                  "width": { "type": "integer", "minimum": 0, "maximum": 255 },
+                  "object_sha256": { "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sha256" }
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["space", "entity_id"],
+                "properties": {
+                  "space": { "const": "entity" },
+                  "entity_id": { "type": "string" }
+                }
+              }
+            ]
+          },
+          "target_resolved": {
+            "description": "Whether every identity needed to place the target resolves in this project, including a runtime target's load map within its named image.",
+            "type": "boolean"
+          },
+          "export_media_type": {
+            "type": "string"
+          },
+          "artifacts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "id",
+                "path",
+                "media_type",
+                "size",
+                "sha256",
+                "recipe_key",
+                "current"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "path": {
+                  "type": "string"
+                },
+                "media_type": {
+                  "type": "string"
+                },
+                "size": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "sha256": {
+                  "type": "string"
+                },
+                "recipe_key": {
+                  "type": "string"
+                },
+                "current": {
+                  "description": "Whether this output still follows from what the project says now, over the resolved dependency graph. Not whether the file on disk is unchanged \u2014 that needs disk access, and is `project.verify`'s answer.",
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "type_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "types": {
+      "description": "Every type the project defines, beside the count. The count answers \"does this project define types\"; the list answers \"which\", which is what a caller about to define one needs \u2014 type identities are canonical and shared, so a frontend writing a record layout has to know which primitives are already there or it would redefine one and be refused for a duplicate id.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "kind",
+          "name"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "integer",
+              "pointer",
+              "array",
+              "struct",
+              "enum",
+              "alias",
+              "function"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "problems": {
+      "description": "Non-fatal problems the load tolerated. A project that opened with problems is still a project that opened, which is the property the format exists for.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

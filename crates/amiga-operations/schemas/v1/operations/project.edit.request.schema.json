@@ -1,0 +1,233 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/project.edit.request.schema.json",
+  "title": "project.edit request",
+  "description": "Apply reviewed changes to a project's annotations. `prepared_output`: `prepare` reports the plan and writes nothing, `commit_reviewed` re-derives it and writes only if the digest still matches. The project is named by the envelope's `project` locator.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "operation",
+    "arguments"
+  ],
+  "properties": {
+    "operation": {
+      "const": "project.edit"
+    },
+    "arguments": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "edits"
+      ],
+      "properties": {
+        "edits": {
+          "description": "Applied together: one plan, one set of expected digests, one commit. Splitting them into separate requests would let a document change between two edits that were meant to land as a unit. A plan that removes an annotation another one is about is refused rather than cascaded, unless it removes that one too.",
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "edit"
+            ],
+            "allOf": [
+              {
+                "description": "Every edit names what it is about by id, except the two that carry a whole type definition: a type's id lives inside `definition`, where the rest of its shape is, rather than being restated beside it.",
+                "if": {
+                  "properties": {
+                    "edit": {
+                      "enum": [
+                        "define_type",
+                        "update_type"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "edit"
+                  ]
+                },
+                "then": {
+                  "required": [
+                    "definition"
+                  ]
+                },
+                "else": {
+                  "required": [
+                    "id"
+                  ]
+                }
+              },
+              {
+                "description": "A capture is bytes nothing can obtain again, so every field that pins them is required and so is the sentence saying what produced them. `env.sandbox.call` composes that sentence and reports it beside each exported range; a capture with no explanation is refused rather than recorded as media somebody has a copy of.",
+                "if": {
+                  "properties": {
+                    "edit": {
+                      "const": "register_capture"
+                    }
+                  },
+                  "required": [
+                    "edit"
+                  ]
+                },
+                "then": {
+                  "required": [
+                    "name",
+                    "size",
+                    "sha256",
+                    "notes"
+                  ]
+                }
+              }
+            ],
+            "properties": {
+              "edit": {
+                "enum": [
+                  "rename",
+                  "rebase",
+                  "annotate",
+                  "comment",
+                  "remove",
+                  "define_resource",
+                  "update_resource",
+                  "remove_resource",
+                  "define_type",
+                  "update_type",
+                  "remove_type",
+                  "remove_artifact",
+                  "register_capture"
+                ]
+              },
+              "id": {
+                "description": "The annotation's or resource's id, e.g. `function:init-graphics` or `resource:title-logo`.",
+                "type": "string",
+                "minLength": 1
+              },
+              "name": {
+                "description": "The new name, for a rename; the display name, for a resource. Never part of a resource's artifact key.",
+                "type": "string"
+              },
+              "kind": {
+                "description": "The annotation kind, for an `annotate`; the resource kind, for a resource edit.",
+                "enum": [
+                  "function",
+                  "symbol",
+                  "region",
+                  "bookmark",
+                  "image",
+                  "palette",
+                  "audio",
+                  "table",
+                  "text",
+                  "code",
+                  "copper",
+                  "data",
+                  "opaque"
+                ]
+              },
+              "parameters": {
+                "description": "The decode parameters for a resource edit, exactly as `resources.schema.json` spells them for that kind \u2014 `width`, `planes`, `count`, `encoding`, and so on. A free-form object rather than nine shapes restated here: the resources schema is the definition, and the operation validates against it before writing, so an unknown or missing field is a refusal. The fields the edit itself names \u2014 `id`, `kind`, `name`, `target`, `export`, `notes` \u2014 are refused here.",
+                "type": "object"
+              },
+              "definition": {
+                "description": "One type definition for a `define_type` or `update_type`, exactly as `types.schema.json` spells it for that kind \u2014 `kind`, `id`, `name`, and whatever else that kind needs. Whole rather than split into `id`/`kind`/`parameters` the way a resource is, because a type needs nothing derived from the project: it has no target and therefore no digest. The operation validates it against the format's own type vocabulary before writing, so an unknown or missing field is a refusal rather than a document nobody can load.",
+                "type": "object",
+                "required": [
+                  "id",
+                  "kind",
+                  "name"
+                ]
+              },
+              "export_media_type": {
+                "description": "What an export of this resource produces. Defaulted per kind when omitted, and part of the artifact key either way.",
+                "enum": [
+                  "image/png",
+                  "audio/wav",
+                  "text/plain",
+                  "application/octet-stream"
+                ]
+              },
+              "notes": {
+                "description": "What produced these bytes. Required for a capture, where it is the only provenance the bytes will ever have; optional prose on a resource edit.",
+                "type": "string"
+              },
+              "target": {
+                "description": "What an `annotate` or a `comment` is about, tagged by `space` the way a document target is. It carries no `object_sha256`: the digest a target is established against is a fact about the project, derived where the project is, so a caller cannot pin an annotation to bytes the project does not describe. `space: entity` names an annotation instead of bytes, and is a `comment` form only.",
+                "type": "object",
+                "required": [
+                  "space"
+                ],
+                "properties": {
+                  "space": {
+                    "enum": [
+                      "object",
+                      "hunk",
+                      "runtime",
+                      "base_register",
+                      "entity"
+                    ]
+                  }
+                }
+              },
+              "classification": {
+                "description": "What the bytes are, for a `region`.",
+                "type": "string",
+                "enum": [
+                  "code",
+                  "data",
+                  "padding",
+                  "text",
+                  "image",
+                  "audio",
+                  "table",
+                  "copper",
+                  "palette",
+                  "unknown"
+                ]
+              },
+              "placement": {
+                "type": "string",
+                "enum": [
+                  "before",
+                  "inline",
+                  "after"
+                ]
+              },
+              "text": {
+                "type": "string"
+              },
+              "size": {
+                "description": "The captured bytes' length, checked against the file at `path` before anything is written.",
+                "type": "integer",
+                "minimum": 0
+              },
+              "sha256": {
+                "description": "SHA-256 of the captured bytes, lowercase hex, checked against the file at `path` before anything is written.",
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "path": {
+                "description": "Where the captured bytes were written, relative to the project root. Omitting it registers the pin alone, which verifies as unbound rather than as verified.",
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "operation": "project.edit",
+      "arguments": {
+        "edits": [
+          {
+            "edit": "rename",
+            "id": "function:init-graphics",
+            "name": "setup_display"
+          }
+        ]
+      }
+    }
+  ]
+}

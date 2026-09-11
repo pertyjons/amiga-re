@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/container.adf.list.request.schema.json",
+  "title": "container.adf.list request",
+  "description": "List an AmigaDOS volume and the files and directories it contains.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["operation", "arguments"],
+  "properties": {
+    "operation": { "const": "container.adf.list" },
+    "arguments": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source"],
+      "properties": {
+        "source": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourceLocator"
+        },
+        "maximum_input_bytes": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/maximumInputBytes",
+          "default": 67108864
+        },
+        "maximum_entries": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/resultCap",
+          "default": 65536
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "operation": "container.adf.list",
+      "arguments": {
+        "source": { "kind": "file", "path": "fixtures/volume.adf" }
+      }
+    }
+  ]
+}

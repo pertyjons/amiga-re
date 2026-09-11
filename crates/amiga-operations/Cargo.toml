@@ -1,0 +1,31 @@
+[package]
+name = "amiga-operations"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+description = "Typed operation API for the amiga-re CLI and downstream tools."
+
+[lints]
+workspace = true
+
+[dependencies]
+amiga-adf.workspace = true
+amiga-analysis.workspace = true
+amiga-compress.workspace = true
+amiga-core.workspace = true
+amiga-disasm.workspace = true
+amiga-env.workspace = true
+amiga-hunk.workspace = true
+amiga-hw.workspace = true
+amiga-iff.workspace = true
+amiga-lha.workspace = true
+amiga-project.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+thiserror.workspace = true
+
+[dev-dependencies]
+jsonschema = { version = "0.49.1", default-features = false, features = ["resolve-file"] }

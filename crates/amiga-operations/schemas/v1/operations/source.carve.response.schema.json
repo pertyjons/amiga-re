@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/source.carve.response.schema.json",
+  "title": "source.carve result",
+  "description": "The file that would be written, and whether it was. The range is part of the result as well as of the plan, because a carved file whose provenance does not say where it came from cannot be re-derived.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "source",
+    "offset",
+    "length",
+    "plan",
+    "committed"
+  ],
+  "properties": {
+    "source": {
+      "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourcePin"
+    },
+    "offset": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "length": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "committed": {
+      "type": "boolean"
+    },
+    "plan": {
+      "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/writePlan"
+    }
+  }
+}

@@ -1,0 +1,22 @@
+[package]
+name = "amiga-analysis"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+description = "Typed survey and extraction orchestration for amiga-re."
+
+[lints]
+workspace = true
+
+[dependencies]
+amiga-adf.workspace = true
+amiga-core.workspace = true
+amiga-hunk.workspace = true
+amiga-hw.workspace = true
+amiga-iff.workspace = true
+amiga-lha.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true

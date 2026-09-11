@@ -1,0 +1,2 @@
+# External writer/extractor only; never linked into or bundled with amiga-re.
+amitools==0.8.1 --hash=sha256:f622c0725c15737e7d4820ed147f930f4cfb7b80b04c786c2bc3943b799faf7e

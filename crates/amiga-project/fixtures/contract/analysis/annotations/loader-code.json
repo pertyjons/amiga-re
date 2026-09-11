@@ -1,0 +1,42 @@
+{
+  "$schema": "../schema/annotations.schema.json",
+  "annotations": [
+    {
+      "id": "function:load-level",
+      "kind": "function",
+      "name": "load_level",
+      "notes": "Hunk 0 offset 0 also exists in image:main-executable. Two annotations, two images, no ambiguity — which is the whole reason a target names its image.",
+      "origin": "user",
+      "target": {
+        "hunk": 0,
+        "image_id": "image:level-loader",
+        "length": 8,
+        "object_sha256": "b497012a50f969d557e9b7ad4b981571b18c76223272ef11ec43d787a1b33a83",
+        "offset": 0,
+        "space": "hunk"
+      },
+      "type_id": "type:load-level-signature"
+    },
+    {
+      "id": "symbol:loader/shared-offset",
+      "kind": "symbol",
+      "name": "loader_tail",
+      "notes": "The same numeric hunk-0 offset 4 that `annotation:main/stale-note` uses in the other image.",
+      "origin": "user",
+      "target": {
+        "hunk": 0,
+        "image_id": "image:level-loader",
+        "length": 2,
+        "object_sha256": "b497012a50f969d557e9b7ad4b981571b18c76223272ef11ec43d787a1b33a83",
+        "offset": 4,
+        "space": "hunk"
+      }
+    }
+  ],
+  "document_kind": "annotations",
+  "format_version": 1,
+  "scope": {
+    "image_id": "image:level-loader",
+    "program_id": "program:main"
+  }
+}

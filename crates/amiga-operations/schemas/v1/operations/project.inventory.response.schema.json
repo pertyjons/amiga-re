@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/project.inventory.response.schema.json",
+  "title": "project.inventory result",
+  "description": "Every file the walk pinned, everything it deliberately left out, and the digest a directory source would record.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "directory",
+    "files",
+    "file_total",
+    "files_truncated",
+    "omitted",
+    "tree_sha256"
+  ],
+  "properties": {
+    "directory": { "type": "string" },
+    "files": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path", "size", "sha256"],
+        "properties": {
+          "path": {
+            "description": "Path relative to the walked directory, so the inventory means the same thing wherever the tree is mounted.",
+            "type": "string"
+          },
+          "size": { "type": "integer", "minimum": 0 },
+          "sha256": { "type": "string" }
+        }
+      }
+    },
+    "file_total": { "type": "integer", "minimum": 0 },
+    "files_truncated": { "type": "boolean" },
+    "omitted": {
+      "description": "Entries the walk deliberately left out, and why. Reported rather than silently skipped: a tree digest that quietly excluded something would pin fewer bytes than the directory holds, and nothing in it would say so.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path", "reason"],
+        "properties": {
+          "path": { "type": "string" },
+          "reason": { "type": "string" }
+        }
+      }
+    },
+    "tree_sha256": {
+      "description": "The digest a directory source would pin. Computed over every file the walk found, not over the reported ones: a cap is about the response, and letting it change the digest would make the pin depend on how much of the answer fit.",
+      "type": "string"
+    }
+  }
+}

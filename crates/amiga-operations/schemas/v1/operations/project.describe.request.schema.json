@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/project.describe.request.schema.json",
+  "title": "project.describe request",
+  "description": "Summarize a project: its sources, objects, programs, and counts. Writes nothing. The project is named by the envelope's `project` locator, not by an argument, so every project-backed operation spells it the same way. `read_only`.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["operation", "arguments"],
+  "properties": {
+    "operation": { "const": "project.describe" },
+    "arguments": { "type": "object", "additionalProperties": false, "properties": {} }
+  },
+  "examples": [{ "operation": "project.describe", "arguments": {} }]
+}

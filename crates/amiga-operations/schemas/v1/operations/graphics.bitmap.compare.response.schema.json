@@ -1,0 +1,233 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/graphics.bitmap.compare.response.schema.json",
+  "title": "graphics.bitmap.compare result",
+  "description": "Which pixels the two images disagree about, and how. Every total is exact whatever the report cap: a capped count would be a fact about the request rather than about the pictures.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "a",
+    "b",
+    "compared",
+    "compared_pixels",
+    "masked_pixels",
+    "identical",
+    "colours_identical",
+    "palette_only",
+    "differing_pixels",
+    "differing_colour_pixels",
+    "substitutions",
+    "substitutions_total",
+    "substitutions_truncated",
+    "regions",
+    "regions_total",
+    "regions_truncated"
+  ],
+  "properties": {
+    "a": {
+      "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourcePin"
+    },
+    "b": {
+      "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourcePin"
+    },
+    "compared": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "x",
+        "y",
+        "width",
+        "height"
+      ],
+      "properties": {
+        "x": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "y": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "width": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "description": "The rectangle compared, in the first image's coordinates."
+    },
+    "compared_pixels": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Pixels the comparison looked at, after the crop and the mask."
+    },
+    "masked_pixels": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Pixels the mask excluded."
+    },
+    "identical": {
+      "description": "Whether every compared pixel holds the same palette index.",
+      "type": "boolean"
+    },
+    "colours_identical": {
+      "description": "Whether every compared pixel resolves to the same colour. Separate from `identical`, and the pair is the point.",
+      "type": "boolean"
+    },
+    "palette_only": {
+      "description": "The indices agree everywhere and the colours do not — a palette disagreement rather than a geometry one.",
+      "type": "boolean"
+    },
+    "differing_pixels": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "differing_colour_pixels": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "pixel_sources": {
+      "description": "Separate comparison of the raw display-source planes, present only when both sides supplied one.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["a", "b", "identical", "differing_pixels"],
+      "properties": {
+        "a": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourcePin"
+        },
+        "b": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourcePin"
+        },
+        "identical": {
+          "type": "boolean"
+        },
+        "differing_pixels": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "differing_bounds": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "x",
+        "y",
+        "width",
+        "height"
+      ],
+      "properties": {
+        "x": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "y": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "width": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "description": "The rectangle every differing pixel falls inside, in the first image's coordinates — the same frame as `compared`, so a crop's origin is already added and the rectangle can be looked up in the image as it is. Absent when no pixel differs."
+    },
+    "substitutions": {
+      "description": "One index consistently replaced by another, most of the picture first. The finding that separates a recoloured picture from a redrawn one: a handful of substitutions covering every differing pixel is a palette permutation.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "from",
+          "to",
+          "pixels"
+        ],
+        "properties": {
+          "from": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 255
+          },
+          "to": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 255
+          },
+          "pixels": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "substitutions_total": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "substitutions_truncated": {
+      "type": "boolean"
+    },
+    "regions": {
+      "description": "Connected runs of differing pixels, four-connected and largest first. Four rather than eight, because a diagonal touch is not a shared edge: two sprites that meet at a corner are two findings.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "bounds",
+          "pixels"
+        ],
+        "properties": {
+          "bounds": {
+            "description": "The region's rectangle, in the first image's coordinates — the same frame as `compared` and `differing_bounds`.",
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "x",
+              "y",
+              "width",
+              "height"
+            ],
+            "properties": {
+              "x": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "y": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "width": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "height": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          },
+          "pixels": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "regions_total": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "regions_truncated": {
+      "type": "boolean"
+    }
+  }
+}

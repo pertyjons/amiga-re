@@ -1,0 +1,141 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/analysis.state.snapshot.request.schema.json",
+  "title": "analysis.state.snapshot request",
+  "description": "Decode a machine's memory and registers through the reviewed types and global-variable annotations a project holds, and report one named, field-addressed value per leaf. `read_only`, and it runs against a project. The point is to stop comparing opaque memory ranges: a digest over a region says two runs differ and nothing about which of the forty values in it moved. Fields are addressed by path rather than by address, so two runs under different load maps align \u2014 aligning on the number would report a relocation as a change in the data. Everything that would make a field silently missing is a refusal of the whole snapshot: a stale annotation, an undefined type, a type whose size disagrees with the storage, two variables over the same bytes, and storage no region covers.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "operation",
+    "arguments"
+  ],
+  "properties": {
+    "operation": {
+      "const": "analysis.state.snapshot"
+    },
+    "arguments": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "regions"
+      ],
+      "properties": {
+        "image": {
+          "description": "Which of the project's images the variables belong to. Omitted, the project's only image \u2014 and a project with more than one is refused rather than having one picked for it, because the wrong choice produces a complete, plausible snapshot of the wrong program.",
+          "type": "string"
+        },
+        "regions": {
+          "description": "The machine's memory, as ranges of bytes at absolute addresses \u2014 typically what `call --save` wrote. A variable whose storage no range covers is a refusal naming it: a snapshot that quietly omitted a field would compare cleanly against one that had it and read as agreement. Ranges are never stitched across a seam: two files that happen to abut are two files, and a value read across the boundary would be half of each with nothing saying so.",
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "address",
+              "source"
+            ],
+            "properties": {
+              "address": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 4294967295,
+                "description": "The absolute address the first byte of the range is at."
+              },
+              "source": {
+                "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourceLocator"
+              },
+              "sha256": {
+                "description": "The digest the file is expected to have. Optional, unlike an artifact seed's, because a snapshot only reads while a seed changes what a run does. The digest of what was actually read is reported either way, so an unpinned snapshot still says which bytes it described.",
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "offset": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 4294967295,
+                "description": "Where the range starts in the file. Omitted means the start."
+              },
+              "length": {
+                "description": "How many bytes. Omitted means the rest of the file.",
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 4294967295
+              }
+            }
+          }
+        },
+        "registers": {
+          "description": "The register file the snapshot was taken with \u2014 the shape a call record reports its outputs in, because that is where a caller pastes it from. A base-register global's address is a register plus a displacement, so a project holding any is refused without this rather than read at whatever zero points at.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "d",
+            "a",
+            "usp",
+            "ssp",
+            "pc",
+            "sr"
+          ],
+          "properties": {
+            "d": {
+              "type": "array",
+              "minItems": 8,
+              "maxItems": 8,
+              "items": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 4294967295
+              }
+            },
+            "a": {
+              "type": "array",
+              "minItems": 7,
+              "maxItems": 7,
+              "items": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 4294967295
+              }
+            },
+            "usp": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 4294967295
+            },
+            "ssp": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 4294967295
+            },
+            "pc": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 4294967295
+            },
+            "sr": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 65535
+            }
+          }
+        },
+        "hunk_bases": {
+          "description": "Where each hunk was mapped, for a variable targeting a hunk offset. The layout is the run's rather than the project's, and a snapshot decoded against a different one would name the right variable at the wrong address.",
+          "type": "array",
+          "items": {
+            "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/hunkBase"
+          }
+        },
+        "maximum_fields": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/resultCap",
+          "default": 4096
+        },
+        "maximum_input_bytes": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/maximumInputBytes",
+          "default": 67108864
+        }
+      }
+    }
+  }
+}

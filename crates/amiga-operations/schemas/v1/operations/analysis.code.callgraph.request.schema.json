@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/analysis.code.callgraph.request.schema.json",
+  "title": "analysis.code.callgraph request",
+  "description": "Reduce a CODE hunk's control flow to its functions and the calls between them, writing nothing. `read_only`.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "operation",
+    "arguments"
+  ],
+  "properties": {
+    "operation": {
+      "const": "analysis.code.callgraph"
+    },
+    "arguments": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source"
+      ],
+      "properties": {
+        "source": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourceLocator"
+        },
+        "hunk": {
+          "description": "CODE hunk to analyze.",
+          "type": "integer",
+          "minimum": 0,
+          "default": 0
+        },
+        "entries": {
+          "description": "Where the traversal starts, as hunk offsets. Defaults to offset 0.",
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4294967295
+          }
+        },
+        "origin": {
+          "description": "The address the hunk is mapped at. With one, every node also reports the runtime address of its entry.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "maximum_nodes": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/resultCap"
+        },
+        "maximum_edges": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/resultCap"
+        },
+        "maximum_input_bytes": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/maximumInputBytes",
+          "default": 67108864
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "operation": "analysis.code.callgraph",
+      "arguments": {
+        "source": {
+          "kind": "file",
+          "path": "extracted/game"
+        },
+        "origin": 65536
+      }
+    }
+  ]
+}

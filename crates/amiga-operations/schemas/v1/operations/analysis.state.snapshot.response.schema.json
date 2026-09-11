@@ -1,0 +1,203 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/analysis.state.snapshot.response.schema.json",
+  "title": "analysis.state.snapshot result",
+  "description": "One machine's reviewed state, named. This document is also an input: `analysis.state.compare` reads it back, including one written by something other than this toolkit.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "image_id",
+    "regions",
+    "fields",
+    "fields_total",
+    "fields_truncated"
+  ],
+  "properties": {
+    "image_id": {
+      "description": "The image whose variables were decoded.",
+      "type": "string"
+    },
+    "regions": {
+      "description": "The ranges of memory the snapshot read, each with the digest of the bytes it actually got.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "address",
+          "length",
+          "source",
+          "sha256"
+        ],
+        "properties": {
+          "address": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4294967295
+          },
+          "length": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4294967295
+          },
+          "source": {
+            "description": "The identity the range was read from, so a snapshot says which file it described rather than only which addresses.",
+            "type": "string"
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        }
+      }
+    },
+    "registers": {
+      "description": "The register file the snapshot was taken with — the shape a call record reports its outputs in, because that is where a caller pastes it from. A base-register global's address is a register plus a displacement, so a project holding any is refused without this rather than read at whatever zero points at.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "d",
+        "a",
+        "usp",
+        "ssp",
+        "pc",
+        "sr"
+      ],
+      "properties": {
+        "d": {
+          "type": "array",
+          "minItems": 8,
+          "maxItems": 8,
+          "items": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4294967295
+          }
+        },
+        "a": {
+          "type": "array",
+          "minItems": 7,
+          "maxItems": 7,
+          "items": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4294967295
+          }
+        },
+        "usp": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "ssp": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "pc": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "sr": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 65535
+        }
+      }
+    },
+    "fields": {
+      "description": "Every leaf value, in path order. An aggregate contributes its leaves and no row of its own: a struct has no value, only fields that do.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "address",
+          "size",
+          "type_id",
+          "object_sha256",
+          "value"
+        ],
+        "properties": {
+          "path": {
+            "description": "`name`, `name.field`, `name[3].field` — stable, and what a comparison aligns on. Never an address: two runs under different load maps hold the same state at different addresses.",
+            "type": "string"
+          },
+          "address": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4294967295,
+            "description": "Where this leaf was read from in the snapshot's address space."
+          },
+          "size": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "type_id": {
+            "description": "The type the project gives it, so a consumer can tell a byte from a signed byte without re-deriving it.",
+            "type": "string"
+          },
+          "object_sha256": {
+            "description": "The object digest the annotation naming this was established against.",
+            "type": "string"
+          },
+          "value": {
+            "description": "What one leaf holds. Tagged, and deliberately not collapsed into a number: a pointer that compared equal to an integer of the same bit pattern would let a relocated address read as an unchanged value.",
+            "type": "object",
+            "required": [
+              "kind"
+            ],
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "integer",
+                  "pointer",
+                  "enum",
+                  "bytes"
+                ]
+              },
+              "value": {
+                "type": "integer"
+              },
+              "signed": {
+                "type": "boolean"
+              },
+              "byte_order": {
+                "type": "string"
+              },
+              "address": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 4294967295
+              },
+              "address_space": {
+                "type": "string"
+              },
+              "member": {
+                "description": "The name the project gives this value, when it names one. Absent means the stored number is not one the project enumerates, which is a finding rather than an error.",
+                "type": "string"
+              },
+              "hex": {
+                "description": "Bytes, for a leaf whose type states a width this build cannot read as a scalar. Reported rather than skipped, so the field still appears in a comparison and still says it changed.",
+                "type": "string",
+                "pattern": "^([0-9a-f]{2})*$"
+              }
+            }
+          }
+        }
+      }
+    },
+    "fields_total": {
+      "description": "Leaves the snapshot decoded before the report cap.",
+      "type": "integer",
+      "minimum": 0
+    },
+    "fields_truncated": {
+      "description": "Whether the reported fields are a prefix. A comparison against a capped snapshot cannot tell an absent field from a truncated one, and says so.",
+      "type": "boolean"
+    }
+  }
+}

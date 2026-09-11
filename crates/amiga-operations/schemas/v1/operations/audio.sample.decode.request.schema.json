@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/audio.sample.decode.request.schema.json",
+  "title": "audio.sample.decode request",
+  "description": "Read an IFF 8SVX sample and summarize it. `read_only`: accepts only the `read` execution mode.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "operation",
+    "arguments"
+  ],
+  "properties": {
+    "operation": {
+      "const": "audio.sample.decode"
+    },
+    "arguments": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source"
+      ],
+      "properties": {
+        "source": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourceLocator"
+        },
+        "offset": {
+          "description": "Byte offset of the IFF FORM within the source, for a sample carved out of a larger file.",
+          "type": "integer",
+          "minimum": 0,
+          "default": 0
+        },
+        "maximum_buckets": {
+          "description": "How many min/max pairs the waveform envelope is reduced to. A few hundred is what a waveform is actually drawn at; more transfers detail nobody can see.",
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/resultCap",
+          "default": 512
+        },
+        "maximum_input_bytes": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/maximumInputBytes",
+          "default": 67108864
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "operation": "audio.sample.decode",
+      "arguments": {
+        "source": {
+          "kind": "file",
+          "path": "extracted/beep.8svx"
+        }
+      }
+    }
+  ]
+}

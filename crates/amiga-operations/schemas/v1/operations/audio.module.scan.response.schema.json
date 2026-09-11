@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/audio.module.scan.response.schema.json",
+  "title": "audio.module.scan result",
+  "description": "Every module the signature scan found, with what its header declares.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["source", "modules", "module_total", "modules_truncated"],
+  "properties": {
+    "source": {
+      "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourcePin"
+    },
+    "modules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "offset",
+          "title",
+          "signature",
+          "channels",
+          "song_length",
+          "pattern_count",
+          "used_samples",
+          "total_length"
+        ],
+        "properties": {
+          "offset": { "type": "integer", "minimum": 0, "maximum": 4294967295 },
+          "title": { "type": "string" },
+          "signature": {
+            "description": "The four-byte format signature, e.g. `M.K.`.",
+            "type": "string"
+          },
+          "channels": { "type": "integer", "minimum": 0, "maximum": 255 },
+          "song_length": {
+            "description": "Entries used in the pattern order table.",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 255
+          },
+          "pattern_count": { "type": "integer", "minimum": 0 },
+          "used_samples": {
+            "description": "Sample slots carrying data. The slots themselves are `audio.module.decode`'s answer, which reports all 31 — a tracker addresses samples by slot number, so a scan counting only the used ones is a summary and not a renumbering.",
+            "type": "integer",
+            "minimum": 0
+          },
+          "total_length": {
+            "description": "Total module length in bytes: header, patterns, and sample PCM.",
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "module_total": { "type": "integer", "minimum": 0 },
+    "modules_truncated": { "type": "boolean" }
+  }
+}

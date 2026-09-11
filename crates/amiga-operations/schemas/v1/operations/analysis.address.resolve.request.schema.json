@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/analysis.address.resolve.request.schema.json",
+  "title": "analysis.address.resolve request",
+  "description": "Report one number in its absolute, hunk-relative, and whole-file frames, writing nothing. `read_only`.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "operation",
+    "arguments"
+  ],
+  "properties": {
+    "operation": {
+      "const": "analysis.address.resolve"
+    },
+    "arguments": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "value",
+        "origin"
+      ],
+      "properties": {
+        "value": {
+          "description": "The number to interpret. Which frame it came from is the question, so every reading of it is answered.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "origin": {
+          "description": "The address the hunk is mapped at. An argument rather than something the operation reads: nothing in a LoadSeg image says where it was loaded, so this is the caller's claim about the machine.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "anchor": {
+          "description": "Anchor the whole-file frame on a hunk's position in an image. Source and hunk travel together because neither means anything alone.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "source"
+          ],
+          "properties": {
+            "source": {
+              "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourceLocator"
+            },
+            "hunk": {
+              "description": "Hunk whose file offset anchors the whole-file frame.",
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          }
+        },
+        "maximum_input_bytes": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/maximumInputBytes",
+          "default": 67108864
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "operation": "analysis.address.resolve",
+      "arguments": {
+        "value": 68674,
+        "origin": 65536,
+        "anchor": {
+          "source": {
+            "kind": "file",
+            "path": "extracted/game"
+          },
+          "hunk": 0
+        }
+      }
+    }
+  ]
+}

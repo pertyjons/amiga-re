@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/graphics.palette.scan.request.schema.json",
+  "title": "graphics.palette.scan request",
+  "description": "Find runs of $0RGB colour words that score as palette tables, writing nothing. `read_only`.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["operation", "arguments"],
+  "properties": {
+    "operation": { "const": "graphics.palette.scan" },
+    "arguments": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source"],
+      "properties": {
+        "source": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourceLocator"
+        },
+        "minimum_colours": {
+          "description": "Shortest run to report as a table. At least 2: a single $0RGB word is one byte pair in sixteen and not a table.",
+          "type": "integer",
+          "minimum": 2,
+          "default": 8
+        },
+        "maximum_tables": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/resultCap"
+        },
+        "maximum_input_bytes": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/maximumInputBytes",
+          "default": 67108864
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "operation": "graphics.palette.scan",
+      "arguments": { "source": { "kind": "file", "path": "extracted/screen.bin" } }
+    }
+  ]
+}

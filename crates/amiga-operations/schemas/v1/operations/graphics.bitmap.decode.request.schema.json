@@ -1,0 +1,138 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/graphics.bitmap.decode.request.schema.json",
+  "title": "graphics.bitmap.decode request",
+  "description": "Decode a planar region into one palette index per pixel. Deliberately stops at indices: which colors they mean, which planes a viewer has switched off, and what a transparent pixel looks like are presentation choices that belong to whatever displays the result.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["operation", "arguments"],
+  "properties": {
+    "operation": { "const": "graphics.bitmap.decode" },
+    "arguments": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "width", "height", "planes"],
+      "properties": {
+        "source": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourceLocator"
+        },
+        "offset": {
+          "description": "Byte offset of the planar data within the source.",
+          "type": "integer",
+          "minimum": 0,
+          "default": 0
+        },
+        "shape": {
+          "description": "What the region decodes to. `bitmap` is one image; `glyph_sheet` tiles `glyph_count` images into a contact sheet; `bob` is one blitter object whose mask says which pixels are opaque.",
+          "type": "string",
+          "enum": ["bitmap", "glyph_sheet", "bob"],
+          "default": "bitmap"
+        },
+        "width": {
+          "description": "Pixel width of one image; for `glyph_sheet`, of one glyph.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65536
+        },
+        "height": {
+          "description": "Pixel height of one image; for `glyph_sheet`, of one glyph.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65536
+        },
+        "planes": {
+          "description": "Bitplanes. The blitter addresses at most eight, and a palette index is one byte.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8
+        },
+        "plane_order": {
+          "description": "`contiguous` stores every row of one plane before the next; `interleaved` stores all planes of each row together; `byte_interleaved`, `word_interleaved`, and `longword_interleaved` store all planes of each 8-, 16-, or 32-pixel chunk together, which are storage layouts code scatters into bitplanes at load time rather than ones the chipset displays.",
+          "type": "string",
+          "enum": [
+            "contiguous",
+            "interleaved",
+            "byte_interleaved",
+            "word_interleaved",
+            "longword_interleaved"
+          ],
+          "default": "contiguous"
+        },
+        "glyph_count": {
+          "description": "`glyph_sheet` only: how many glyphs to decode.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65536,
+          "default": 1
+        },
+        "glyph_columns": {
+          "description": "`glyph_sheet` only: glyphs per row of the contact sheet.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65536,
+          "default": 1
+        },
+        "glyph_gap": {
+          "description": "`glyph_sheet` only: separator pixels between tiled glyphs.",
+          "type": "integer",
+          "minimum": 0,
+          "default": 0
+        },
+        "bob_mask": {
+          "description": "`bob` only: where transparency comes from.",
+          "type": "object",
+          "required": ["kind"],
+          "properties": {
+            "kind": {
+              "type": "string",
+              "enum": ["none", "interleaved", "separate", "color_key"]
+            }
+          },
+          "oneOf": [
+            {
+              "additionalProperties": false,
+              "properties": { "kind": { "enum": ["none", "interleaved"] } }
+            },
+            {
+              "additionalProperties": false,
+              "required": ["kind", "offset"],
+              "properties": {
+                "kind": { "const": "separate" },
+                "offset": { "type": "integer", "minimum": 0 }
+              }
+            },
+            {
+              "additionalProperties": false,
+              "required": ["kind", "index"],
+              "properties": {
+                "kind": { "const": "color_key" },
+                "index": { "type": "integer", "minimum": 0, "maximum": 255 }
+              }
+            }
+          ]
+        },
+        "maximum_input_bytes": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/maximumInputBytes",
+          "default": 67108864
+        },
+        "maximum_output_pixels": {
+          "description": "Refuse a decode whose output would exceed this many pixels. Checked from the declared geometry before anything is read, because a planar decode's cost is its output rather than its input.",
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/resultCap",
+          "default": 67108864
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "operation": "graphics.bitmap.decode",
+      "arguments": {
+        "source": { "kind": "file", "path": "fixtures/sample.bin" },
+        "offset": 0,
+        "width": 16,
+        "height": 8,
+        "planes": 2
+      }
+    }
+  ]
+}

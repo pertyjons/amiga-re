@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/project.check.request.schema.json",
+  "title": "project.check request",
+  "description": "Load a versioned project and report every problem by stable code. A project that opened with problems is a success: the problems are the answer, not a failure to give one. The project is named by the envelope's `project` locator, not by an argument, so every project-backed operation spells it the same way.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "operation",
+    "arguments"
+  ],
+  "properties": {
+    "operation": {
+      "const": "project.check"
+    },
+    "arguments": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {}
+    }
+  },
+  "examples": [
+    {
+      "operation": "project.check",
+      "arguments": {}
+    }
+  ]
+}

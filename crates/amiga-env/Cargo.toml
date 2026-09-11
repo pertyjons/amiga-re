@@ -1,0 +1,19 @@
+[package]
+name = "amiga-env"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+description = "Bounded, offline Amiga execution environment: memory map, fake ExecBase, trackdisk IORequest, OCS chips."
+
+[lints]
+workspace = true
+
+[dependencies]
+amiga-adf.workspace = true
+amiga-core.workspace = true
+amiga-disasm.workspace = true
+amiga-hw.workspace = true
+serde.workspace = true
+thiserror.workspace = true

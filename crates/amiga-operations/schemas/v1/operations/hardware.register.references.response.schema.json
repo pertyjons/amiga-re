@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/hardware.register.references.response.schema.json",
+  "title": "hardware.register.references result",
+  "description": "Every access, with what the register is as well as where it is touched. Which instruction touches which register is analysis; the name and the subsystem are hardware fact, and leaving the second to whichever frontend renders the first is how two of them end up disagreeing about what $09a is.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "source",
+    "hunk",
+    "entries",
+    "custom_base",
+    "accesses",
+    "access_total",
+    "accesses_truncated"
+  ],
+  "properties": {
+    "source": {
+      "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourcePin"
+    },
+    "hunk": { "type": "integer", "minimum": 0 },
+    "origin": { "type": "integer", "minimum": 0, "maximum": 4294967295 },
+    "entries": {
+      "type": "array",
+      "items": { "type": "integer", "minimum": 0, "maximum": 4294967295 }
+    },
+    "custom_base": {
+      "description": "The base the offsets are relative to, normally $DFF000.",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 4294967295
+    },
+    "accesses": {
+      "description": "Ordered by register then site, so every access to one register groups together — which is the order the question is asked in.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["site", "offset", "subsystem", "form", "kind"],
+        "properties": {
+          "site": {
+            "description": "Hunk offset of the accessing instruction.",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4294967295
+          },
+          "offset": { "type": "integer", "minimum": 0, "maximum": 65535 },
+          "name": {
+            "description": "The register's name, when this build's map knows it.",
+            "type": "string"
+          },
+          "subsystem": {
+            "description": "Which part of the machine the register belongs to — dma, blitter, audio, and so on.",
+            "type": "string"
+          },
+          "form": {
+            "description": "`absolute` names the register outright; `base_relative` is a displacement from an address register holding the custom base.",
+            "enum": ["absolute", "base_relative"]
+          },
+          "kind": { "enum": ["read", "write", "modify", "address", "other"] }
+        }
+      }
+    },
+    "access_total": { "type": "integer", "minimum": 0 },
+    "accesses_truncated": { "type": "boolean" }
+  }
+}

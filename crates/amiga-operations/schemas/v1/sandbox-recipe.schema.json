@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/sandbox-recipe.schema.json",
+  "title": "Immutable sandbox derivation recipe",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "recipe_version",
+    "execution_version",
+    "request",
+    "normalized_request_sha256"
+  ],
+  "properties": {
+    "recipe_version": {
+      "const": 1
+    },
+    "execution_version": {
+      "const": 1
+    },
+    "normalized_request_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "request": {
+      "allOf": [
+        {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/request.schema.json"
+        },
+        {
+          "properties": {
+            "request": {
+              "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/env.sandbox.call.request.schema.json"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,171 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/analysis.code.fixed-point.response.schema.json",
+  "title": "analysis.code.fixed-point result",
+  "description": "Three different observations about the same code: idioms pairing an operation with its normalizing shift, clamps bounding a register, and the points where a register acquires a known Q scale.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "source",
+    "hunk",
+    "entries",
+    "hints",
+    "hint_total",
+    "clamps",
+    "clamp_total",
+    "scales",
+    "scale_total",
+    "truncated"
+  ],
+  "$defs": {
+    "offset": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 4294967295
+    },
+    "dataRegister": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 7
+    }
+  },
+  "properties": {
+    "source": {
+      "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourcePin"
+    },
+    "hunk": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "origin": {
+      "$ref": "#/$defs/offset"
+    },
+    "entries": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/offset"
+      }
+    },
+    "hints": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "site",
+          "shift_site",
+          "kind",
+          "register"
+        ],
+        "properties": {
+          "site": {
+            "description": "Offset of the multiply or divide.",
+            "$ref": "#/$defs/offset"
+          },
+          "shift_site": {
+            "description": "Offset of the normalizing shift.",
+            "$ref": "#/$defs/offset"
+          },
+          "kind": {
+            "enum": [
+              "scaled_multiply",
+              "scaled_divide"
+            ]
+          },
+          "register": {
+            "$ref": "#/$defs/dataRegister"
+          },
+          "fractional_bits": {
+            "description": "The Q fractional bit count, when the shift is by an immediate. Absent for a register-count shift, where the scale is not statically known — a guessed Q would read exactly like a known one, and every value derived from it would be wrong by a power of two.",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 255
+          }
+        }
+      }
+    },
+    "hint_total": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "clamps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "site",
+          "assign_site",
+          "register",
+          "size",
+          "bound",
+          "kind"
+        ],
+        "properties": {
+          "site": {
+            "description": "Offset of the comparison or overflow-producing operation.",
+            "$ref": "#/$defs/offset"
+          },
+          "assign_site": {
+            "description": "Offset of the write that applies the bound.",
+            "$ref": "#/$defs/offset"
+          },
+          "register": {
+            "$ref": "#/$defs/dataRegister"
+          },
+          "size": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 255
+          },
+          "bound": {
+            "$ref": "#/$defs/offset"
+          },
+          "kind": {
+            "enum": [
+              "lower",
+              "upper"
+            ]
+          }
+        }
+      }
+    },
+    "clamp_total": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "scales": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "site",
+          "register",
+          "fractional_bits"
+        ],
+        "properties": {
+          "site": {
+            "$ref": "#/$defs/offset"
+          },
+          "register": {
+            "$ref": "#/$defs/dataRegister"
+          },
+          "fractional_bits": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 255
+          }
+        }
+      }
+    },
+    "scale_total": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "truncated": {
+      "description": "True when any of the three lists was capped.",
+      "type": "boolean"
+    }
+  }
+}

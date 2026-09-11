@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/project.init.response.schema.json",
+  "title": "project.init plan",
+  "description": "The project that would be created and the digest that authorizes creating it. Every document and every copied file is listed before anything is written, so a five-disk project is one decision rather than five.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "project_id",
+    "name",
+    "media",
+    "sources",
+    "plan",
+    "committed",
+    "written"
+  ],
+  "properties": {
+    "project_id": {
+      "description": "Derived from the name, through the same conversion every derived id uses.",
+      "type": "string"
+    },
+    "name": { "type": "string" },
+    "media": { "enum": ["copy", "in_place"] },
+    "sources": {
+      "description": "Every source the project would register, in id order, each with the whole-file object derived from it.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "object_id", "display_name", "size", "sha256"],
+        "properties": {
+          "id": { "type": "string" },
+          "object_id": {
+            "description": "The whole-file object. It carries a `range` selector covering the entire source rather than no selector at all, because an object without one verifies as unrecoverable.",
+            "type": "string"
+          },
+          "display_name": { "type": "string" },
+          "size": { "type": "integer", "minimum": 0 },
+          "sha256": { "type": "string" },
+          "location": {
+            "description": "The project-relative path recorded for this source, when one is. Absent when the source stays outside the root under `in_place`, in which case a local binding is written instead.",
+            "type": "string"
+          },
+          "bound_locally": {
+            "description": "Whether this source needed a `.amiga-re/local.json` binding, which is true on this machine and nowhere else.",
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "plan": {
+      "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/writePlan"
+    },
+    "committed": {
+      "description": "Whether the plan was written. False for `prepare`.",
+      "type": "boolean"
+    },
+    "written": {
+      "description": "Paths actually written, relative to the destination. Empty for `prepare`.",
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}

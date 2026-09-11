@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/project.annotations.request.schema.json",
+  "title": "project.annotations request",
+  "description": "Report a project's reviewed knowledge about one image or one object. Writes nothing. The project is named by the envelope's `project` locator; the scope is an argument, because a project describes several of each. Exactly one of `image` and `object` is named: they are different questions, answered in different address spaces. `read_only`.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["operation", "arguments"],
+  "properties": {
+    "operation": { "const": "project.annotations" },
+    "arguments": {
+      "type": "object",
+      "additionalProperties": false,
+      "oneOf": [{ "required": ["image"] }, { "required": ["object"] }],
+      "properties": {
+        "image": {
+          "description": "Which of the project's images to resolve against, in hunk space. An offset means nothing until you say which image it is an offset into.",
+          "type": "string",
+          "minLength": 1
+        },
+        "object": {
+          "description": "Which of the project's objects to list annotations for, in file space. A project created by `project.init` has objects and no image at all, so this is the scope that answers for one.",
+          "type": "string",
+          "minLength": 1
+        },
+        "maximum_locations": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/resultCap"
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "operation": "project.annotations",
+      "arguments": { "image": "image:main-executable" }
+    },
+    {
+      "operation": "project.annotations",
+      "arguments": { "object": "object:title-screen" }
+    }
+  ]
+}

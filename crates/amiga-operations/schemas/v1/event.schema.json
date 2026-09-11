@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/event.schema.json",
+  "title": "One event an operation reports before its response",
+  "description": "Events exist so a caller can display progress while work is running. They are never the authoritative answer: the response carries every diagnostic an event carried, so a consumer that ignores events loses responsiveness and nothing else. Adding an event kind is additive; a consumer must tolerate one it does not know by ignoring it.",
+  "type": "object",
+  "required": ["event"],
+  "properties": {
+    "event": {
+      "description": "Which kind of event this is. A consumer dispatches on this and never on which fields happen to be present.",
+      "type": "string",
+      "enum": ["started", "progress", "diagnostic", "truncated"]
+    }
+  },
+  "oneOf": [
+    {
+      "title": "started",
+      "description": "Work has begun. Exactly one per operation that reports events, always first.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["event", "operation"],
+      "properties": {
+        "event": { "const": "started" },
+        "operation": {
+          "type": "string",
+          "enum": ["source.survey", "container.adf.list", "graphics.bitmap.decode", "container.adf.extract", "container.lha.extract", "graphics.bitmap.export", "project.check", "project.verify"]
+        }
+      }
+    },
+    {
+      "title": "progress",
+      "description": "How far one named phase has got. Phases arrive in the order the handler reaches them.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["event", "phase", "completed"],
+      "properties": {
+        "event": { "const": "progress" },
+        "phase": {
+          "description": "A stable identifier for the phase. Not a human message; it may be used as a map key.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "completed": { "type": "integer", "minimum": 0 },
+        "total": {
+          "description": "Absent when the handler does not yet know the total, which a consumer must render as indeterminate rather than as zero.",
+          "type": ["integer", "null"],
+          "minimum": 0
+        }
+      }
+    },
+    {
+      "title": "diagnostic",
+      "description": "A finding reported early. The same diagnostic also appears on the response.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["event", "diagnostic"],
+      "properties": {
+        "event": { "const": "diagnostic" },
+        "diagnostic": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/diagnostic.schema.json"
+        }
+      }
+    },
+    {
+      "title": "truncated",
+      "description": "The event budget was exhausted. Always last if present, and emitted once, so a truncated stream is never mistaken for a complete one.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["event", "emitted"],
+      "properties": {
+        "event": { "const": "truncated" },
+        "emitted": {
+          "description": "How many events were delivered before the budget ran out.",
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    }
+  ]
+}

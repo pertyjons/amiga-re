@@ -1,0 +1,375 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/analysis.code.disassemble.response.schema.json",
+  "title": "analysis.code.disassemble result",
+  "description": "Instructions and edges — everything a listing is rendered from, and nothing about how. A listing is a display format, and freezing one here would make every consumer inherit one frontend's choices.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "source",
+    "region",
+    "mode",
+    "hunk_bytes",
+    "start",
+    "end",
+    "instructions",
+    "instruction_total",
+    "instructions_truncated"
+  ],
+  "$defs": {
+    "offset": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 4294967295
+    },
+    "hexBytes": {
+      "description": "Lowercase hex, two characters per byte.",
+      "type": "string",
+      "pattern": "^([0-9a-f]{2})*$"
+    }
+  },
+  "properties": {
+    "source": {
+      "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourcePin"
+    },
+    "region": {
+      "enum": ["hunk", "raw"]
+    },
+    "hunk": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "mode": {
+      "enum": [
+        "linear",
+        "flow"
+      ]
+    },
+    "hunk_bytes": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "origin": {
+      "description": "The mapped origin, when the request named one.",
+      "$ref": "#/$defs/offset"
+    },
+    "start": {
+      "description": "The range actually covered, as hunk offsets. A flow traversal is not bounded by a range, so it reports the whole hunk.",
+      "$ref": "#/$defs/offset"
+    },
+    "end": {
+      "$ref": "#/$defs/offset"
+    },
+    "instructions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "offset",
+          "bytes",
+          "text",
+          "owner_total"
+        ],
+        "properties": {
+          "offset": {
+            "$ref": "#/$defs/offset"
+          },
+          "address": {
+            "description": "The address the MC68000 would fetch this from, when the request named an origin. Absent without one — offset zero is not an address anybody claimed.",
+            "$ref": "#/$defs/offset"
+          },
+          "bytes": {
+            "$ref": "#/$defs/hexBytes"
+          },
+          "text": {
+            "description": "The mnemonic and its operands. No label, no columns, no comment marker: those are a frontend's choices.",
+            "type": "string"
+          },
+          "owners": {
+            "description": "Flow mode: the entries whose traversal reached this instruction, capped by the analysis itself.",
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/offset"
+            }
+          },
+          "owner_total": {
+            "description": "Distinct owners that arrived, counting those the analysis's own cap refused, so a capped owner set never reads as a complete one.",
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "instruction_total": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "instructions_truncated": {
+      "type": "boolean"
+    },
+    "flow": {
+      "description": "What the traversal found beside the instructions. Present only in flow mode: a linear sweep follows nothing and so knows nothing about functions, calls, or what it failed to reach.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "entries",
+        "unreached",
+        "unreached_total",
+        "unreached_truncated",
+        "functions",
+        "function_total",
+        "calls",
+        "call_total",
+        "flows",
+        "flow_total",
+        "unresolved",
+        "unresolved_total",
+        "library_calls",
+        "library_call_total",
+        "external",
+        "external_total",
+        "truncated",
+        "coverage"
+      ],
+      "properties": {
+        "entries": {
+          "description": "The entry offsets the traversal started from, echoed because the answer means nothing without them.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/offset"
+          }
+        },
+        "unreached": {
+          "description": "Maximal runs of bytes no decoded instruction covers. Unreached does not prove data — only that recursive direct control flow did not arrive. The bytes travel so a caller can render or re-examine them without opening the source again.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "offset",
+              "bytes"
+            ],
+            "properties": {
+              "offset": {
+                "$ref": "#/$defs/offset"
+              },
+              "bytes": {
+                "$ref": "#/$defs/hexBytes"
+              }
+            }
+          }
+        },
+        "unreached_total": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "unreached_truncated": {
+          "type": "boolean"
+        },
+        "functions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/offset"
+          }
+        },
+        "function_total": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "calls": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "caller",
+              "call_site",
+              "callee"
+            ],
+            "properties": {
+              "caller": {
+                "$ref": "#/$defs/offset"
+              },
+              "call_site": {
+                "$ref": "#/$defs/offset"
+              },
+              "callee": {
+                "$ref": "#/$defs/offset"
+              }
+            }
+          }
+        },
+        "call_total": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "flows": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "owner",
+              "site",
+              "target",
+              "kind"
+            ],
+            "properties": {
+              "owner": {
+                "description": "Function entry whose traversal discovered the edge.",
+                "$ref": "#/$defs/offset"
+              },
+              "site": {
+                "$ref": "#/$defs/offset"
+              },
+              "target": {
+                "$ref": "#/$defs/offset"
+              },
+              "kind": {
+                "enum": [
+                  "fallthrough",
+                  "branch",
+                  "call"
+                ]
+              }
+            }
+          }
+        },
+        "flow_total": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "unresolved": {
+          "description": "Transfers with no static target and no explaining convention.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "owner",
+              "site"
+            ],
+            "properties": {
+              "owner": {
+                "$ref": "#/$defs/offset"
+              },
+              "site": {
+                "$ref": "#/$defs/offset"
+              }
+            }
+          }
+        },
+        "unresolved_total": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "library_calls": {
+          "description": "Sites of `JSR`/`JMP (d16,A6)` with a negative displacement — the AmigaOS library-call convention. Statically unresolved, but the convention explains them, so they are not warned about as unresolved.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/offset"
+          }
+        },
+        "library_call_total": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "external": {
+          "description": "Transfers a relocation proves leave the analyzed hunk. Resolved, so not unresolved; not this hunk's calls either.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "site",
+              "kind",
+              "relocation",
+              "target_hunk",
+              "target_offset"
+            ],
+            "properties": {
+              "site": {
+                "$ref": "#/$defs/offset"
+              },
+              "kind": {
+                "enum": [
+                  "call",
+                  "jump"
+                ]
+              },
+              "relocation": {
+                "description": "Offset of the patched longword whose relocation proves the target.",
+                "$ref": "#/$defs/offset"
+              },
+              "target_hunk": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "target_offset": {
+                "$ref": "#/$defs/offset"
+              }
+            }
+          }
+        },
+        "external_total": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "truncated": {
+          "description": "True when any list in this object was capped.",
+          "type": "boolean"
+        },
+        "coverage": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "total_bytes",
+            "decoded_bytes",
+            "instructions",
+            "functions",
+            "calls",
+            "library_calls",
+            "unresolved",
+            "external"
+          ],
+          "properties": {
+            "total_bytes": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "decoded_bytes": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "instructions": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "functions": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "calls": {
+              "description": "Statically resolved direct calls, as distinct (site, callee) pairs rather than as control-flow edges: shared code records one edge per owning entry.",
+              "type": "integer",
+              "minimum": 0
+            },
+            "library_calls": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "unresolved": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "external": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/container.lha.list.response.schema.json",
+  "title": "container.lha.list result",
+  "description": "Every member the archive declares, with the true total beside a capped list.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["source", "members", "member_total", "members_truncated"],
+  "properties": {
+    "source": {
+      "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourcePin"
+    },
+    "members": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "method",
+          "compressed_size",
+          "original_size",
+          "crc16",
+          "header_level",
+          "directory"
+        ],
+        "properties": {
+          "name": { "type": "string" },
+          "method": {
+            "description": "The five-byte method id, e.g. `-lh5-`. Verbatim rather than mapped to supported/unsupported: a caller deciding whether an extraction will work needs to know which method, and an honest name is what keeps the extractor's refusal precise.",
+            "type": "string"
+          },
+          "compressed_size": { "type": "integer", "minimum": 0 },
+          "original_size": { "type": "integer", "minimum": 0 },
+          "crc16": {
+            "description": "CRC-16 of the uncompressed file, as stored in the header.",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 65535
+          },
+          "header_level": { "type": "integer", "minimum": 0, "maximum": 255 },
+          "directory": {
+            "description": "A directory marker (`-lhd-`) rather than a file.",
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "member_total": { "type": "integer", "minimum": 0 },
+    "members_truncated": { "type": "boolean" }
+  }
+}

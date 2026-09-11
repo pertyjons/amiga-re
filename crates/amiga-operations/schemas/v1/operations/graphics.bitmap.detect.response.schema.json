@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/graphics.bitmap.detect.response.schema.json",
+  "title": "graphics.bitmap.detect result",
+  "description": "The entropy map, the scored row strides, and the widths the best stride admits. The widths are derived here because the division is the same in every frontend, and one that got it wrong would send someone hunting for a bitmap that is not there.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "source",
+    "offset",
+    "length",
+    "block",
+    "blocks",
+    "block_total",
+    "blocks_truncated",
+    "strides",
+    "stride_total",
+    "strides_truncated",
+    "geometry"
+  ],
+  "properties": {
+    "source": {
+      "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourcePin"
+    },
+    "offset": { "type": "integer", "minimum": 0, "maximum": 4294967295 },
+    "length": {
+      "description": "The region actually examined, which is the rest of the source when the request named no length.",
+      "type": "integer",
+      "minimum": 0
+    },
+    "block": { "type": "integer", "minimum": 1 },
+    "blocks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["offset", "length", "entropy", "class"],
+        "properties": {
+          "offset": {
+            "description": "Whole-file byte offset, so a block can be named without adding the region start back on.",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4294967295
+          },
+          "length": { "type": "integer", "minimum": 0 },
+          "entropy": {
+            "description": "Shannon entropy in bits per byte, 0.0..=8.0.",
+            "type": "number"
+          },
+          "class": {
+            "description": "`code_or_bitmap` names both because entropy alone cannot tell them apart, and saying so beats picking one.",
+            "enum": ["sparse", "code_or_bitmap", "packed"]
+          }
+        }
+      }
+    },
+    "block_total": { "type": "integer", "minimum": 0 },
+    "blocks_truncated": { "type": "boolean" },
+    "strides": {
+      "description": "Empty when the request named no length.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["stride", "score"],
+        "properties": {
+          "stride": { "type": "integer", "minimum": 0 },
+          "score": {
+            "description": "Fraction of byte positions equal to the byte `stride` earlier.",
+            "type": "number"
+          }
+        }
+      }
+    },
+    "stride_total": { "type": "integer", "minimum": 0 },
+    "strides_truncated": { "type": "boolean" },
+    "geometry": {
+      "description": "Widths the best-scoring stride admits, one per plane count that divides it.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["planes", "width"],
+        "properties": {
+          "planes": { "type": "integer", "minimum": 1, "maximum": 8 },
+          "width": { "type": "integer", "minimum": 0 }
+        }
+      }
+    }
+  }
+}

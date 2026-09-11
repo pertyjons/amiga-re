@@ -1,0 +1,178 @@
+{
+  "$schema": "../schema/annotations.schema.json",
+  "annotations": [
+    {
+      "id": "annotation:init-graphics/comment-1",
+      "kind": "comment",
+      "origin": "user",
+      "placement": "before",
+      "target": {
+        "entity_id": "function:init-graphics",
+        "space": "entity"
+      },
+      "text": "Opens `graphics.library` and returns its base in D0.\n\nAttached to the entity, not to an offset, so renaming or rebasing the function carries the comment with it."
+    },
+    {
+      "classification": "text",
+      "confidence": "certain",
+      "id": "annotation:main/data-region",
+      "kind": "region",
+      "origin": "reviewed_analysis",
+      "target": {
+        "hunk": 1,
+        "image_id": "image:main-executable",
+        "length": 17,
+        "object_sha256": "9d26d8c87c29dfbc789e05602a497b9b771889df0030a8e07dd7219e3039a7e8",
+        "offset": 0,
+        "space": "hunk"
+      }
+    },
+    {
+      "id": "annotation:main/entry-bookmark",
+      "kind": "bookmark",
+      "name": "Program entry",
+      "origin": "user",
+      "target": {
+        "address": "0x0000e63e",
+        "image_id": "image:main-executable",
+        "length": 2,
+        "load_map_id": "loadmap:main/default",
+        "object_sha256": "9d26d8c87c29dfbc789e05602a497b9b771889df0030a8e07dd7219e3039a7e8",
+        "space": "runtime"
+      }
+    },
+    {
+      "id": "annotation:main/stale-note",
+      "kind": "symbol",
+      "name": "old_entry_point",
+      "notes": "Deliberately stale: the recorded object digest does not match the object this image is built from. A loader must surface it as stale and refuse to resolve it, rather than silently reapplying the name to whatever now lives at hunk 0 offset 4.",
+      "origin": "user",
+      "stale": true,
+      "target": {
+        "hunk": 0,
+        "image_id": "image:main-executable",
+        "length": 2,
+        "object_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+        "offset": 4,
+        "space": "hunk"
+      }
+    },
+    {
+      "confidence": "user",
+      "id": "function:init-graphics",
+      "kind": "function",
+      "name": "init_graphics",
+      "notes": "Opens graphics.library through the ExecBase in A6.",
+      "origin": "user",
+      "target": {
+        "hunk": 0,
+        "image_id": "image:main-executable",
+        "length": 16,
+        "object_sha256": "9d26d8c87c29dfbc789e05602a497b9b771889df0030a8e07dd7219e3039a7e8",
+        "offset": 0,
+        "space": "hunk"
+      }
+    },
+    {
+      "id": "symbol:graphics-name",
+      "kind": "symbol",
+      "name": "graphics_library_name",
+      "origin": "user",
+      "target": {
+        "hunk": 1,
+        "image_id": "image:main-executable",
+        "length": 17,
+        "object_sha256": "9d26d8c87c29dfbc789e05602a497b9b771889df0030a8e07dd7219e3039a7e8",
+        "offset": 0,
+        "space": "hunk"
+      }
+    },
+    {
+      "id": "variable:init-graphics/library-base",
+      "kind": "variable",
+      "lifetime": {
+        "end": {
+          "hunk": 0,
+          "image_id": "image:main-executable",
+          "length": 2,
+          "object_sha256": "9d26d8c87c29dfbc789e05602a497b9b771889df0030a8e07dd7219e3039a7e8",
+          "offset": 14,
+          "space": "hunk"
+        },
+        "start": {
+          "hunk": 0,
+          "image_id": "image:main-executable",
+          "length": 4,
+          "object_sha256": "9d26d8c87c29dfbc789e05602a497b9b771889df0030a8e07dd7219e3039a7e8",
+          "offset": 10,
+          "space": "hunk"
+        }
+      },
+      "name": "library_base",
+      "notes": "Scoped to the function: D0 means something else three instructions later, and a project-wide name for it would be wrong more often than right.",
+      "origin": "user",
+      "scope": {
+        "function_id": "function:init-graphics"
+      },
+      "storage": {
+        "kind": "register",
+        "register": "d0"
+      },
+      "type_id": "type:u32"
+    },
+    {
+      "id": "variable:main/level-table",
+      "kind": "variable",
+      "name": "level_table",
+      "notes": "A global whose type is an aggregate. The storage width and `type:level-table` state the same 32 bytes, which is the agreement the validator checks: an array of four eight-byte headers cannot be recorded as occupying some other number.",
+      "origin": "reviewed_analysis",
+      "target": {
+        "hunk": 1,
+        "image_id": "image:main-executable",
+        "length": 32,
+        "object_sha256": "9d26d8c87c29dfbc789e05602a497b9b771889df0030a8e07dd7219e3039a7e8",
+        "offset": 0,
+        "space": "hunk"
+      },
+      "type_id": "type:level-table"
+    },
+    {
+      "id": "variable:main/map-seed",
+      "kind": "variable",
+      "name": "map_seed",
+      "notes": "A small-data global at a base-register displacement: every function shares it, so it has no function scope. `disasm globals` reports the slot; this is what names it. The object digest is carried like any other target, so the name goes stale when the image does.",
+      "origin": "reviewed_analysis",
+      "target": {
+        "base_register": "a5",
+        "displacement": -8,
+        "image_id": "image:main-executable",
+        "object_sha256": "9d26d8c87c29dfbc789e05602a497b9b771889df0030a8e07dd7219e3039a7e8",
+        "space": "base_register",
+        "width": 4
+      },
+      "type_id": "type:u32"
+    },
+    {
+      "id": "variable:main/player-lives",
+      "kind": "variable",
+      "name": "player_lives",
+      "notes": "The other global shape: shared state at an absolute address rather than behind a base register. It is located under a named load map, because an executable loaded high and the same executable loaded low are both true and the address alone does not say which.",
+      "origin": "reviewed_analysis",
+      "target": {
+        "address": "0x00022010",
+        "image_id": "image:main-executable",
+        "length": 2,
+        "load_map_id": "loadmap:main/default",
+        "object_sha256": "9d26d8c87c29dfbc789e05602a497b9b771889df0030a8e07dd7219e3039a7e8",
+        "space": "runtime"
+      },
+      "type_id": "type:s16"
+    }
+  ],
+  "document_kind": "annotations",
+  "format_version": 1,
+  "scope": {
+    "image_id": "image:main-executable",
+    "program_id": "program:main"
+  }
+}

@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/compress.powerpacker.export.request.schema.json",
+  "title": "compress.powerpacker.export request",
+  "description": "Decompress a PowerPacker stream exactly as `compress.powerpacker.decode` does, then write the result. `prepared_output`: accepts only `prepare` and `commit_reviewed`.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "operation",
+    "arguments"
+  ],
+  "properties": {
+    "operation": {
+      "const": "compress.powerpacker.export"
+    },
+    "arguments": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source",
+        "modes"
+      ],
+      "properties": {
+        "source": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourceLocator"
+        },
+        "modes": {
+          "description": "The four PowerPacker offset widths in bits, most significant first. Required and never guessed: a headerless stream stores them outside the data, so a wrong table decodes to plausible rubbish instead of failing.",
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 255
+          }
+        },
+        "offset": {
+          "description": "Byte offset the packed stream starts at, for a stream embedded in a larger file.",
+          "type": "integer",
+          "minimum": 0,
+          "default": 0
+        },
+        "maximum_input_bytes": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/maximumInputBytes",
+          "default": 67108864
+        },
+        "maximum_output_bytes": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/maximumOutputBytes",
+          "default": 67108864
+        },
+        "destination": {
+          "description": "Directory the decoded file goes in, as an identity the adapter resolves against its own output root. Relative, normal components only.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024,
+          "pattern": "^(?!/)(?!.*(^|/)\\.\\.(/|$)).+$"
+        },
+        "file_name": {
+          "description": "File name within the destination: one relative path component. Not derived from the source, because a packed stream says nothing about what it holds.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255,
+          "pattern": "^[^/]+$",
+          "default": "decoded.bin"
+        },
+        "policy": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/outputPolicy",
+          "default": "create_only"
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "operation": "compress.powerpacker.export",
+      "arguments": {
+        "source": {
+          "kind": "file",
+          "path": "extracted/level1.pp"
+        },
+        "modes": [
+          9,
+          10,
+          12,
+          13
+        ],
+        "destination": "unpacked",
+        "file_name": "level1.bin"
+      }
+    }
+  ]
+}

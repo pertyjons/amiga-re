@@ -1,0 +1,23 @@
+[package]
+name = "amiga-project"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+description = "The versioned amiga-re reverse-engineering project format: bundled Draft 2020-12 schemas and the contract fixture they are proven against."
+
+[lints]
+workspace = true
+
+[dependencies]
+amiga-core.workspace = true
+jsonschema = { version = "0.49.1", default-features = false }
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+thiserror.workspace = true
+
+[dev-dependencies]
+serde_json.workspace = true
+sha2.workspace = true

@@ -1,0 +1,15 @@
+[package]
+name = "amiga-hunk"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+description = "Read-only parser for Amiga LoadSeg/HUNK executables."
+
+[lints]
+workspace = true
+
+[dependencies]
+amiga-core.workspace = true
+thiserror.workspace = true

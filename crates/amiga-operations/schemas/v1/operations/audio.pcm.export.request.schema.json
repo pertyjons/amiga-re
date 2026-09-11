@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/audio.pcm.export.request.schema.json",
+  "title": "audio.pcm.export request",
+  "description": "Read a raw PCM region exactly as `audio.pcm.decode` does, then write it as WAV. `prepared_output`: accepts only `prepare` and `commit_reviewed`.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "operation",
+    "arguments"
+  ],
+  "properties": {
+    "operation": {
+      "const": "audio.pcm.export"
+    },
+    "arguments": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source",
+        "offset",
+        "length",
+        "sample_rate",
+        "destination"
+      ],
+      "properties": {
+        "source": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourceLocator"
+        },
+        "offset": {
+          "description": "Byte offset of the first sample.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "length": {
+          "description": "Number of sample bytes. One byte per frame: this is 8-bit signed mono.",
+          "type": "integer",
+          "minimum": 1
+        },
+        "sample_rate": {
+          "description": "Playback rate in Hz. Required and never guessed: raw Paula PCM has no header, so nothing in the bytes states it, and every consumer divides by it.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65535
+        },
+        "maximum_buckets": {
+          "description": "How many min/max pairs the waveform envelope is reduced to.",
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/resultCap",
+          "default": 512
+        },
+        "maximum_input_bytes": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/maximumInputBytes",
+          "default": 67108864
+        },
+        "destination": {
+          "description": "Directory the file goes in, as an identity the adapter resolves against its own output root. Relative, normal components only.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024,
+          "pattern": "^(?!/)(?!.*(^|/)\\.\\.(/|$)).+$"
+        },
+        "file_name": {
+          "description": "File name within the destination: one relative path component.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255,
+          "pattern": "^[^/]+$",
+          "default": "sample.wav"
+        },
+        "policy": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/outputPolicy",
+          "default": "create_only"
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "operation": "audio.pcm.export",
+      "arguments": {
+        "source": {
+          "kind": "file",
+          "path": "extracted/game.bin"
+        },
+        "offset": 4096,
+        "length": 8192,
+        "sample_rate": 8287,
+        "destination": "audio",
+        "file_name": "shot.wav"
+      }
+    }
+  ]
+}

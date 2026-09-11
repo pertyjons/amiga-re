@@ -1,0 +1,20 @@
+{
+  "protocol_version": 1,
+  "request_id": "request:survey-sample",
+  "execution": {
+    "mode": { "kind": "read" },
+    "events": "final_only"
+  },
+  "request": {
+    "operation": "source.survey",
+    "arguments": {
+      "source": {
+        "kind": "file",
+        "path": "fixtures/sample.bin"
+      },
+      "minimum_string_length": 6,
+      "maximum_input_bytes": 67108864,
+      "maximum_regions": 4096
+    }
+  }
+}

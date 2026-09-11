@@ -1,0 +1,37 @@
+{
+  "$schema": "../schema/resources.schema.json",
+  "document_kind": "resources",
+  "format_version": 1,
+  "resources": [
+    {
+      "id": "resource:level-table",
+      "kind": "table",
+      "name": "Level table",
+      "notes": "Four eight-byte rows described by a struct, so the table and the type stay one fact rather than two that can disagree.",
+      "row_count": 4,
+      "row_stride": 8,
+      "target": {
+        "length": 32,
+        "object_id": "object:installed/levels",
+        "object_sha256": "630dcd2966c4336691125448bbb25b4ff412a49c732db2c8abc1b8581bd710dd",
+        "offset": 0,
+        "space": "object"
+      },
+      "type_id": "type:level-header"
+    },
+    {
+      "encoding": "latin1",
+      "id": "resource:startup-text",
+      "kind": "text",
+      "name": "Startup script",
+      "target": {
+        "length": 1,
+        "object_id": "object:installed/levels",
+        "object_sha256": "630dcd2966c4336691125448bbb25b4ff412a49c732db2c8abc1b8581bd710dd",
+        "offset": 0,
+        "space": "object"
+      },
+      "termination": "nul"
+    }
+  ]
+}

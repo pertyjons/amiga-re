@@ -1,0 +1,17 @@
+[package]
+name = "amiga-iff"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+description = "Generic IFF container reader: 8SVX samples, ILBM images, PCM and tracker-module scanning, WAV export."
+
+[lints]
+workspace = true
+
+[dependencies]
+amiga-compress.workspace = true
+amiga-core.workspace = true
+amiga-hw.workspace = true
+thiserror.workspace = true

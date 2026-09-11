@@ -1,0 +1,29 @@
+/target/
+/.idea/
+
+# Private source media and generated derivatives.
+/original/
+/extracted/
+/decoded/
+*.[aA][dD][fF]
+*.[hH][dD][fF]
+*.[dD][mM][sS]
+*.[iI][pP][fF]
+*.[lL][hH][aA]
+*.[lL][zZ][hH]
+*.[eE][xX][eE]
+
+# Only these documented, reproducible synthetic media are public fixtures.
+!/crates/amiga-operations/fixtures/volume.adf
+!/crates/amiga-project/fixtures/contract/original/disk1.adf
+!/crates/amiga-project/fixtures/contract/original/disk2.adf
+!/crates/amiga-project/fixtures/contract/original/disk3.adf
+/crates/amiga-lha/fixtures/real/
+
+# Local source bindings and task state.
+.amiga-re/
+/.claude/scheduled_tasks.lock
+
+# Python tooling caches.
+__pycache__/
+*.pyc

@@ -1,0 +1,61 @@
+{
+  "protocol_version": 1,
+  "request_id": "request:survey-sample",
+  "operation": "source.survey",
+  "status": "success",
+  "diagnostics": [],
+  "normalized_request_sha256": "e7a26364af02877c29fb02fe5f5fc182e8bc2998ffd53eb37b3ce89d81e030ae",
+  "result": {
+    "source": {
+      "size": 336,
+      "sha256": "ecaf752fbb7b25add16877827b70da92e66ba40c7e06cd984aff9fa1f65ee022"
+    },
+    "regions": [
+      {
+        "start": 0,
+        "end": 46,
+        "kind": "strings",
+        "detail": "3 string(s), \"AMIGA SAMPLE SOURCE\"",
+        "entropy": null,
+        "palette": null
+      },
+      {
+        "start": 46,
+        "end": 80,
+        "kind": "palette",
+        "detail": "17 colors",
+        "entropy": null,
+        "palette": [
+          0,
+          0,
+          3823,
+          2748,
+          1911,
+          291,
+          4095,
+          1638,
+          819,
+          2457,
+          546,
+          3276,
+          1092,
+          4011,
+          273,
+          2184,
+          3549
+        ]
+      },
+      {
+        "start": 80,
+        "end": 336,
+        "kind": "code-or-bitmap",
+        "detail": "(entropy 7.26)",
+        "entropy": 7.262371,
+        "palette": null
+      }
+    ],
+    "region_total": 3,
+    "regions_truncated": false,
+    "copper_lists": []
+  }
+}

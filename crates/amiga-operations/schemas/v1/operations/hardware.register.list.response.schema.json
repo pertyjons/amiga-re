@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/hardware.register.list.response.schema.json",
+  "title": "hardware.register.list result",
+  "description": "Every register the map names, in both frames: the offset a listing shows and the absolute address a real machine uses.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["custom_base", "registers"],
+  "properties": {
+    "custom_base": {
+      "description": "The base the offsets are relative to, normally `$DFF000`.",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 4294967295
+    },
+    "registers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["offset", "address", "name"],
+        "properties": {
+          "offset": { "type": "integer", "minimum": 0, "maximum": 65535 },
+          "address": { "type": "integer", "minimum": 0, "maximum": 4294967295 },
+          "name": { "type": "string" }
+        }
+      }
+    }
+  }
+}

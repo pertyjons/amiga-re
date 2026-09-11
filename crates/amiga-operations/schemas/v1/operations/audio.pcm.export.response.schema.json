@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/audio.pcm.export.response.schema.json",
+  "title": "audio.pcm.export result",
+  "description": "The WAV that would be written, and whether it was, beside the region it came from.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "pcm",
+    "plan",
+    "committed"
+  ],
+  "properties": {
+    "pcm": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source",
+        "offset",
+        "frames",
+        "sample_rate",
+        "region_sha256",
+        "envelope",
+        "bucket_frames"
+      ],
+      "properties": {
+        "source": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourcePin"
+        },
+        "offset": {
+          "description": "Byte offset the region was read from.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "frames": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "sample_rate": {
+          "description": "The rate the request stated, echoed back beside the pinned bytes so the claim is checkable.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "region_sha256": {
+          "description": "Digest of exactly the bytes the request selected, so two guesses at the same sample can be compared without holding either.",
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sha256"
+        },
+        "envelope": {
+          "description": "One min/max pair per waveform column. Both extremes, not an average: averaging a waveform toward zero is how a loud sample ends up looking like silence.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "minimum",
+              "maximum"
+            ],
+            "properties": {
+              "minimum": {
+                "type": "integer",
+                "minimum": -128,
+                "maximum": 127
+              },
+              "maximum": {
+                "type": "integer",
+                "minimum": -128,
+                "maximum": 127
+              }
+            }
+          }
+        },
+        "bucket_frames": {
+          "description": "Frames each envelope bucket summarizes.",
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "plan": {
+      "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/writePlan"
+    },
+    "committed": {
+      "type": "boolean"
+    }
+  }
+}

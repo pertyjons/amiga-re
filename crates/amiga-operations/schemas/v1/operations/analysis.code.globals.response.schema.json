@@ -1,0 +1,231 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/analysis.code.globals.response.schema.json",
+  "title": "analysis.code.globals result",
+  "description": "Every access, in each of the three conventions a program reaches its variables by. Grouping accesses into slots is a rendering choice and stays with the caller; whether a written constant points into the image is decided here, because it needs the image's bounds.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "source",
+    "hunk",
+    "entries",
+    "base_register",
+    "hunk_bytes",
+    "base_relative",
+    "base_relative_total",
+    "absolute",
+    "absolute_total",
+    "derived_total",
+    "truncated"
+  ],
+  "$defs": {
+    "offset": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 4294967295
+    },
+    "accessKind": {
+      "enum": [
+        "read",
+        "write",
+        "modify",
+        "address",
+        "other"
+      ]
+    },
+    "operandSize": {
+      "description": "Operand size in bytes, where the encoding specifies one.",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 255
+    }
+  },
+  "properties": {
+    "source": {
+      "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourcePin"
+    },
+    "hunk": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "origin": {
+      "$ref": "#/$defs/offset"
+    },
+    "entries": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/offset"
+      }
+    },
+    "base_register": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 7
+    },
+    "hunk_bytes": {
+      "description": "Bytes of the analyzed hunk, which is what \"inside the image\" means.",
+      "type": "integer",
+      "minimum": 0
+    },
+    "base_relative": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "site",
+          "displacement",
+          "kind",
+          "library_base",
+          "value_points_into_image"
+        ],
+        "properties": {
+          "site": {
+            "description": "Hunk offset of the accessing instruction.",
+            "$ref": "#/$defs/offset"
+          },
+          "displacement": {
+            "description": "Signed displacement from the base register.",
+            "type": "integer",
+            "minimum": -32768,
+            "maximum": 32767
+          },
+          "size": {
+            "$ref": "#/$defs/operandSize"
+          },
+          "kind": {
+            "$ref": "#/$defs/accessKind"
+          },
+          "value": {
+            "description": "Constant stored by a direct `MOVE #value,slot`, or zero by `CLR`.",
+            "$ref": "#/$defs/offset"
+          },
+          "library_base": {
+            "description": "The slot is loaded into an address register used for a library call.",
+            "type": "boolean"
+          },
+          "value_points_into_image": {
+            "description": "The stored constant lands inside the loaded image, so the slot plausibly holds a pointer. Zero never counts: it is the commonest constant in any program, and calling it a pointer would make almost every slot look like one.",
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "base_relative_total": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "absolute": {
+      "description": "Absolute accesses landing inside the image. Empty without an origin.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "site",
+          "address",
+          "kind",
+          "library_base",
+          "value_points_into_image"
+        ],
+        "properties": {
+          "site": {
+            "$ref": "#/$defs/offset"
+          },
+          "address": {
+            "description": "The absolute target address.",
+            "$ref": "#/$defs/offset"
+          },
+          "offset": {
+            "description": "That address as a hunk offset, when the origin can express it.",
+            "$ref": "#/$defs/offset"
+          },
+          "size": {
+            "$ref": "#/$defs/operandSize"
+          },
+          "kind": {
+            "$ref": "#/$defs/accessKind"
+          },
+          "value": {
+            "$ref": "#/$defs/offset"
+          },
+          "library_base": {
+            "type": "boolean"
+          },
+          "value_points_into_image": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "absolute_total": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "derived": {
+      "description": "Indirect accesses resolved through propagated address registers. Present only when the request asked for the pass.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "site",
+          "register",
+          "target",
+          "kind"
+        ],
+        "properties": {
+          "site": {
+            "$ref": "#/$defs/offset"
+          },
+          "register": {
+            "description": "Address register the memory operand used.",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 7
+          },
+          "target": {
+            "description": "Where the access lands, as far as propagation could tell. An unknown target is reported rather than dropped: an access whose target is unknown is still an access, and omitting it would understate what the code touches.",
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "kind"
+            ],
+            "properties": {
+              "kind": {
+                "enum": [
+                  "exact",
+                  "range",
+                  "unknown"
+                ]
+              },
+              "address": {
+                "$ref": "#/$defs/offset"
+              },
+              "start": {
+                "$ref": "#/$defs/offset"
+              },
+              "end": {
+                "$ref": "#/$defs/offset"
+              }
+            }
+          },
+          "size": {
+            "$ref": "#/$defs/operandSize"
+          },
+          "kind": {
+            "$ref": "#/$defs/accessKind"
+          }
+        }
+      }
+    },
+    "derived_total": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "truncated": {
+      "description": "True when any of the three lists was capped.",
+      "type": "boolean"
+    }
+  }
+}

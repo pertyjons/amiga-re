@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/analysis.pointers.scan.request.schema.json",
+  "title": "analysis.pointers.scan request",
+  "description": "Find runs of plausible in-hunk pointers and report what they address, writing nothing. `read_only`.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "operation",
+    "arguments"
+  ],
+  "properties": {
+    "operation": {
+      "const": "analysis.pointers.scan"
+    },
+    "arguments": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source"
+      ],
+      "properties": {
+        "source": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourceLocator"
+        },
+        "hunk": {
+          "description": "Hunk to scan.",
+          "type": "integer",
+          "minimum": 0,
+          "default": 0
+        },
+        "origin": {
+          "description": "The address the hunk is mapped at. A target is plausible when it lands inside `[origin, origin + hunk bytes)`, so this is the claim the scan tests.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295,
+          "default": 0
+        },
+        "minimum_entries": {
+          "description": "Consecutive plausible entries a run needs before it counts as a table. Three by default: two in-range longwords in a row happen by accident in ordinary data and three do so far less often.",
+          "type": "integer",
+          "minimum": 1,
+          "default": 3
+        },
+        "word_scale": {
+          "description": "Read unsigned words scaled by this factor and added to the origin, instead of absolute longwords. A scale of zero is refused — it would decode every word to the origin.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4294967295
+        },
+        "maximum_tables": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/resultCap"
+        },
+        "maximum_targets": {
+          "description": "Cap on the targets reported per table. Each table always reports its true total and its full span beside the capped list.",
+          "type": "integer",
+          "minimum": 1
+        },
+        "maximum_entry_offsets": {
+          "description": "Cap on the derived entry offsets. Its own bound rather than the target cap's: the targets are what a table shows and the entry offsets are what a caller analyzes from, so narrowing the display must not narrow the analysis.",
+          "type": "integer",
+          "minimum": 1
+        },
+        "maximum_input_bytes": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/maximumInputBytes",
+          "default": 67108864
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "operation": "analysis.pointers.scan",
+      "arguments": {
+        "source": {
+          "kind": "file",
+          "path": "extracted/game"
+        },
+        "hunk": 0,
+        "origin": 65536,
+        "minimum_entries": 4
+      }
+    }
+  ]
+}

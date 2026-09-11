@@ -1,0 +1,217 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/graphics.bitmap.export.request.schema.json",
+  "title": "graphics.bitmap.export request",
+  "description": "Decode a planar region exactly as `graphics.bitmap.decode` does, then write it as an indexed PNG. `prepared_output`: accepts only `prepare` and `commit_reviewed`.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "operation",
+    "arguments"
+  ],
+  "properties": {
+    "operation": {
+      "const": "graphics.bitmap.export"
+    },
+    "arguments": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source",
+        "width",
+        "height",
+        "planes",
+        "destination"
+      ],
+      "properties": {
+        "source": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourceLocator"
+        },
+        "offset": {
+          "description": "Byte offset of the planar data within the source.",
+          "type": "integer",
+          "minimum": 0,
+          "default": 0
+        },
+        "shape": {
+          "description": "What the region decodes to. `bitmap` is one image; `glyph_sheet` tiles `glyph_count` images into a contact sheet; `bob` is one blitter object whose mask says which pixels are opaque.",
+          "type": "string",
+          "enum": [
+            "bitmap",
+            "glyph_sheet",
+            "bob"
+          ],
+          "default": "bitmap"
+        },
+        "width": {
+          "description": "Pixel width of one image; for `glyph_sheet`, of one glyph.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65536
+        },
+        "height": {
+          "description": "Pixel height of one image; for `glyph_sheet`, of one glyph.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65536
+        },
+        "planes": {
+          "description": "Bitplanes. The blitter addresses at most eight, and a palette index is one byte.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8
+        },
+        "plane_order": {
+          "description": "`contiguous` stores every row of one plane before the next; `interleaved` stores all planes of each row together; `byte_interleaved`, `word_interleaved`, and `longword_interleaved` store all planes of each 8-, 16-, or 32-pixel chunk together, which are storage layouts code scatters into bitplanes at load time rather than ones the chipset displays.",
+          "type": "string",
+          "enum": [
+            "contiguous",
+            "interleaved",
+            "byte_interleaved",
+            "word_interleaved",
+            "longword_interleaved"
+          ],
+          "default": "contiguous"
+        },
+        "glyph_count": {
+          "description": "`glyph_sheet` only: how many glyphs to decode.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65536,
+          "default": 1
+        },
+        "glyph_columns": {
+          "description": "`glyph_sheet` only: glyphs per row of the contact sheet.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65536,
+          "default": 1
+        },
+        "glyph_gap": {
+          "description": "`glyph_sheet` only: separator pixels between tiled glyphs.",
+          "type": "integer",
+          "minimum": 0,
+          "default": 0
+        },
+        "bob_mask": {
+          "description": "`bob` only: where transparency comes from.",
+          "type": "object",
+          "required": [
+            "kind"
+          ],
+          "properties": {
+            "kind": {
+              "type": "string",
+              "enum": [
+                "none",
+                "interleaved",
+                "separate",
+                "color_key"
+              ]
+            }
+          },
+          "oneOf": [
+            {
+              "additionalProperties": false,
+              "properties": {
+                "kind": {
+                  "enum": [
+                    "none",
+                    "interleaved"
+                  ]
+                }
+              }
+            },
+            {
+              "additionalProperties": false,
+              "required": [
+                "kind",
+                "offset"
+              ],
+              "properties": {
+                "kind": {
+                  "const": "separate"
+                },
+                "offset": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            {
+              "additionalProperties": false,
+              "required": [
+                "kind",
+                "index"
+              ],
+              "properties": {
+                "kind": {
+                  "const": "color_key"
+                },
+                "index": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 255
+                }
+              }
+            }
+          ]
+        },
+        "maximum_input_bytes": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/maximumInputBytes",
+          "default": 67108864
+        },
+        "maximum_output_pixels": {
+          "description": "Refuse a decode whose output would exceed this many pixels. Checked from the declared geometry before anything is read, because a planar decode's cost is its output rather than its input.",
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/resultCap",
+          "default": 67108864
+        },
+        "destination": {
+          "description": "Directory the PNG goes in, as an identity the adapter resolves against its own output root. Relative, normal components only.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024,
+          "pattern": "^(?!/)(?!.*(^|/)\\.\\.(/|$)).+$"
+        },
+        "file_name": {
+          "description": "File name within the destination: one relative path component, so an export cannot write beside its destination let alone outside it.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255,
+          "pattern": "^[^/]+$",
+          "default": "bitmap.png"
+        },
+        "palette": {
+          "description": "RGB4 (`$0RGB`) colors, at least `1 << planes` of them. Omitted, the export uses an evenly spaced grayscale ramp and records it in the result \u2014 an export with no palette still commits to specific colors, and the result says which.",
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4095
+          },
+          "maxItems": 256
+        },
+        "policy": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/outputPolicy",
+          "default": "create_only"
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "operation": "graphics.bitmap.export",
+      "arguments": {
+        "source": {
+          "kind": "file",
+          "path": "fixtures/sample.bin"
+        },
+        "width": 16,
+        "height": 8,
+        "planes": 2,
+        "destination": "exports",
+        "file_name": "title.png"
+      }
+    }
+  ]
+}

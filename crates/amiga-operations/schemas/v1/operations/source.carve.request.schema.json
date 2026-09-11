@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/source.carve.request.schema.json",
+  "title": "source.carve request",
+  "description": "Write one byte range of a source as its own file. Stops at bytes deliberately: what the range is has its own operation, and a carve that guessed would be a decode nobody asked for. `prepared_output`: accepts only `prepare` and `commit_reviewed`.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "operation",
+    "arguments"
+  ],
+  "properties": {
+    "operation": {
+      "const": "source.carve"
+    },
+    "arguments": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source",
+        "offset",
+        "length",
+        "destination"
+      ],
+      "properties": {
+        "source": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourceLocator"
+        },
+        "offset": {
+          "description": "Byte offset of the range within the source.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "length": {
+          "description": "Length of the range in bytes. At least one: an empty carve writes nothing.",
+          "type": "integer",
+          "minimum": 1
+        },
+        "destination": {
+          "description": "Directory the carved file goes in, as an identity the adapter resolves against its own output root. Relative, normal components only.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024,
+          "pattern": "^(?!/)(?!.*(^|/)\\.\\.(/|$)).+$"
+        },
+        "file_name": {
+          "description": "File name within the destination: one relative path component, so a carve cannot write beside its destination let alone outside it.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255,
+          "pattern": "^[^/]+$",
+          "default": "carve.bin"
+        },
+        "maximum_input_bytes": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/maximumInputBytes",
+          "default": 67108864
+        },
+        "policy": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/outputPolicy",
+          "default": "create_only"
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "operation": "source.carve",
+      "arguments": {
+        "source": {
+          "kind": "file",
+          "path": "original/disk.adf"
+        },
+        "offset": 4096,
+        "length": 2048,
+        "destination": "carved",
+        "file_name": "unknown-region.bin"
+      }
+    }
+  ]
+}

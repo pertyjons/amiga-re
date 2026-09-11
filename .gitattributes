@@ -1,0 +1,4 @@
+# Preserve synthetic compressed payloads byte-for-byte on every checkout.
+crates/amiga-lha/fixtures/synthetic/*.bin binary
+crates/amiga-analysis/fixtures/lha/*.bin binary
+crates/amiga-lha/fixtures/conformance/*.bin binary

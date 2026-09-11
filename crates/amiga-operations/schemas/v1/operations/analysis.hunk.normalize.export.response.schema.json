@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/analysis.hunk.normalize.export.response.schema.json",
+  "title": "analysis.hunk.normalize.export result",
+  "description": "The rewritten image that would be written, and whether it was.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "normalized",
+    "plan",
+    "committed"
+  ],
+  "properties": {
+    "normalized": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source",
+        "normalized_bytes",
+        "normalized_sha256",
+        "segments",
+        "relocations"
+      ],
+      "properties": {
+        "source": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourcePin"
+        },
+        "normalized_bytes": {
+          "description": "Bytes of the rewritten image.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "normalized_sha256": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sha256"
+        },
+        "segments": {
+          "description": "Hunks the rewritten image declares. Present only because the rewrite's own re-parse succeeded — that re-parse is what turns a bad rewrite into a refusal.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "relocations": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "plan": {
+      "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/writePlan"
+    },
+    "committed": {
+      "type": "boolean"
+    }
+  }
+}

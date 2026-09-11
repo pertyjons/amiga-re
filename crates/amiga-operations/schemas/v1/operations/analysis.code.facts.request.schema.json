@@ -1,0 +1,162 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/analysis.code.facts.request.schema.json",
+  "title": "analysis.code.facts request",
+  "description": "Compose every code analysis into one fact list, with the instructions it is about. Writes nothing. `read_only`.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "operation",
+    "arguments"
+  ],
+  "properties": {
+    "operation": {
+      "const": "analysis.code.facts"
+    },
+    "arguments": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "required": ["region"],
+            "properties": { "region": { "const": "raw" } }
+          },
+          "then": { "required": ["expected_sha256"] }
+        },
+        {
+          "if": {
+            "required": ["region"],
+            "properties": { "region": { "enum": ["raw", "boot_block"] } }
+          },
+          "then": { "not": { "required": ["hunk"] } }
+        }
+      ],
+      "properties": {
+        "source": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourceLocator"
+        },
+        "region": {
+          "description": "Where the code lives. A boot block and a raw project image are not hunks, and the same question is asked of all three \u2014 one selector rather than separate fact models.",
+          "enum": [
+            "hunk",
+            "boot_block",
+            "raw"
+          ],
+          "default": "hunk"
+        },
+        "hunk": {
+          "description": "CODE hunk to analyze. Omit for `boot_block` and `raw`, which have no hunks.",
+          "type": "integer",
+          "minimum": 0,
+          "default": 0
+        },
+        "expected_sha256": {
+          "description": "Required for raw code: the exact digest the source must have before any instruction is decoded.",
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sha256"
+        },
+        "entries": {
+          "description": "Where the traversal starts, as offsets within the selected code region. Defaults to offset 0. Every fact is about code some entry reaches, so an entry list that misses a routine produces no facts about it rather than wrong ones.",
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4294967295
+          }
+        },
+        "origin": {
+          "description": "The address the hunk is mapped at. Nothing in a LoadSeg image says where it was loaded, so this is the caller's claim about the machine: absolute references cannot be identified without one, and are left unresolved rather than guessed at.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "base_register": {
+          "description": "Address register the small-data convention uses. A5 by convention, and the convention is what makes a displacement from it a global rather than an arbitrary offset from an arbitrary pointer.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 7,
+          "default": 5
+        },
+        "default_library": {
+          "description": "The library initially in A6. Defaults to `exec` for a boot block, which the machine guarantees \u2014 the fact model is told rather than left to infer it from code that never opens exec.",
+          "type": "string"
+        },
+        "library_vectors": {
+          "description": "Extra vectors, consulted before this build's curated tables. The tables travel as data, never as a path: a frontend reads its own fd files and puts the entries here, so two adapters given the same table get the same facts.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "library",
+              "lvo",
+              "name"
+            ],
+            "properties": {
+              "library": {
+                "type": "string"
+              },
+              "lvo": {
+                "type": "integer",
+                "minimum": -32768,
+                "maximum": 32767
+              },
+              "name": {
+                "type": "string"
+              },
+              "arguments": {
+                "description": "The register each argument arrives in, and the parameter name the table gives it. Both, because a table naming `parm` in `d0` and one saying only `d0` describe different amounts of knowledge.",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "register"
+                  ],
+                  "properties": {
+                    "register": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "public": {
+                "description": "Whether the supplying table marked the vector public. False keeps an fd-supplied private name from reading like documented API.",
+                "type": "boolean",
+                "default": true
+              }
+            }
+          }
+        },
+        "maximum_facts": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/resultCap"
+        },
+        "maximum_instructions": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/resultCap"
+        },
+        "maximum_input_bytes": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/maximumInputBytes",
+          "default": 67108864
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "operation": "analysis.code.facts",
+      "arguments": {
+        "source": {
+          "kind": "file",
+          "path": "original/disk1.adf"
+        },
+        "region": "boot_block"
+      }
+    }
+  ]
+}

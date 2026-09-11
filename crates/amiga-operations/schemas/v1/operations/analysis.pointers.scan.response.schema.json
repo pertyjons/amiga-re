@@ -1,0 +1,119 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/analysis.pointers.scan.response.schema.json",
+  "title": "analysis.pointers.scan result",
+  "description": "Every candidate table, what it addresses, and the entry offsets the targets derive.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "source",
+    "hunk",
+    "origin",
+    "scanned_bytes",
+    "tables",
+    "table_total",
+    "tables_truncated",
+    "entry_offsets",
+    "entry_offset_total",
+    "entry_offsets_truncated"
+  ],
+  "properties": {
+    "source": {
+      "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourcePin"
+    },
+    "hunk": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "origin": {
+      "description": "The mapped origin the targets were judged against, echoed because a candidate whose criteria are invisible cannot be judged.",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 4294967295
+    },
+    "scanned_bytes": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "tables": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "offset",
+          "encoding",
+          "targets",
+          "target_total",
+          "targets_truncated",
+          "target_lowest",
+          "target_highest"
+        ],
+        "properties": {
+          "offset": {
+            "description": "Byte offset of the first entry within the scanned hunk.",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4294967295
+          },
+          "encoding": {
+            "enum": [
+              "long",
+              "scaled_word"
+            ]
+          },
+          "targets": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 4294967295
+            }
+          },
+          "target_total": {
+            "description": "Entries the run holds before the cap. Always the true total.",
+            "type": "integer",
+            "minimum": 0
+          },
+          "targets_truncated": {
+            "type": "boolean"
+          },
+          "target_lowest": {
+            "description": "Lowest target the whole run reaches, capped or not: the span says which part of the hunk a table addresses, and reading it off a truncated list would understate it.",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4294967295
+          },
+          "target_highest": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4294967295
+          }
+        }
+      }
+    },
+    "table_total": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "tables_truncated": {
+      "type": "boolean"
+    },
+    "entry_offsets": {
+      "description": "Every distinct target that lands on an even offset inside the scanned hunk, ascending — the entry points a control-flow analysis would be seeded from. Derived from every target found, not from the capped lists, so a capped response still names the same seeds.",
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 4294967295
+      }
+    },
+    "entry_offset_total": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "entry_offsets_truncated": {
+      "type": "boolean"
+    }
+  }
+}

@@ -1,0 +1,1231 @@
+{
+  "address_spaces": {
+    "file_start": 32,
+    "hunk": 0,
+    "runtime_origin": null,
+    "size": 92
+  },
+  "anchor_format": "h<hunk>-<kind>-<offset as 8 hex digits>",
+  "base": null,
+  "entities": [
+    {
+      "anchor": "h0-fn-00000000",
+      "kind": "function",
+      "location": {
+        "file": 32,
+        "hunk": 0,
+        "offset": 0
+      },
+      "name": "sub_0"
+    },
+    {
+      "anchor": "h0-fn-00000008",
+      "kind": "function",
+      "location": {
+        "file": 40,
+        "hunk": 0,
+        "offset": 8
+      },
+      "name": "init_gfx"
+    },
+    {
+      "anchor": "h0-sym-00000008",
+      "kind": "symbol",
+      "location": {
+        "file": 40,
+        "hunk": 0,
+        "offset": 8
+      },
+      "name": "init_gfx"
+    },
+    {
+      "anchor": "h0-fn-00000042",
+      "kind": "function",
+      "location": {
+        "file": 98,
+        "hunk": 0,
+        "offset": 66
+      },
+      "name": "helper"
+    },
+    {
+      "anchor": "h0-sym-00000042",
+      "kind": "symbol",
+      "location": {
+        "file": 98,
+        "hunk": 0,
+        "offset": 66
+      },
+      "name": "helper"
+    },
+    {
+      "anchor": "h0-data-00000044",
+      "kind": "data_region",
+      "location": {
+        "file": 100,
+        "hunk": 0,
+        "offset": 68
+      },
+      "name": "text"
+    }
+  ],
+  "entries": [
+    0,
+    8
+  ],
+  "facts": [
+    {
+      "anchor": "h0-fn-00000000",
+      "confidence": "certain",
+      "entry": 0,
+      "evidence": [
+        {
+          "site": 0,
+          "type": "instruction"
+        }
+      ],
+      "kind": "function",
+      "location": {
+        "file": 32,
+        "hunk": 0,
+        "offset": 0
+      },
+      "name": "sub_0",
+      "producer": "control_flow",
+      "subject": 0
+    },
+    {
+      "anchor": "h0-fn-00000000",
+      "clobbered": [],
+      "complete": false,
+      "confidence": "probable",
+      "entry": 0,
+      "evidence": [
+        {
+          "site": 0,
+          "type": "instruction"
+        },
+        {
+          "site": 4,
+          "type": "instruction"
+        },
+        {
+          "site": 44,
+          "type": "instruction"
+        },
+        {
+          "site": 48,
+          "type": "instruction"
+        },
+        {
+          "site": 54,
+          "type": "instruction"
+        },
+        {
+          "site": 56,
+          "type": "instruction"
+        },
+        {
+          "site": 58,
+          "type": "instruction"
+        },
+        {
+          "site": 60,
+          "type": "instruction"
+        }
+      ],
+      "evidence_total": 8,
+      "frame": {
+        "kind": "frameless"
+      },
+      "inputs": [],
+      "kind": "function_signature",
+      "leaf": false,
+      "location": {
+        "file": 32,
+        "hunk": 0,
+        "offset": 0
+      },
+      "name": "sub_0",
+      "outputs": [],
+      "preserved": [],
+      "producer": "function_analysis",
+      "prototype": "sub_0()",
+      "returns": "none",
+      "stack_slots": [],
+      "subject": 0,
+      "tail_call": false
+    },
+    {
+      "addressing": "absolute_short",
+      "anchor": "h0-insn-00000000",
+      "confidence": "certain",
+      "evidence": [
+        {
+          "site": 0,
+          "type": "instruction"
+        }
+      ],
+      "kind": "reference",
+      "location": {
+        "file": 32,
+        "hunk": 0,
+        "offset": 0
+      },
+      "producer": "reference_scan",
+      "subject": 0,
+      "target": 4
+    },
+    {
+      "anchor": "h0-fn-00000008",
+      "confidence": "certain",
+      "entry": 8,
+      "evidence": [
+        {
+          "site": 8,
+          "type": "instruction"
+        }
+      ],
+      "kind": "function",
+      "location": {
+        "file": 40,
+        "hunk": 0,
+        "offset": 8
+      },
+      "name": "init_gfx",
+      "producer": "control_flow",
+      "subject": 8
+    },
+    {
+      "anchor": "h0-fn-00000008",
+      "clobbered": [],
+      "complete": false,
+      "confidence": "probable",
+      "entry": 8,
+      "evidence": [
+        {
+          "site": 8,
+          "type": "instruction"
+        },
+        {
+          "site": 12,
+          "type": "instruction"
+        },
+        {
+          "site": 16,
+          "type": "instruction"
+        },
+        {
+          "site": 20,
+          "type": "instruction"
+        },
+        {
+          "site": 24,
+          "type": "instruction"
+        },
+        {
+          "site": 26,
+          "type": "instruction"
+        },
+        {
+          "site": 32,
+          "type": "instruction"
+        },
+        {
+          "site": 38,
+          "type": "instruction"
+        },
+        {
+          "site": 40,
+          "type": "instruction"
+        },
+        {
+          "site": 42,
+          "type": "instruction"
+        },
+        {
+          "site": 44,
+          "type": "instruction"
+        },
+        {
+          "site": 48,
+          "type": "instruction"
+        },
+        {
+          "site": 54,
+          "type": "instruction"
+        },
+        {
+          "site": 56,
+          "type": "instruction"
+        },
+        {
+          "site": 58,
+          "type": "instruction"
+        },
+        {
+          "site": 60,
+          "type": "instruction"
+        }
+      ],
+      "evidence_total": 16,
+      "frame": {
+        "kind": "frameless"
+      },
+      "inputs": [],
+      "kind": "function_signature",
+      "leaf": false,
+      "location": {
+        "file": 40,
+        "hunk": 0,
+        "offset": 8
+      },
+      "name": "init_gfx",
+      "outputs": [],
+      "preserved": [],
+      "producer": "function_analysis",
+      "prototype": "init_gfx()",
+      "returns": "none",
+      "stack_slots": [],
+      "subject": 8,
+      "tail_call": false
+    },
+    {
+      "addressing": "absolute_short",
+      "anchor": "h0-insn-00000008",
+      "confidence": "certain",
+      "evidence": [
+        {
+          "site": 8,
+          "type": "instruction"
+        }
+      ],
+      "kind": "reference",
+      "location": {
+        "file": 40,
+        "hunk": 0,
+        "offset": 8
+      },
+      "producer": "reference_scan",
+      "subject": 8,
+      "target": 4
+    },
+    {
+      "addr": 8,
+      "anchor": "h0-sym-00000008",
+      "confidence": "user",
+      "evidence": [
+        {
+          "addr": 8,
+          "type": "config"
+        }
+      ],
+      "kind": "symbol",
+      "location": {
+        "file": 40,
+        "hunk": 0,
+        "offset": 8
+      },
+      "name": "init_gfx",
+      "producer": "config",
+      "subject": 8
+    },
+    {
+      "addressing": "pc_relative",
+      "anchor": "h0-insn-0000000c",
+      "confidence": "certain",
+      "evidence": [
+        {
+          "site": 12,
+          "type": "instruction"
+        }
+      ],
+      "kind": "reference",
+      "location": {
+        "file": 44,
+        "hunk": 0,
+        "offset": 12
+      },
+      "producer": "reference_scan",
+      "subject": 12,
+      "target": 68,
+      "target_anchor": "h0-data-00000044",
+      "target_location": {
+        "file": 100,
+        "hunk": 0,
+        "offset": 68
+      }
+    },
+    {
+      "anchor": "h0-insn-00000010",
+      "arguments": [
+        {
+          "name": "libName",
+          "register": "a1",
+          "unresolved": "unresolved_flow"
+        },
+        {
+          "name": "version",
+          "register": "d0",
+          "unresolved": "unresolved_flow"
+        }
+      ],
+      "confidence": "inferred",
+      "evidence": [
+        {
+          "site": 8,
+          "type": "instruction"
+        },
+        {
+          "site": 16,
+          "type": "instruction"
+        },
+        {
+          "library": "exec.library",
+          "lvo": -552,
+          "type": "abi"
+        }
+      ],
+      "function": "OpenLibrary",
+      "kind": "library_call",
+      "library": "exec.library",
+      "location": {
+        "file": 48,
+        "hunk": 0,
+        "offset": 16
+      },
+      "lvo": -552,
+      "producer": "library_inference",
+      "public": true,
+      "register": 6,
+      "subject": 16
+    },
+    {
+      "access": "write",
+      "addressing": "base_relative",
+      "anchor": "h0-insn-00000014",
+      "confidence": "certain",
+      "displacement": 8,
+      "evidence": [
+        {
+          "site": 20,
+          "type": "instruction"
+        }
+      ],
+      "kind": "memory_access",
+      "library_base": false,
+      "location": {
+        "file": 52,
+        "hunk": 0,
+        "offset": 20
+      },
+      "producer": "global_scan",
+      "register": 5,
+      "size": 4,
+      "subject": 20,
+      "value": null
+    },
+    {
+      "addressing": "absolute",
+      "anchor": "h0-insn-0000001a",
+      "confidence": "certain",
+      "evidence": [
+        {
+          "site": 26,
+          "type": "instruction"
+        }
+      ],
+      "kind": "reference",
+      "location": {
+        "file": 58,
+        "hunk": 0,
+        "offset": 26
+      },
+      "operand": 28,
+      "producer": "reference_scan",
+      "subject": 26,
+      "target": 14675968
+    },
+    {
+      "access": "write",
+      "anchor": "h0-insn-00000020",
+      "confidence": "inferred",
+      "evidence": [
+        {
+          "site": 32,
+          "type": "instruction"
+        }
+      ],
+      "form": "base_relative",
+      "kind": "hardware_access",
+      "location": {
+        "file": 64,
+        "hunk": 0,
+        "offset": 32
+      },
+      "offset": 150,
+      "producer": "hardware_scan",
+      "register_name": "DMACON",
+      "subject": 32,
+      "subsystem": "dma"
+    },
+    {
+      "anchor": "h0-insn-0000002c",
+      "arguments": [],
+      "confidence": "probable",
+      "evidence": [
+        {
+          "site": 44,
+          "type": "instruction"
+        }
+      ],
+      "function": null,
+      "kind": "library_call",
+      "library": null,
+      "location": {
+        "file": 76,
+        "hunk": 0,
+        "offset": 44
+      },
+      "lvo": -30,
+      "producer": "library_inference",
+      "public": true,
+      "register": 6,
+      "subject": 44
+    },
+    {
+      "anchor": "h0-insn-0000002c",
+      "candidates": [
+        {
+          "library": "exec.library",
+          "sites": [
+            0
+          ]
+        },
+        {
+          "library": "graphics.library",
+          "sites": [
+            12,
+            16,
+            24
+          ]
+        }
+      ],
+      "confidence": "probable",
+      "evidence": [
+        {
+          "site": 0,
+          "type": "instruction"
+        },
+        {
+          "site": 12,
+          "type": "instruction"
+        },
+        {
+          "site": 16,
+          "type": "instruction"
+        },
+        {
+          "site": 24,
+          "type": "instruction"
+        },
+        {
+          "site": 44,
+          "type": "instruction"
+        }
+      ],
+      "kind": "library_conflict",
+      "location": {
+        "file": 76,
+        "hunk": 0,
+        "offset": 44
+      },
+      "lvo": -30,
+      "producer": "library_inference",
+      "register": 6,
+      "subject": 44
+    },
+    {
+      "access": "read",
+      "anchor": "h0-insn-00000030",
+      "confidence": "certain",
+      "evidence": [
+        {
+          "site": 48,
+          "type": "instruction"
+        }
+      ],
+      "form": "absolute",
+      "kind": "hardware_access",
+      "location": {
+        "file": 80,
+        "hunk": 0,
+        "offset": 48
+      },
+      "offset": 28,
+      "producer": "hardware_scan",
+      "register_name": "INTENAR",
+      "subject": 48,
+      "subsystem": "interrupt"
+    },
+    {
+      "addressing": "absolute",
+      "anchor": "h0-insn-00000030",
+      "confidence": "certain",
+      "evidence": [
+        {
+          "site": 48,
+          "type": "instruction"
+        }
+      ],
+      "kind": "reference",
+      "location": {
+        "file": 80,
+        "hunk": 0,
+        "offset": 48
+      },
+      "operand": 50,
+      "producer": "reference_scan",
+      "subject": 48,
+      "target": 14675996
+    },
+    {
+      "anchor": "h0-insn-00000036",
+      "confidence": "probable",
+      "evidence": [
+        {
+          "site": 54,
+          "type": "instruction"
+        },
+        {
+          "site": 56,
+          "type": "instruction"
+        }
+      ],
+      "fractional_bits": 8,
+      "idiom": "scaled_multiply",
+      "kind": "fixed_point",
+      "location": {
+        "file": 86,
+        "hunk": 0,
+        "offset": 54
+      },
+      "producer": "fixed_point_scan",
+      "register": 3,
+      "subject": 54
+    },
+    {
+      "anchor": "h0-insn-00000038",
+      "confidence": "probable",
+      "evidence": [
+        {
+          "site": 56,
+          "type": "instruction"
+        }
+      ],
+      "fractional_bits": 8,
+      "kind": "q_scale",
+      "location": {
+        "file": 88,
+        "hunk": 0,
+        "offset": 56
+      },
+      "producer": "fixed_point_scan",
+      "register": 3,
+      "subject": 56
+    },
+    {
+      "anchor": "h0-insn-0000003a",
+      "callee": 66,
+      "confidence": "certain",
+      "evidence": [
+        {
+          "site": 58,
+          "type": "instruction"
+        }
+      ],
+      "kind": "call",
+      "location": {
+        "file": 90,
+        "hunk": 0,
+        "offset": 58
+      },
+      "name": "helper",
+      "owner_total": 2,
+      "owners": [
+        0,
+        8
+      ],
+      "producer": "control_flow",
+      "subject": 58,
+      "target_anchor": "h0-fn-00000042",
+      "target_location": {
+        "file": 98,
+        "hunk": 0,
+        "offset": 66
+      }
+    },
+    {
+      "anchor": "h0-insn-0000003c",
+      "confidence": "certain",
+      "evidence": [
+        {
+          "site": 60,
+          "type": "instruction"
+        }
+      ],
+      "kind": "unresolved_flow",
+      "location": {
+        "file": 92,
+        "hunk": 0,
+        "offset": 60
+      },
+      "producer": "control_flow",
+      "subject": 60
+    },
+    {
+      "anchor": "h0-fn-00000042",
+      "confidence": "certain",
+      "entry": 66,
+      "evidence": [
+        {
+          "site": 58,
+          "type": "instruction"
+        }
+      ],
+      "kind": "function",
+      "location": {
+        "file": 98,
+        "hunk": 0,
+        "offset": 66
+      },
+      "name": "helper",
+      "producer": "control_flow",
+      "subject": 66
+    },
+    {
+      "anchor": "h0-fn-00000042",
+      "clobbered": [],
+      "complete": true,
+      "confidence": "probable",
+      "entry": 66,
+      "evidence": [
+        {
+          "site": 66,
+          "type": "instruction"
+        }
+      ],
+      "evidence_total": 1,
+      "frame": {
+        "kind": "frameless"
+      },
+      "inputs": [],
+      "kind": "function_signature",
+      "leaf": true,
+      "location": {
+        "file": 98,
+        "hunk": 0,
+        "offset": 66
+      },
+      "name": "helper",
+      "outputs": [],
+      "preserved": [
+        {
+          "index": 0,
+          "kind": "data"
+        },
+        {
+          "index": 1,
+          "kind": "data"
+        },
+        {
+          "index": 2,
+          "kind": "data"
+        },
+        {
+          "index": 3,
+          "kind": "data"
+        },
+        {
+          "index": 4,
+          "kind": "data"
+        },
+        {
+          "index": 5,
+          "kind": "data"
+        },
+        {
+          "index": 6,
+          "kind": "data"
+        },
+        {
+          "index": 7,
+          "kind": "data"
+        },
+        {
+          "index": 0,
+          "kind": "address"
+        },
+        {
+          "index": 1,
+          "kind": "address"
+        },
+        {
+          "index": 2,
+          "kind": "address"
+        },
+        {
+          "index": 3,
+          "kind": "address"
+        },
+        {
+          "index": 4,
+          "kind": "address"
+        },
+        {
+          "index": 5,
+          "kind": "address"
+        },
+        {
+          "index": 6,
+          "kind": "address"
+        }
+      ],
+      "producer": "function_analysis",
+      "prototype": "helper()",
+      "returns": "rts",
+      "stack_slots": [],
+      "subject": 66,
+      "tail_call": false
+    },
+    {
+      "anchor": "h0-fn-00000042",
+      "confidence": "certain",
+      "evidence": [
+        {
+          "site": 58,
+          "type": "instruction"
+        }
+      ],
+      "kind": "referenced_by",
+      "location": {
+        "file": 98,
+        "hunk": 0,
+        "offset": 66
+      },
+      "producer": "control_flow",
+      "sites": [
+        58
+      ],
+      "subject": 66,
+      "total": 1,
+      "via": "call"
+    },
+    {
+      "anchor": "h0-fn-00000042",
+      "confidence": "certain",
+      "evidence": [
+        {
+          "offset": 86,
+          "type": "relocation"
+        }
+      ],
+      "kind": "referenced_by",
+      "location": {
+        "file": 98,
+        "hunk": 0,
+        "offset": 66
+      },
+      "producer": "relocations",
+      "sites": [
+        86
+      ],
+      "subject": 66,
+      "total": 1,
+      "via": "relocation"
+    },
+    {
+      "addr": 66,
+      "anchor": "h0-sym-00000042",
+      "confidence": "user",
+      "evidence": [
+        {
+          "addr": 66,
+          "type": "config"
+        }
+      ],
+      "kind": "symbol",
+      "location": {
+        "file": 98,
+        "hunk": 0,
+        "offset": 66
+      },
+      "name": "helper",
+      "producer": "config",
+      "subject": 66
+    },
+    {
+      "anchor": "h0-data-00000044",
+      "confidence": "certain",
+      "evidence": [
+        {
+          "site": 12,
+          "type": "instruction"
+        }
+      ],
+      "kind": "referenced_by",
+      "location": {
+        "file": 100,
+        "hunk": 0,
+        "offset": 68
+      },
+      "producer": "reference_scan",
+      "sites": [
+        12
+      ],
+      "subject": 68,
+      "total": 1,
+      "via": "operand"
+    },
+    {
+      "anchor": "h0-data-00000044",
+      "class": "text",
+      "confidence": "probable",
+      "end": 85,
+      "evidence": [
+        {
+          "site": 12,
+          "type": "instruction"
+        }
+      ],
+      "kind": "data_region",
+      "location": {
+        "file": 100,
+        "hunk": 0,
+        "offset": 68
+      },
+      "producer": "data_scan",
+      "subject": 68,
+      "text": "graphics.library",
+      "truncated": false
+    },
+    {
+      "anchor": "h0-data-00000056",
+      "confidence": "certain",
+      "evidence": [
+        {
+          "offset": 86,
+          "type": "relocation"
+        }
+      ],
+      "instruction": null,
+      "kind": "relocation",
+      "location": {
+        "file": 118,
+        "hunk": 0,
+        "offset": 86
+      },
+      "producer": "relocations",
+      "subject": 86,
+      "target_anchor": "h0-fn-00000042",
+      "target_hunk": 0,
+      "target_location": {
+        "file": 98,
+        "hunk": 0,
+        "offset": 66
+      },
+      "target_offset": 66
+    }
+  ],
+  "functions": [
+    {
+      "anchor": "h0-fn-00000000",
+      "callees": [
+        66
+      ],
+      "callers": [],
+      "end": 62,
+      "entry": 0,
+      "external_calls": 0,
+      "globals_read": [],
+      "globals_written": [],
+      "hardware_registers": [
+        28
+      ],
+      "hardware_subsystems": [
+        "interrupt"
+      ],
+      "instruction_count": 8,
+      "leaf": false,
+      "library_calls": [
+        {
+          "lvo": -30,
+          "sites": 1
+        }
+      ],
+      "name": "sub_0",
+      "ownership_truncated": false,
+      "signature": {
+        "clobbered": [],
+        "complete": false,
+        "entry": 0,
+        "evidence": [
+          0,
+          4,
+          44,
+          48,
+          54,
+          56,
+          58,
+          60
+        ],
+        "evidence_total": 8,
+        "frame": {
+          "kind": "frameless"
+        },
+        "inputs": [],
+        "leaf": false,
+        "outputs": [],
+        "preserved": [],
+        "returns": "none",
+        "stack_slots": [],
+        "tail_call": false
+      },
+      "unresolved_exits": [
+        60
+      ]
+    },
+    {
+      "anchor": "h0-fn-00000008",
+      "callees": [
+        66
+      ],
+      "callers": [],
+      "end": 62,
+      "entry": 8,
+      "external_calls": 0,
+      "globals_read": [],
+      "globals_written": [
+        "A5+0x8"
+      ],
+      "hardware_registers": [
+        28,
+        150
+      ],
+      "hardware_subsystems": [
+        "dma",
+        "interrupt"
+      ],
+      "instruction_count": 16,
+      "leaf": false,
+      "library_calls": [
+        {
+          "lvo": -30,
+          "sites": 1
+        },
+        {
+          "function": "OpenLibrary",
+          "library": "exec.library",
+          "lvo": -552,
+          "sites": 1
+        }
+      ],
+      "name": "init_gfx",
+      "ownership_truncated": false,
+      "signature": {
+        "clobbered": [],
+        "complete": false,
+        "entry": 8,
+        "evidence": [
+          8,
+          12,
+          16,
+          20,
+          24,
+          26,
+          32,
+          38,
+          40,
+          42,
+          44,
+          48,
+          54,
+          56,
+          58,
+          60
+        ],
+        "evidence_total": 16,
+        "frame": {
+          "kind": "frameless"
+        },
+        "inputs": [],
+        "leaf": false,
+        "outputs": [],
+        "preserved": [],
+        "returns": "none",
+        "stack_slots": [],
+        "tail_call": false
+      },
+      "unresolved_exits": [
+        60
+      ]
+    },
+    {
+      "anchor": "h0-fn-00000042",
+      "callees": [],
+      "callers": [
+        0,
+        8
+      ],
+      "end": 68,
+      "entry": 66,
+      "external_calls": 0,
+      "globals_read": [],
+      "globals_written": [],
+      "hardware_registers": [],
+      "hardware_subsystems": [],
+      "instruction_count": 1,
+      "leaf": true,
+      "library_calls": [],
+      "name": "helper",
+      "ownership_truncated": false,
+      "signature": {
+        "clobbered": [],
+        "complete": true,
+        "entry": 66,
+        "evidence": [
+          66
+        ],
+        "evidence_total": 1,
+        "frame": {
+          "kind": "frameless"
+        },
+        "inputs": [],
+        "leaf": true,
+        "outputs": [],
+        "preserved": [
+          {
+            "index": 0,
+            "kind": "data"
+          },
+          {
+            "index": 1,
+            "kind": "data"
+          },
+          {
+            "index": 2,
+            "kind": "data"
+          },
+          {
+            "index": 3,
+            "kind": "data"
+          },
+          {
+            "index": 4,
+            "kind": "data"
+          },
+          {
+            "index": 5,
+            "kind": "data"
+          },
+          {
+            "index": 6,
+            "kind": "data"
+          },
+          {
+            "index": 7,
+            "kind": "data"
+          },
+          {
+            "index": 0,
+            "kind": "address"
+          },
+          {
+            "index": 1,
+            "kind": "address"
+          },
+          {
+            "index": 2,
+            "kind": "address"
+          },
+          {
+            "index": 3,
+            "kind": "address"
+          },
+          {
+            "index": 4,
+            "kind": "address"
+          },
+          {
+            "index": 5,
+            "kind": "address"
+          },
+          {
+            "index": 6,
+            "kind": "address"
+          }
+        ],
+        "returns": "rts",
+        "stack_slots": [],
+        "tail_call": false
+      },
+      "unresolved_exits": []
+    }
+  ],
+  "hunk": 0,
+  "provenance": {
+    "base_register": 5,
+    "call_graph_dot": null,
+    "config_file": "amiga-re.toml",
+    "config_sha256": "f07b378e5bb70be4c720e06fd94981a9d8a914d327c4d31d196b543822db0480",
+    "library": null,
+    "tool": "amiga-re-cli",
+    "version": "0.1.0"
+  },
+  "schema": "amiga-re.semantic-report",
+  "selection": {
+    "categories": [],
+    "complete": true,
+    "description": "whole hunk",
+    "excluded": {
+      "by_category": 0,
+      "by_confidence": 0,
+      "by_selection": 0
+    },
+    "minimum_confidence": null
+  },
+  "source_sha256": "6f5550b914d75e92e03c9a80833e260ee6569046290a542e6f6b706eff4c695d",
+  "stats": {
+    "hunk": {
+      "calls": 1,
+      "decoded_bytes": 64,
+      "functions": 3,
+      "instructions": 19,
+      "total_bytes": 92
+    },
+    "report": {
+      "external_flow": 0,
+      "hardware_accesses_named": 2,
+      "hardware_accesses_unknown": 0,
+      "references_relocated": 0,
+      "references_resolved": 1,
+      "references_unresolved": 4,
+      "resolution": {
+        "arguments": 2,
+        "described": 1,
+        "named": 1,
+        "reasons": {
+          "unresolved_flow": 2
+        },
+        "resolved": 0,
+        "sites": 2,
+        "symbolic": 0,
+        "undescribed": 0,
+        "unknown_library": 1,
+        "unnamed_vector": 0
+      },
+      "unresolved_flow": 1
+    }
+  },
+  "version": 16
+}

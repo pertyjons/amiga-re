@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/analysis.hunk.diff.export.response.schema.json",
+  "title": "analysis.hunk.diff.export result",
+  "description": "The report that would be written, and whether it was. Carries the comparison's summary beside the plan, so a reviewer sees what the report says before authorizing the file that would say it.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "a",
+    "b",
+    "identical",
+    "changed_hunks",
+    "format",
+    "plan",
+    "committed"
+  ],
+  "properties": {
+    "a": {
+      "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourcePin"
+    },
+    "b": {
+      "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourcePin"
+    },
+    "identical": {
+      "type": "boolean"
+    },
+    "changed_hunks": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "format": {
+      "type": "string",
+      "enum": [
+        "json",
+        "text"
+      ]
+    },
+    "committed": {
+      "type": "boolean"
+    },
+    "plan": {
+      "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/writePlan"
+    }
+  }
+}

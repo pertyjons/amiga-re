@@ -1,0 +1,83 @@
+{
+  "$schema": "../schema/program.schema.json",
+  "document_kind": "program",
+  "format_version": 1,
+  "id": "program:main",
+  "images": [
+    {
+      "architecture": "mc68000",
+      "format": "hunk",
+      "id": "image:level-loader",
+      "load_maps": [
+        {
+          "entry_points": [
+            {
+              "address": "0x0000e63e",
+              "role": "program_entry"
+            }
+          ],
+          "id": "loadmap:loader/default",
+          "name": "Normal launch",
+          "segments": [
+            {
+              "hunk": 0,
+              "runtime_base": "0x0000e63e"
+            }
+          ]
+        }
+      ],
+      "object_id": "object:disk-2/s/loader"
+    },
+    {
+      "architecture": "mc68000",
+      "format": "hunk",
+      "id": "image:main-executable",
+      "load_maps": [
+        {
+          "entry_points": [
+            {
+              "address": "0x0000e63e",
+              "role": "program_entry"
+            }
+          ],
+          "id": "loadmap:main/default",
+          "name": "Normal launch",
+          "segments": [
+            {
+              "hunk": 0,
+              "runtime_base": "0x0000e63e"
+            },
+            {
+              "hunk": 1,
+              "runtime_base": "0x00022000"
+            }
+          ]
+        },
+        {
+          "entry_points": [
+            {
+              "address": "0x00080000",
+              "role": "program_entry"
+            }
+          ],
+          "id": "loadmap:main/relocated",
+          "name": "Loaded high",
+          "segments": [
+            {
+              "hunk": 0,
+              "runtime_base": "0x00080000"
+            },
+            {
+              "hunk": 1,
+              "runtime_base": "0x00090000"
+            }
+          ]
+        }
+      ],
+      "object_id": "object:disk-1/s/main"
+    }
+  ],
+  "name": "Main program",
+  "notes": "Two modules whose hunk offsets deliberately overlap numerically: hunk 0 offset 4 exists in both. Nothing may resolve an annotation by number alone.",
+  "source_set_id": "set:retail-release"
+}

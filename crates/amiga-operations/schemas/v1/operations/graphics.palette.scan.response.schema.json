@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/graphics.palette.scan.response.schema.json",
+  "title": "graphics.palette.scan result",
+  "description": "Every candidate table, in both colour encodings. Deriving one from the other separately in each frontend is how two of them end up showing different colours.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["source", "minimum_colours", "tables", "table_total", "tables_truncated"],
+  "properties": {
+    "source": {
+      "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourcePin"
+    },
+    "minimum_colours": {
+      "description": "The shortest run the scan accepted, echoed because a table is what this number accepted rather than something the file declares.",
+      "type": "integer",
+      "minimum": 2
+    },
+    "tables": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["offset", "rgb12", "rgb8"],
+        "properties": {
+          "offset": { "type": "integer", "minimum": 0, "maximum": 4294967295 },
+          "rgb12": {
+            "description": "The 12-bit colour words, in order.",
+            "type": "array",
+            "items": { "type": "integer", "minimum": 0, "maximum": 65535 }
+          },
+          "rgb8": {
+            "description": "The same colours expanded to 8 bits per channel.",
+            "type": "array",
+            "items": {
+              "type": "array",
+              "minItems": 3,
+              "maxItems": 3,
+              "items": { "type": "integer", "minimum": 0, "maximum": 255 }
+            }
+          }
+        }
+      }
+    },
+    "table_total": { "type": "integer", "minimum": 0 },
+    "tables_truncated": { "type": "boolean" }
+  }
+}

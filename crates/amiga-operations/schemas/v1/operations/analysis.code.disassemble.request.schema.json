@@ -1,0 +1,120 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/analysis.code.disassemble.request.schema.json",
+  "title": "analysis.code.disassemble request",
+  "description": "Decode a CODE hunk or explicitly pinned raw MC68000 image, by linear sweep or by following control flow, writing nothing. `read_only`.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "operation",
+    "arguments"
+  ],
+  "properties": {
+    "operation": {
+      "const": "analysis.code.disassemble"
+    },
+    "arguments": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "required": ["region"],
+            "properties": { "region": { "const": "raw" } }
+          },
+          "then": {
+            "required": ["expected_sha256"],
+            "not": { "required": ["hunk"] }
+          }
+        }
+      ],
+      "properties": {
+        "source": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourceLocator"
+        },
+        "region": {
+          "description": "Where the code lives. Raw code must be pinned by digest so format detection can never turn arbitrary bytes into an implicit executable.",
+          "enum": ["hunk", "raw"],
+          "default": "hunk"
+        },
+        "hunk": {
+          "description": "CODE hunk to disassemble when `region` is `hunk`. A hunk that is not CODE is refused by name rather than decoded into a plausible listing of something that is not code.",
+          "type": "integer",
+          "minimum": 0,
+          "default": 0
+        },
+        "expected_sha256": {
+          "description": "Required for raw code: the exact digest the source must have before any instruction is decoded.",
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sha256"
+        },
+        "mode": {
+          "description": "`linear` decodes every word in a range whether or not anything reaches it; `flow` follows control flow from the entry points and reports what it did not reach.",
+          "enum": [
+            "linear",
+            "flow"
+          ],
+          "default": "linear"
+        },
+        "start": {
+          "description": "Linear mode: where the sweep starts, as a hunk offset. Must be even — an MC68000 fetches instructions on word boundaries.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295,
+          "default": 0
+        },
+        "end": {
+          "description": "Linear mode: where the sweep stops. Defaults to the end of the hunk.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "entries": {
+          "description": "Flow mode: where the traversal starts, as offsets within the selected code region. Defaults to offset 0 — an empty list would traverse nothing and report an image with no code in it.",
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4294967295
+          }
+        },
+        "origin": {
+          "description": "The address the selected code region is mapped at. With one, every instruction also reports the address the MC68000 would fetch it from, and the traversal resolves absolute operands through it.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "maximum_instructions": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/resultCap"
+        },
+        "maximum_edges": {
+          "description": "Cap on each edge list and on the unreached runs. Every list reports its true total beside the capped one.",
+          "type": "integer",
+          "minimum": 1
+        },
+        "maximum_input_bytes": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/maximumInputBytes",
+          "default": 67108864
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "operation": "analysis.code.disassemble",
+      "arguments": {
+        "source": {
+          "kind": "file",
+          "path": "extracted/game"
+        },
+        "mode": "flow",
+        "entries": [
+          0
+        ],
+        "origin": 65536
+      }
+    }
+  ]
+}

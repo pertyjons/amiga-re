@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/project.format.request.schema.json",
+  "title": "project.format request",
+  "description": "Bring every document a project names into canonical form. `prepared_output`: `prepare` reports which documents differ and writes nothing — which is exactly what a `--check` run needs — and `commit_reviewed` rewrites what the plan named. The project is named by the envelope's `project` locator.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["operation", "arguments"],
+  "properties": {
+    "operation": { "const": "project.format" },
+    "arguments": { "type": "object", "additionalProperties": false, "properties": {} }
+  },
+  "examples": [{ "operation": "project.format", "arguments": {} }]
+}

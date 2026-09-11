@@ -1,0 +1,571 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/project/v1/resources.schema.json",
+  "title": "Named bytes and the recipe for interpreting them",
+  "description": "A resource says what a range of bytes is and how to decode it \u2014 never what the decoded bytes are. That is what makes an export reproducible: the recipe is the durable knowledge, the PNG or WAV is a cache. The kinds are a tagged union so an image cannot omit its width or borrow an audio-only field.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "document_kind",
+    "format_version",
+    "resources"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "document_kind": {
+      "const": "resources"
+    },
+    "format_version": {
+      "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/formatVersion"
+    },
+    "resources": {
+      "type": "array",
+      "maxItems": 262144,
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "kind",
+              "name",
+              "target",
+              "format",
+              "width",
+              "height",
+              "planes"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/id"
+              },
+              "kind": {
+                "const": "image"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "target": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/target"
+              },
+              "notes": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/notes"
+              },
+              "extensions": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/extensions"
+              },
+              "export": {
+                "$ref": "#/$defs/exportProfile"
+              },
+              "format": {
+                "type": "string",
+                "enum": [
+                  "planar",
+                  "chunky"
+                ]
+              },
+              "width": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 65536
+              },
+              "height": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 65536
+              },
+              "planes": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 8
+              },
+              "plane_order": {
+                "description": "How the bitplanes are ordered in the recorded bytes. `contiguous` stores every row of one plane before the next; `interleaved` stores all planes of each row together; `byte_interleaved`, `word_interleaved`, and `longword_interleaved` store all planes of each 8-, 16-, or 32-pixel chunk together, which are storage layouts code scatters into bitplanes at load time rather than ones the chipset displays.",
+                "type": "string",
+                "enum": [
+                  "contiguous",
+                  "interleaved",
+                  "byte_interleaved",
+                  "word_interleaved",
+                  "longword_interleaved"
+                ]
+              },
+              "palette_resource_id": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/id"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "kind",
+              "name",
+              "target",
+              "format",
+              "count"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/id"
+              },
+              "kind": {
+                "const": "palette"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "target": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/target"
+              },
+              "notes": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/notes"
+              },
+              "extensions": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/extensions"
+              },
+              "export": {
+                "$ref": "#/$defs/exportProfile"
+              },
+              "format": {
+                "type": "string",
+                "enum": [
+                  "rgb4",
+                  "rgb8"
+                ]
+              },
+              "count": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 256
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "kind",
+              "name",
+              "target",
+              "encoding"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/id"
+              },
+              "kind": {
+                "const": "audio"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "target": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/target"
+              },
+              "notes": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/notes"
+              },
+              "extensions": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/extensions"
+              },
+              "export": {
+                "$ref": "#/$defs/exportProfile"
+              },
+              "encoding": {
+                "type": "string",
+                "enum": [
+                  "8svx",
+                  "mod",
+                  "raw_pcm8"
+                ]
+              },
+              "channels": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 8
+              },
+              "sample_rate": {
+                "description": "Only for encodings that do not carry their own rate; raw Paula samples have none in the bytes.",
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 192000
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "kind",
+              "name",
+              "target",
+              "row_count",
+              "row_stride"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/id"
+              },
+              "kind": {
+                "const": "table"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "target": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/target"
+              },
+              "notes": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/notes"
+              },
+              "extensions": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/extensions"
+              },
+              "export": {
+                "$ref": "#/$defs/exportProfile"
+              },
+              "row_count": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 16777216
+              },
+              "row_stride": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 65536
+              },
+              "type_id": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/id"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "kind",
+              "name",
+              "target",
+              "encoding",
+              "termination"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/id"
+              },
+              "kind": {
+                "const": "text"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "target": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/target"
+              },
+              "notes": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/notes"
+              },
+              "extensions": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/extensions"
+              },
+              "export": {
+                "$ref": "#/$defs/exportProfile"
+              },
+              "encoding": {
+                "type": "string",
+                "enum": [
+                  "latin1",
+                  "ascii"
+                ]
+              },
+              "termination": {
+                "type": "string",
+                "enum": [
+                  "nul",
+                  "length_prefixed",
+                  "fixed"
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "kind",
+              "name",
+              "target",
+              "architecture"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/id"
+              },
+              "kind": {
+                "const": "code"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "target": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/target"
+              },
+              "notes": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/notes"
+              },
+              "extensions": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/extensions"
+              },
+              "export": {
+                "$ref": "#/$defs/exportProfile"
+              },
+              "architecture": {
+                "type": "string",
+                "enum": [
+                  "mc68000"
+                ]
+              },
+              "load_map_id": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/id"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "kind",
+              "name",
+              "target"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/id"
+              },
+              "kind": {
+                "const": "copper"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "target": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/target"
+              },
+              "notes": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/notes"
+              },
+              "extensions": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/extensions"
+              },
+              "export": {
+                "$ref": "#/$defs/exportProfile"
+              },
+              "initial_address": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/hexAddress"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "kind",
+              "name",
+              "target"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/id"
+              },
+              "kind": {
+                "const": "data"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "target": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/target"
+              },
+              "notes": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/notes"
+              },
+              "extensions": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/extensions"
+              },
+              "export": {
+                "$ref": "#/$defs/exportProfile"
+              },
+              "type_id": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/id"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "kind",
+              "name",
+              "target"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/id"
+              },
+              "kind": {
+                "const": "opaque"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "target": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/target"
+              },
+              "notes": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/notes"
+              },
+              "extensions": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/extensions"
+              },
+              "export": {
+                "$ref": "#/$defs/exportProfile"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "artifacts": {
+      "description": "Generated output that has been produced from a resource. Never the authority for its source data: it records what was made, from what, by what, so it can be remade or discarded.",
+      "type": "array",
+      "maxItems": 262144,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "resource_id",
+          "path",
+          "media_type",
+          "size",
+          "sha256",
+          "recipe_key",
+          "produced_by"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/id"
+          },
+          "resource_id": {
+            "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/id"
+          },
+          "path": {
+            "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/relativePath"
+          },
+          "media_type": {
+            "type": "string",
+            "enum": [
+              "image/png",
+              "audio/wav",
+              "text/plain",
+              "application/octet-stream"
+            ]
+          },
+          "size": {
+            "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/size"
+          },
+          "sha256": {
+            "description": "The digest of the output file, which is what a verify compares against the bytes on disk.",
+            "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/sha256"
+          },
+          "recipe_key": {
+            "description": "The artifact key this output was produced from: the object digest, the fully resolved recipe, the export profile and the tool version. Its own field because one field cannot be both the recipe fingerprint and the file checksum. A recipe_key that no longer matches the project means \"needs re-export\", never \"the file is wrong\".",
+            "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/sha256"
+          },
+          "produced_by": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "tool",
+              "version"
+            ],
+            "properties": {
+              "tool": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              },
+              "version": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64
+              }
+            }
+          },
+          "warnings": {
+            "type": "array",
+            "maxItems": 4096,
+            "items": {
+              "type": "string",
+              "maxLength": 4096
+            }
+          }
+        }
+      }
+    },
+    "extensions": {
+      "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/extensions"
+    }
+  },
+  "$defs": {
+    "exportProfile": {
+      "description": "What an export of this resource produces. A resource says how to read source bytes and nothing about what comes out, so a PNG and a raw dump of one image would otherwise be the same recipe. Optional: each kind has a default (image and palette PNG, audio WAV, table/text/code/copper plain text, data and opaque raw bytes), and a stored profile equal to the default keys identically to an omitted one. Encoder parameters belong here beside the media type when an encoder gains any, because they change the output and must change the artifact key.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "media_type"
+      ],
+      "properties": {
+        "media_type": {
+          "type": "string",
+          "enum": [
+            "image/png",
+            "audio/wav",
+            "text/plain",
+            "application/octet-stream"
+          ]
+        }
+      }
+    }
+  }
+}

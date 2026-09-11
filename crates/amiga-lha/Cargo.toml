@@ -1,0 +1,16 @@
+[package]
+name = "amiga-lha"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+description = "LHA/LZH archive reader: level-0/1/2 headers, CRC-verified -lh0-, -lh1- and -lh4- through -lh7- extraction."
+
+[lints]
+workspace = true
+
+[dependencies]
+amiga-core.workspace = true
+delharc.workspace = true
+thiserror.workspace = true

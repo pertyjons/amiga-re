@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/project.migrate.request.schema.json",
+  "title": "project.migrate request",
+  "description": "Convert a legacy `amiga-re.toml` into project documents. `prepared_output`: `prepare` reports the plan and writes nothing, `commit_reviewed` re-derives it and writes. The config is named as a source, never a host path — it is a legacy document being converted, which is what separates this from `config show`, whose subject is the same file as this frontend's settings.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["operation", "arguments"],
+  "properties": {
+    "operation": { "const": "project.migrate" },
+    "arguments": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["config", "name", "destination"],
+      "properties": {
+        "config": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourceLocator"
+        },
+        "name": {
+          "description": "The name the imported project takes.",
+          "type": "string"
+        },
+        "image": {
+          "description": "The image the legacy `[base]` describes. Both halves or neither: an id with no media names an object that does not exist, so the importer is told nothing rather than half a decision.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "media"],
+          "properties": {
+            "id": { "type": "string" },
+            "media": { "type": "string" }
+          }
+        },
+        "destination": {
+          "description": "Where the documents go.",
+          "type": "string"
+        },
+        "in_place": {
+          "description": "Write into a directory this toolkit does not own, leaving everything else there alone. An import beside the config it came from lands in a repository, where staging a replacement of the whole directory would ask a user to authorize replacing all their work.",
+          "type": "boolean",
+          "default": false
+        },
+        "policy": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/outputPolicy"
+        },
+        "maximum_input_bytes": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/maximumInputBytes",
+          "default": 67108864
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "operation": "project.migrate",
+      "arguments": {
+        "config": { "kind": "file", "path": "amiga-re.toml" },
+        "name": "My game",
+        "destination": "imported"
+      }
+    }
+  ]
+}

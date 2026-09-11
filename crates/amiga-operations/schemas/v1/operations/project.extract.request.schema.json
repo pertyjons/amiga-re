@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/project.extract.request.schema.json",
+  "title": "project.extract request",
+  "description": "Extract every registered carrier into the project, as one reviewed write. `prepared_output`: `prepare` reports the plan and writes nothing, `commit_reviewed` re-derives it and writes only if the digest still matches. Each recovered member becomes an object carrying the selector that reproduces it, so a materialised file is a convenience rather than the only copy. The project is named by the envelope's `project` locator.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["operation", "arguments"],
+  "properties": {
+    "operation": { "const": "project.extract" },
+    "arguments": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "sources": {
+          "description": "Which registered sources to extract. Omitted or empty means every one of them, which is what makes a five-disk project one decision rather than five.",
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "maximum_input_bytes": {
+          "description": "Per-source ceiling. The aggregate ceilings — objects, total recovered bytes — are the context's.",
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    }
+  },
+  "examples": [{ "operation": "project.extract", "arguments": {} }]
+}

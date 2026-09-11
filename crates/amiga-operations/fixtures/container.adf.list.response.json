@@ -1,0 +1,61 @@
+{
+  "protocol_version": 1,
+  "request_id": "request:list-volume",
+  "operation": "container.adf.list",
+  "status": "success",
+  "diagnostics": [
+    {
+      "code": "CONTAINER_ADF_BOOT_CHECKSUM_INVALID",
+      "severity": "warning",
+      "message": "boot block checksum is invalid; ignored for filesystem recovery",
+      "entity_id": "block:0"
+    },
+    {
+      "code": "CONTAINER_ADF_EMPTY_FILE_WITH_DATA_POINTER",
+      "severity": "warning",
+      "message": "S/stale is empty but retains data pointer 4; ignored",
+      "entity_id": "block:7"
+    }
+  ],
+  "normalized_request_sha256": "fbc348a03737ecb65e17015e19607777b5e1aae93fdf2dcbac96d6836a3b1fe9",
+  "result": {
+    "source": {
+      "size": 10240,
+      "sha256": "7ddd7ff77a1f4d1d2edc069977a65ff6f0006db3440ef86c2efe37bd0f4b2042"
+    },
+    "volume": {
+      "name": "AmigaRe",
+      "filesystem": "ofs",
+      "block_size": 512,
+      "root_block": 10
+    },
+    "entries": [
+      {
+        "path": "S",
+        "kind": "directory",
+        "size": 0,
+        "header_block": 2
+      },
+      {
+        "path": "S/stale",
+        "kind": "file",
+        "size": 0,
+        "header_block": 7
+      },
+      {
+        "path": "S/startup-sequence",
+        "kind": "file",
+        "size": 28,
+        "header_block": 3
+      },
+      {
+        "path": "readme.txt",
+        "kind": "file",
+        "size": 49,
+        "header_block": 5
+      }
+    ],
+    "entry_total": 4,
+    "entries_truncated": false
+  }
+}

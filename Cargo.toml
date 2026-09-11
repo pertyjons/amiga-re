@@ -1,0 +1,56 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/amiga-core",
+    "crates/amiga-hunk",
+    "crates/amiga-adf",
+    "crates/amiga-hw",
+    "crates/amiga-disasm",
+    "crates/amiga-env",
+    "crates/amiga-compress",
+    "crates/amiga-iff",
+    "crates/amiga-lha",
+    "crates/amiga-analysis",
+    "crates/amiga-operations",
+    "crates/amiga-project",
+    "tools/amiga-re-cli",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+license = "MIT OR Apache-2.0"
+rust-version = "1.98.1"
+repository = "https://github.com/pertyjons/amiga-re"
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+
+[workspace.dependencies]
+# Internal crates
+amiga-core = { version = "0.1.0", path = "crates/amiga-core" }
+amiga-project = { version = "0.1.0", path = "crates/amiga-project" }
+amiga-hunk = { version = "0.1.0", path = "crates/amiga-hunk" }
+amiga-adf = { version = "0.1.0", path = "crates/amiga-adf" }
+amiga-hw = { version = "0.1.0", path = "crates/amiga-hw" }
+amiga-disasm = { version = "0.1.0", path = "crates/amiga-disasm" }
+amiga-env = { version = "0.1.0", path = "crates/amiga-env" }
+amiga-compress = { version = "0.1.0", path = "crates/amiga-compress" }
+amiga-iff = { version = "0.1.0", path = "crates/amiga-iff" }
+amiga-lha = { version = "0.1.0", path = "crates/amiga-lha" }
+amiga-analysis = { version = "0.1.0", path = "crates/amiga-analysis" }
+amiga-operations = { version = "0.1.0", path = "crates/amiga-operations" }
+
+# External crate versions are centralized here.
+anyhow = "1.0.104"
+clap = { version = "4.6.6", features = ["derive"] }
+# Use the slice-based decoder API; disable unrelated formats and unchecked assertions.
+delharc = { version = "0.8.0", default-features = false, features = ["lh1", "no-unsafe-assertions"] }
+hex = "0.4.3"
+m68000 = "0.2.3"
+png = "0.18.1"
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.151"
+sha2 = "0.11.0"
+thiserror = "2.0.20"
+toml = "1.1.6"

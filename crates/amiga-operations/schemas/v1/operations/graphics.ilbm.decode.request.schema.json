@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/graphics.ilbm.decode.request.schema.json",
+  "title": "graphics.ilbm.decode request",
+  "description": "Describe an ILBM form: geometry, masking, viewport mode, and palette. Writes nothing. `read_only`.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["operation", "arguments"],
+  "properties": {
+    "operation": { "const": "graphics.ilbm.decode" },
+    "arguments": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source"],
+      "properties": {
+        "source": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourceLocator"
+        },
+        "maximum_input_bytes": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/maximumInputBytes",
+          "default": 67108864
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "operation": "graphics.ilbm.decode",
+      "arguments": { "source": { "kind": "file", "path": "extracted/title.iff" } }
+    }
+  ]
+}

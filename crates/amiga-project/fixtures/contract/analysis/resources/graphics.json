@@ -1,0 +1,55 @@
+{
+  "$schema": "../schema/resources.schema.json",
+  "artifacts": [
+    {
+      "id": "artifact:title-logo-png",
+      "media_type": "image/png",
+      "path": "decoded/images/title-logo.png",
+      "produced_by": {
+        "tool": "amiga-re",
+        "version": "0.1.0"
+      },
+      "recipe_key": "0000000000000000000000000000000000000000000000000000000000000000",
+      "resource_id": "resource:title-logo",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "size": 0
+    }
+  ],
+  "document_kind": "resources",
+  "format_version": 1,
+  "resources": [
+    {
+      "format": "planar",
+      "height": 8,
+      "id": "resource:title-logo",
+      "kind": "image",
+      "name": "Title logo",
+      "notes": "The recipe, not the pixels: 8x8, two planes, contiguous, with the palette named separately. Anyone with the source bytes and this record produces the same PNG.",
+      "palette_resource_id": "resource:title-palette",
+      "plane_order": "contiguous",
+      "planes": 2,
+      "target": {
+        "length": 16,
+        "object_id": "object:assets/title-pixels",
+        "object_sha256": "9047f384250347de3a519258915b4a5fca6d5ce7070a3023fccc2f04205bbb85",
+        "offset": 0,
+        "space": "object"
+      },
+      "width": 8
+    },
+    {
+      "count": 4,
+      "format": "rgb4",
+      "id": "resource:title-palette",
+      "kind": "palette",
+      "name": "Title palette",
+      "target": {
+        "length": 8,
+        "object_id": "object:assets/palette",
+        "object_sha256": "7e8f5554b6a2ebe8bafa19df1290bdd3cb539422f1b678132b7373462a399376",
+        "offset": 0,
+        "space": "object"
+      }
+    }
+  ]
+}

@@ -1,0 +1,417 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/project/v1/annotations.schema.json",
+  "title": "Reviewed knowledge attached to locations and entities",
+  "description": "Durable, human-reviewed facts. Raw generated analysis stays in reports and caches until someone promotes it, so this document is what a person meant rather than what a pass guessed. Every byte target carries the object digest it was established against; if the bytes change the annotation is stale and must be rebased explicitly.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "document_kind",
+    "format_version",
+    "annotations"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "document_kind": {
+      "const": "annotations"
+    },
+    "format_version": {
+      "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/formatVersion"
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "program_id": {
+          "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/id"
+        },
+        "image_id": {
+          "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/id"
+        }
+      }
+    },
+    "annotations": {
+      "type": "array",
+      "maxItems": 1048576,
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "kind",
+              "origin",
+              "target",
+              "name"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/id"
+              },
+              "kind": {
+                "const": "function"
+              },
+              "origin": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/origin"
+              },
+              "confidence": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/confidence"
+              },
+              "notes": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/notes"
+              },
+              "target": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/target"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "noreturn": {
+                "type": "boolean"
+              },
+              "type_id": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/id"
+              },
+              "stale": {
+                "description": "Set when the object digest no longer matches, so the annotation is preserved and visibly untrustworthy rather than quietly reapplied.",
+                "type": "boolean"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "kind",
+              "origin",
+              "target",
+              "name"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/id"
+              },
+              "kind": {
+                "const": "symbol"
+              },
+              "origin": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/origin"
+              },
+              "confidence": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/confidence"
+              },
+              "notes": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/notes"
+              },
+              "target": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/target"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "stale": {
+                "type": "boolean"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "kind",
+              "origin",
+              "target",
+              "placement",
+              "text"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/id"
+              },
+              "kind": {
+                "const": "comment"
+              },
+              "origin": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/origin"
+              },
+              "confidence": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/confidence"
+              },
+              "notes": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/notes"
+              },
+              "target": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/target"
+              },
+              "placement": {
+                "type": "string",
+                "enum": [
+                  "before",
+                  "inline",
+                  "after"
+                ]
+              },
+              "text": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 65536
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "kind",
+              "origin",
+              "name",
+              "scope",
+              "storage"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/id"
+              },
+              "kind": {
+                "const": "variable"
+              },
+              "origin": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/origin"
+              },
+              "confidence": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/confidence"
+              },
+              "notes": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/notes"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "scope": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "function_id"
+                ],
+                "properties": {
+                  "function_id": {
+                    "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/id"
+                  }
+                }
+              },
+              "storage": {
+                "description": "A register or stack variable needs its function scope, so a reused register is not given one name for the whole program.",
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "kind",
+                      "register"
+                    ],
+                    "properties": {
+                      "kind": {
+                        "const": "register"
+                      },
+                      "register": {
+                        "type": "string",
+                        "pattern": "^[ad][0-7]$"
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "kind",
+                      "base_register",
+                      "displacement"
+                    ],
+                    "properties": {
+                      "kind": {
+                        "const": "stack"
+                      },
+                      "base_register": {
+                        "type": "string",
+                        "pattern": "^a[0-7]$"
+                      },
+                      "displacement": {
+                        "type": "integer",
+                        "minimum": -32768,
+                        "maximum": 32767
+                      }
+                    }
+                  }
+                ]
+              },
+              "lifetime": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "start",
+                  "end"
+                ],
+                "properties": {
+                  "start": {
+                    "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/hunkRange"
+                  },
+                  "end": {
+                    "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/hunkRange"
+                  }
+                }
+              },
+              "type_id": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/id"
+              },
+              "stale": {
+                "description": "Set when the annotation no longer matches the code it was established against — for a local, a register or stack slot the function no longer uses it for. The annotation is preserved and visibly untrustworthy rather than quietly reapplied, and it is resolved by name nowhere while the flag is set.",
+                "type": "boolean"
+              }
+            }
+          },
+          {
+            "description": "A variable every function shares. It has no function scope — requiring one would mean inventing a scope for something the whole program reads — and is located by a target that names storage, which carries the image and the object digest so it can go stale like any other annotation. Any of the four byte spaces will do: a small-data slot at a base-register displacement, and equally a `runtime` address or a `hunk` offset, which is how a program that keeps its shared state at absolute addresses says so. Where `type_id` is present its size must equal the storage width, so the document does not state two conflicting sizes for one variable.",
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "kind",
+              "origin",
+              "name",
+              "target"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/id"
+              },
+              "kind": {
+                "const": "variable"
+              },
+              "origin": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/origin"
+              },
+              "confidence": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/confidence"
+              },
+              "notes": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/notes"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "target": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/storageTarget"
+              },
+              "type_id": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/id"
+              },
+              "stale": {
+                "description": "Set when the object digest no longer matches, so the annotation is preserved and visibly untrustworthy rather than quietly reapplied. A stale global is resolved by name nowhere, and `analysis.state.snapshot` refuses to decode one rather than reading whatever now lives at the address.",
+                "type": "boolean"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "kind",
+              "origin",
+              "target",
+              "classification"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/id"
+              },
+              "kind": {
+                "const": "region"
+              },
+              "origin": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/origin"
+              },
+              "confidence": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/confidence"
+              },
+              "notes": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/notes"
+              },
+              "target": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/target"
+              },
+              "classification": {
+                "type": "string",
+                "enum": [
+                  "code",
+                  "data",
+                  "padding",
+                  "text",
+                  "image",
+                  "audio",
+                  "table",
+                  "copper",
+                  "palette",
+                  "unknown"
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "kind",
+              "origin",
+              "target",
+              "name"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/id"
+              },
+              "kind": {
+                "const": "bookmark"
+              },
+              "origin": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/origin"
+              },
+              "confidence": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/confidence"
+              },
+              "notes": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/notes"
+              },
+              "target": {
+                "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/target"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              }
+            }
+          }
+        ]
+      }
+    },
+    "extensions": {
+      "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/extensions"
+    }
+  }
+}

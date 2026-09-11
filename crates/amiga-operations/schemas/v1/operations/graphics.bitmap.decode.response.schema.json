@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/graphics.bitmap.decode.response.schema.json",
+  "title": "graphics.bitmap.decode result",
+  "description": "One palette index per pixel, row-major. No colors and no RGBA: a palette is separate knowledge that may come from a Copper list, a config, or a guess, and combining it here would make one operation answer two questions.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["source", "width", "height", "planes", "indices"],
+  "properties": {
+    "source": {
+      "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourcePin"
+    },
+    "width": { "type": "integer", "minimum": 1 },
+    "height": { "type": "integer", "minimum": 1 },
+    "planes": { "type": "integer", "minimum": 1, "maximum": 8 },
+    "indices": {
+      "description": "One palette index per pixel, row-major, hex-encoded. Hex rather than a JSON array because one byte per pixel as `[0,0,1,...]` costs several characters per pixel; the count is already bounded by `maximum_output_pixels`.",
+      "type": "string",
+      "pattern": "^([0-9a-f]{2})*$"
+    },
+    "opaque": {
+      "description": "`bob` only: `01` where a pixel is opaque and `00` where it is not, in the same order as `indices`. Absent for shapes that have no transparency.",
+      "type": "string",
+      "pattern": "^(00|01)*$"
+    }
+  }
+}

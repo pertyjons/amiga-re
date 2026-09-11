@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/analysis.strings.scan.request.schema.json",
+  "title": "analysis.strings.scan request",
+  "description": "Find printable runs in a source and report where they sit, writing nothing. `read_only`.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "operation",
+    "arguments"
+  ],
+  "properties": {
+    "operation": {
+      "const": "analysis.strings.scan"
+    },
+    "arguments": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source"
+      ],
+      "properties": {
+        "source": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourceLocator"
+        },
+        "hunk": {
+          "description": "Scan only this hunk's bytes. Offsets are then relative to the hunk. Omitted, the whole file is scanned and never parsed — a data file that is not a HUNK executable is an ordinary thing to scan.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "minimum_length": {
+          "description": "Shortest printable run to report.",
+          "type": "integer",
+          "minimum": 1,
+          "default": 4
+        },
+        "contains": {
+          "description": "Report only strings holding this substring. Part of the request rather than something a caller applies afterwards: filtering a capped list would silently drop matches the scan found and the cap discarded.",
+          "type": "string",
+          "minLength": 1
+        },
+        "maximum_strings": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/resultCap"
+        },
+        "maximum_input_bytes": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/maximumInputBytes",
+          "default": 67108864
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "operation": "analysis.strings.scan",
+      "arguments": {
+        "source": {
+          "kind": "file",
+          "path": "extracted/game"
+        },
+        "minimum_length": 6,
+        "contains": "disk"
+      }
+    }
+  ]
+}

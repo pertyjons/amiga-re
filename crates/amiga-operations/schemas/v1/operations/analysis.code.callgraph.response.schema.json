@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/analysis.code.callgraph.response.schema.json",
+  "title": "analysis.code.callgraph result",
+  "description": "Functions and the calls between them, with the degrees that fall out of the collapsed edges. No names: what a routine is called comes from a config table or a project, both of which are a frontend's own.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "source",
+    "hunk",
+    "entries",
+    "nodes",
+    "node_total",
+    "nodes_truncated",
+    "edges",
+    "edge_total",
+    "edges_truncated"
+  ],
+  "$defs": {
+    "offset": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 4294967295
+    }
+  },
+  "properties": {
+    "source": {
+      "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourcePin"
+    },
+    "hunk": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "origin": {
+      "$ref": "#/$defs/offset"
+    },
+    "entries": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/offset"
+      }
+    },
+    "nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "function",
+          "in_degree",
+          "out_degree"
+        ],
+        "properties": {
+          "function": {
+            "description": "Hunk offset of the function entry.",
+            "$ref": "#/$defs/offset"
+          },
+          "address": {
+            "description": "The runtime address of that entry, when an origin is in effect.",
+            "$ref": "#/$defs/offset"
+          },
+          "in_degree": {
+            "description": "Distinct functions that call this one.",
+            "type": "integer",
+            "minimum": 0
+          },
+          "out_degree": {
+            "description": "Distinct functions this one calls.",
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "node_total": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "nodes_truncated": {
+      "type": "boolean"
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "caller",
+          "callee",
+          "calls"
+        ],
+        "properties": {
+          "caller": {
+            "$ref": "#/$defs/offset"
+          },
+          "callee": {
+            "$ref": "#/$defs/offset"
+          },
+          "calls": {
+            "description": "Distinct call sites in the caller that reach the callee. The sites are collapsed onto the pair, so an edge is a relationship rather than a count of instructions.",
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "edge_total": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "edges_truncated": {
+      "type": "boolean"
+    }
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/audio.pcm.scan.response.schema.json",
+  "title": "audio.pcm.scan result",
+  "description": "Every candidate region and the score that accepted it. Raw PCM has no header, so a region is not something the file declares — it is what the thresholds accepted, and both the thresholds and the evidence travel back.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "source",
+    "block",
+    "minimum_length",
+    "regions",
+    "region_total",
+    "regions_truncated"
+  ],
+  "properties": {
+    "source": {
+      "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourcePin"
+    },
+    "block": { "type": "integer", "minimum": 2 },
+    "minimum_length": { "type": "integer", "minimum": 0 },
+    "regions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["offset", "length", "mean_amplitude", "smoothness"],
+        "properties": {
+          "offset": { "type": "integer", "minimum": 0 },
+          "length": { "type": "integer", "minimum": 0 },
+          "mean_amplitude": {
+            "description": "Mean absolute sample amplitude over the region, 0..=128.",
+            "type": "number"
+          },
+          "smoothness": {
+            "description": "Mean absolute step between consecutive samples, relative to amplitude. Lower is smoother and more waveform-like.",
+            "type": "number"
+          }
+        }
+      }
+    },
+    "region_total": { "type": "integer", "minimum": 0 },
+    "regions_truncated": { "type": "boolean" }
+  }
+}

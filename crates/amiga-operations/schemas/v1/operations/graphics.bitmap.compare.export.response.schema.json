@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/graphics.bitmap.compare.export.response.schema.json",
+  "title": "graphics.bitmap.compare.export result",
+  "description": "The comparison, plus the plan for the heatmap, the overlay and their manifest.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "comparison",
+    "plan",
+    "committed"
+  ],
+  "properties": {
+    "comparison": {
+      "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/graphics.bitmap.compare.response.schema.json"
+    },
+    "plan": {
+      "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/writePlan"
+    },
+    "committed": {
+      "type": "boolean"
+    }
+  }
+}

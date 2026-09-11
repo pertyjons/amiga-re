@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/analysis.address.references.request.schema.json",
+  "title": "analysis.address.references request",
+  "description": "Report the addresses a hunk's code names, or the sites that name one address, writing nothing. `read_only`.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "operation",
+    "arguments"
+  ],
+  "properties": {
+    "operation": {
+      "const": "analysis.address.references"
+    },
+    "arguments": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source"
+      ],
+      "properties": {
+        "source": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourceLocator"
+        },
+        "hunk": {
+          "description": "CODE hunk whose instructions are examined.",
+          "type": "integer",
+          "minimum": 0,
+          "default": 0
+        },
+        "target": {
+          "description": "Report only references naming this address. Naming one also brings in the image's relocations, because a stored pointer is a reference too; without one there is nothing to match a relocation against, and the full list is `analysis.hunk.list`'s answer already.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "entries": {
+          "description": "Where the traversal starts, as hunk offsets. Defaults to offset 0.",
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4294967295
+          }
+        },
+        "origin": {
+          "description": "The address the hunk is mapped at. With one, a PC-relative target also reports the runtime address it names.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "maximum_references": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/resultCap"
+        },
+        "maximum_input_bytes": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/maximumInputBytes",
+          "default": 67108864
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "operation": "analysis.address.references",
+      "arguments": {
+        "source": {
+          "kind": "file",
+          "path": "extracted/game"
+        },
+        "target": 113160
+      }
+    }
+  ]
+}

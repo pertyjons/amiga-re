@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/project/v1/inventory.schema.json",
+  "title": "A directory source's pinned inventory",
+  "description": "One sorted entry per regular file. Sorted by the normalized byte representation of the path, so the tree hash is reproducible; symbolic links are never followed and unreadable files are reported rather than dropped.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "document_kind",
+    "format_version",
+    "source_id",
+    "tree_sha256",
+    "files"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "document_kind": {
+      "const": "inventory"
+    },
+    "format_version": {
+      "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/formatVersion"
+    },
+    "source_id": {
+      "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/id"
+    },
+    "tree_sha256": {
+      "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/sha256"
+    },
+    "files": {
+      "type": "array",
+      "maxItems": 1048576,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "size",
+          "sha256"
+        ],
+        "properties": {
+          "path": {
+            "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/relativePath"
+          },
+          "size": {
+            "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/size"
+          },
+          "sha256": {
+            "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/sha256"
+          }
+        }
+      }
+    },
+    "omitted": {
+      "description": "Paths deliberately left out, with why. Present so an inventory that skipped something says so rather than looking complete.",
+      "type": "array",
+      "maxItems": 65536,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "reason"
+        ],
+        "properties": {
+          "path": {
+            "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/relativePath"
+          },
+          "reason": {
+            "type": "string",
+            "enum": [
+              "symlink",
+              "unreadable",
+              "not_regular"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

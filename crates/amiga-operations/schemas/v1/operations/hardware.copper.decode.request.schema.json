@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/hardware.copper.decode.request.schema.json",
+  "title": "hardware.copper.decode request",
+  "description": "Decode a Copper stream instruction by instruction from an offset, writing nothing. `read_only`.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["operation", "arguments"],
+  "properties": {
+    "operation": { "const": "hardware.copper.decode" },
+    "arguments": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source"],
+      "properties": {
+        "source": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourceLocator"
+        },
+        "offset": {
+          "description": "Byte offset the stream starts at. Nothing in an image marks a Copper list, so this is a claim about the bytes rather than something read from them. Must be even — a Copper instruction begins on a word boundary.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295,
+          "default": 0
+        },
+        "maximum_instructions": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/resultCap"
+        },
+        "maximum_input_bytes": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/maximumInputBytes",
+          "default": 67108864
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "operation": "hardware.copper.decode",
+      "arguments": {
+        "source": { "kind": "file", "path": "extracted/screen.bin" },
+        "offset": 512
+      }
+    }
+  ]
+}

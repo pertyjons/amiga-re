@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/analysis.hunk.list.response.schema.json",
+  "title": "analysis.hunk.list result",
+  "description": "Every hunk, its sizes, and the relocation sites whose source it is.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "source",
+    "first_hunk",
+    "last_hunk",
+    "segments"
+  ],
+  "properties": {
+    "source": {
+      "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourcePin"
+    },
+    "first_hunk": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "last_hunk": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "segments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "index",
+          "kind",
+          "allocation_bytes",
+          "file_offset",
+          "file_bytes",
+          "relocations",
+          "relocation_total",
+          "relocations_truncated"
+        ],
+        "properties": {
+          "index": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "kind": {
+            "type": "string"
+          },
+          "allocation_bytes": {
+            "description": "Bytes the loader allocates, which for BSS exceeds what the file holds.",
+            "type": "integer",
+            "minimum": 0
+          },
+          "file_offset": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "file_bytes": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "relocations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "source_hunk",
+                "source_offset",
+                "target_hunk"
+              ],
+              "properties": {
+                "source_hunk": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "source_offset": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 4294967295
+                },
+                "target_hunk": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "stored_offset": {
+                  "description": "The offset stored at the site, which is what the pointer becomes once the target hunk's load address is added. Absent when the site itself is unreadable — reported rather than skipped, because a relocation nobody can read is a fact about the image.",
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 4294967295
+                }
+              }
+            }
+          },
+          "relocation_total": {
+            "description": "Relocations this hunk has before the cap. Always the true total: a capped list that read as a complete one would make a heavily relocated hunk look simple.",
+            "type": "integer",
+            "minimum": 0
+          },
+          "relocations_truncated": {
+            "type": "boolean"
+          }
+        }
+      }
+    }
+  }
+}

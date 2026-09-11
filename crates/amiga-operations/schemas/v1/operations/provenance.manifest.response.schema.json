@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/provenance.manifest.response.schema.json",
+  "title": "provenance.manifest result",
+  "description": "What a manifest for this source would say.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "source",
+    "name"
+  ],
+  "properties": {
+    "source": {
+      "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourcePin"
+    },
+    "name": {
+      "description": "The source identity the request named, echoed back. A manifest is about a named thing, and the resolver's identity is the only name that means the same on another machine.",
+      "type": "string"
+    }
+  }
+}

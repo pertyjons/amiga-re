@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/analysis.address.references.response.schema.json",
+  "title": "analysis.address.references result",
+  "description": "Every reference the code makes, or every reference to one address, with the true total beside a capped list.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "source",
+    "hunk",
+    "entries",
+    "references",
+    "reference_total",
+    "references_truncated",
+    "relocations",
+    "relocation_total",
+    "relocations_truncated"
+  ],
+  "$defs": {
+    "offset": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 4294967295
+    }
+  },
+  "properties": {
+    "source": {
+      "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourcePin"
+    },
+    "hunk": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "target": {
+      "description": "The address the request asked about, when it named one.",
+      "$ref": "#/$defs/offset"
+    },
+    "origin": {
+      "$ref": "#/$defs/offset"
+    },
+    "entries": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/offset"
+      }
+    },
+    "references": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "site",
+          "kind",
+          "target"
+        ],
+        "properties": {
+          "site": {
+            "description": "Hunk offset of the referencing instruction.",
+            "$ref": "#/$defs/offset"
+          },
+          "kind": {
+            "description": "How the operand names its target. The two absolute forms are distinct because their encodings are: an absolute-long operand may be patched by a HUNK_RELOC32 record and so can name a hunk offset, while no relocation record patches sixteen bits, so an absolute-short target is an absolute address and nothing else.",
+            "enum": [
+              "absolute",
+              "absolute_short",
+              "pc_relative"
+            ]
+          },
+          "target": {
+            "description": "The referenced address, in the frame its addressing mode uses: an encoded absolute address (sign-extended for the short form), or a hunk offset for a PC-relative operand. The three are not interchangeable, which is why the kind travels with it.",
+            "$ref": "#/$defs/offset"
+          },
+          "target_address": {
+            "description": "The runtime address the target names, where that can be said. Absent for a PC-relative operand with no mapped origin.",
+            "$ref": "#/$defs/offset"
+          }
+        }
+      }
+    },
+    "reference_total": {
+      "description": "References matching the request before the cap. Always the true total.",
+      "type": "integer",
+      "minimum": 0
+    },
+    "references_truncated": {
+      "type": "boolean"
+    },
+    "relocations": {
+      "description": "Relocation sites whose stored pointer names the requested target, searched across the whole image rather than the analyzed hunk: a pointer to this address is a reference to it wherever it sits. Empty when the request named no target.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "source_hunk",
+          "source_offset",
+          "target_hunk"
+        ],
+        "properties": {
+          "source_hunk": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "source_offset": {
+            "$ref": "#/$defs/offset"
+          },
+          "target_hunk": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "stored_offset": {
+            "description": "The offset stored at the site. Absent when the stored longword could not be read.",
+            "$ref": "#/$defs/offset"
+          }
+        }
+      }
+    },
+    "relocation_total": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "relocations_truncated": {
+      "type": "boolean"
+    }
+  }
+}

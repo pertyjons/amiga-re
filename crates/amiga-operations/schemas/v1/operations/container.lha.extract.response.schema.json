@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/container.lha.extract.response.schema.json",
+  "title": "container.lha.extract result",
+  "description": "What would be written, and whether it was. A `prepared` response and a `conflict` response both carry the plan with `committed: false`; the envelope's status says which happened. A `success` carries the same plan with `committed: true`, so the response documents exactly what is now on disk.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "source",
+    "plan",
+    "committed",
+    "unreadable"
+  ],
+  "properties": {
+    "source": {
+      "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourcePin"
+    },
+    "committed": {
+      "description": "Whether the plan was written. False for `prepare` and for a refused commit.",
+      "type": "boolean"
+    },
+    "plan": {
+      "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/writePlan"
+    },
+    "unreadable": {
+      "description": "Members the container names and this build could not recover: a data chain it could not walk, a block that is not the kind the table claims. Empty for a sound container. A damaged member is **absent** from `plan` rather than written short or zero-filled, so the plan stays a statement of complete files and this is where the loss is recorded. Reported alongside a CONTAINER_MEMBER_UNREADABLE diagnostic per member.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "reason"
+        ],
+        "properties": {
+          "path": {
+            "description": "The path it would have been written to, `/`-separated.",
+            "type": "string"
+          },
+          "reason": {
+            "description": "Why it could not be read, as the reader that refused it said.",
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

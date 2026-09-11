@@ -1,0 +1,241 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/graphics.bitmap.compare.request.schema.json",
+  "title": "graphics.bitmap.compare request",
+  "description": "Compare two decoded images in palette-index space as well as in colour space, writing nothing. `read_only`. A digest over two framebuffers says they differ and nothing else; this says how many pixels, inside what rectangle, in what connected regions, and which palette index was substituted for which. The two spaces are separate answers because they are separate questions: a port whose palette came out in a different order differs in every pixel while being wholly correct, and two images can agree pixel for pixel and still look different.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "operation",
+    "arguments"
+  ],
+  "properties": {
+    "operation": {
+      "const": "graphics.bitmap.compare"
+    },
+    "arguments": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "a",
+        "b"
+      ],
+      "properties": {
+        "a": {
+          "description": "Image a.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "source",
+            "width",
+            "height"
+          ],
+          "properties": {
+            "source": {
+              "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourceLocator"
+            },
+            "pixel_sources": {
+              "description": "Raw pixel-source plane from env.frame.capture.export: one byte per pixel, zero for playfield or 1-8 for sprite channels 0-7. Both sides must provide one or neither side may.",
+              "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourceLocator"
+            },
+            "offset": {
+              "description": "Byte offset of the pixel data within the source.",
+              "type": "integer",
+              "minimum": 0
+            },
+            "width": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "height": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "planes": {
+              "description": "Bitplanes to deinterleave, read exactly as graphics.bitmap.decode reads them. Absent means the source is already one palette index per byte — which is what a decoded frame's indices are, and what makes an original and a reimplementation comparable without either being re-encoded into the other's layout.",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 8
+            },
+            "plane_order": {
+              "description": "`contiguous` stores every row of one plane before the next; `interleaved` stores all planes of each row together; `byte_interleaved`, `word_interleaved`, and `longword_interleaved` store all planes of each 8-, 16-, or 32-pixel chunk together, which are storage layouts code scatters into bitplanes at load time rather than ones the chipset displays.",
+              "type": "string",
+              "enum": [
+                "contiguous",
+                "interleaved",
+                "byte_interleaved",
+                "word_interleaved",
+                "longword_interleaved"
+              ],
+              "default": "contiguous"
+            },
+            "palette": {
+              "description": "The palette this side's indices are read through, as RGB4 words. Optional, and its absence is why the comparison reports index space and colour space separately: two images can agree pixel for pixel and still look different, and a comparison that only had colours could not tell that apart from a change in the picture.",
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 65535
+              }
+            },
+            "align": {
+              "description": "Shift this side by (x, y) before comparing. An explicit alignment, because a comparison that searched for its own would report whichever offset made the two agree best rather than the one the caller meant. A sample the shift moves outside the image counts as a difference: a pixel that is not there is not a pixel that agrees.",
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "x",
+                "y"
+              ],
+              "properties": {
+                "x": {
+                  "type": "integer"
+                },
+                "y": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        },
+        "b": {
+          "description": "Image b.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "source",
+            "width",
+            "height"
+          ],
+          "properties": {
+            "source": {
+              "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourceLocator"
+            },
+            "pixel_sources": {
+              "description": "Raw pixel-source plane from env.frame.capture.export: one byte per pixel, zero for playfield or 1-8 for sprite channels 0-7. Both sides must provide one or neither side may.",
+              "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourceLocator"
+            },
+            "offset": {
+              "description": "Byte offset of the pixel data within the source.",
+              "type": "integer",
+              "minimum": 0
+            },
+            "width": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "height": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "planes": {
+              "description": "Bitplanes to deinterleave, read exactly as graphics.bitmap.decode reads them. Absent means the source is already one palette index per byte — which is what a decoded frame's indices are, and what makes an original and a reimplementation comparable without either being re-encoded into the other's layout.",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 8
+            },
+            "plane_order": {
+              "description": "`contiguous` stores every row of one plane before the next; `interleaved` stores all planes of each row together; `byte_interleaved`, `word_interleaved`, and `longword_interleaved` store all planes of each 8-, 16-, or 32-pixel chunk together, which are storage layouts code scatters into bitplanes at load time rather than ones the chipset displays.",
+              "type": "string",
+              "enum": [
+                "contiguous",
+                "interleaved",
+                "byte_interleaved",
+                "word_interleaved",
+                "longword_interleaved"
+              ],
+              "default": "contiguous"
+            },
+            "palette": {
+              "description": "The palette this side's indices are read through, as RGB4 words. Optional, and its absence is why the comparison reports index space and colour space separately: two images can agree pixel for pixel and still look different, and a comparison that only had colours could not tell that apart from a change in the picture.",
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 65535
+              }
+            },
+            "align": {
+              "description": "Shift this side by (x, y) before comparing. An explicit alignment, because a comparison that searched for its own would report whichever offset made the two agree best rather than the one the caller meant. A sample the shift moves outside the image counts as a difference: a pixel that is not there is not a pixel that agrees.",
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "x",
+                "y"
+              ],
+              "properties": {
+                "x": {
+                  "type": "integer"
+                },
+                "y": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        },
+        "crop": {
+          "description": "The rectangle compared, in the first image's coordinates. Omitted, the whole of it. Differing dimensions are refused rather than resampled — a resampler's rounding would be reported as a difference in the picture — so a crop is how two images of different sizes are made comparable.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "x",
+            "y",
+            "width",
+            "height"
+          ],
+          "properties": {
+            "x": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "y": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "width": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "height": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        },
+        "mask": {
+          "description": "A reviewed mask saying which pixels are worth comparing: one byte per pixel of the compared rectangle, zero to exclude. Pinned by digest, unlike either image, because a mask decides what the comparison ignores — an unpinned one could turn a failing comparison into a passing one and leave nothing in the record to say it had.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "source",
+            "sha256"
+          ],
+          "properties": {
+            "source": {
+              "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourceLocator"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "maximum_input_bytes": {
+              "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/maximumInputBytes"
+            }
+          }
+        },
+        "maximum_entries": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/resultCap",
+          "default": 256
+        },
+        "maximum_input_bytes": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/maximumInputBytes",
+          "default": 67108864
+        }
+      }
+    }
+  }
+}

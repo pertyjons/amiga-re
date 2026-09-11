@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/project.extract.response.schema.json",
+  "title": "project.extract plan",
+  "description": "What each carrier holds, the objects the plan would create, and the digest that authorizes writing them. A carrier the toolkit cannot enumerate is reported as such rather than skipped: a plan that quietly covered less than it was asked to would read as complete.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["carriers", "objects", "plan", "committed", "written"],
+  "properties": {
+    "carriers": {
+      "description": "One entry per source considered, in id order.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["source_id", "kind", "members"],
+        "properties": {
+          "source_id": { "type": "string" },
+          "kind": {
+            "description": "`hunk` needs no extraction — the whole-file object already is the object. `lha` and `adf` enumerate. `adf_non_dos` has no filesystem to walk, so it enumerates nothing and reports what the non-executing scans found instead.",
+            "enum": ["hunk", "lha", "adf", "adf_non_dos", "opaque"]
+          },
+          "members": { "type": "integer", "minimum": 0 },
+          "detail": {
+            "description": "Why a carrier enumerated nothing, when it did not.",
+            "type": "string"
+          }
+        }
+      }
+    },
+    "objects": {
+      "description": "Every object the plan would add to the sources document, in id order.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "parent_id", "kind", "size", "sha256", "path"],
+        "properties": {
+          "id": { "type": "string" },
+          "parent_id": { "type": "string" },
+          "kind": { "type": "string" },
+          "size": { "type": "integer", "minimum": 0 },
+          "sha256": { "type": "string" },
+          "path": {
+            "description": "Where the bytes are materialised, relative to the project root. The object's selector is what reproduces it, so this file can be deleted and re-made.",
+            "type": "string"
+          }
+        }
+      }
+    },
+    "plan": {
+      "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/writePlan"
+    },
+    "committed": { "type": "boolean" },
+    "written": { "type": "array", "items": { "type": "string" } }
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/compress.rle-xor.export.response.schema.json",
+  "title": "compress.rle-xor.export result",
+  "description": "The decoded file that would be written, and whether it was, beside the summary of the stream it came from.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "decoded",
+    "plan",
+    "committed"
+  ],
+  "properties": {
+    "decoded": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source",
+        "offset",
+        "packed_bytes",
+        "decoded_bytes",
+        "decoded_sha256"
+      ],
+      "properties": {
+        "source": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourcePin"
+        },
+        "offset": {
+          "description": "Byte offset the packed stream was read from.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "packed_bytes": {
+          "description": "Bytes of packed input available from that offset.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "decoded_bytes": {
+          "description": "Bytes the stream decoded to.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "decoded_sha256": {
+          "description": "Digest of the decoded bytes, so two recipes' output can be compared without holding either. The bytes themselves are the export's business.",
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sha256"
+        },
+        "declared_size": {
+          "description": "What a leading size field claimed, when the layout has one. A value that disagrees with `decoded_bytes` is reported as a COMPRESS_DECLARED_SIZE_MISMATCH warning rather than swallowed.",
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "plan": {
+      "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/writePlan"
+    },
+    "committed": {
+      "type": "boolean"
+    }
+  }
+}

@@ -1,0 +1,140 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/analysis.hunk.diff.response.schema.json",
+  "title": "analysis.hunk.diff result",
+  "description": "Every hunk present in either image, identical ones included \u2014 a report that omitted them would make \"this hunk is not listed\" mean both \"unchanged\" and \"absent from both\".",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "a",
+    "b",
+    "identical",
+    "changed_hunks",
+    "hunks"
+  ],
+  "properties": {
+    "a": {
+      "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourcePin"
+    },
+    "b": {
+      "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourcePin"
+    },
+    "identical": {
+      "type": "boolean"
+    },
+    "changed_hunks": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "hunks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "index",
+          "presence",
+          "unchanged",
+          "changed_ranges",
+          "changed_range_total",
+          "changed_ranges_truncated",
+          "added_relocations",
+          "removed_relocations"
+        ],
+        "properties": {
+          "index": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "presence": {
+            "description": "Which image the hunk index appears in.",
+            "type": "string",
+            "enum": [
+              "both",
+              "only_a",
+              "only_b"
+            ]
+          },
+          "unchanged": {
+            "description": "Byte-for-byte identical in both images, including kind, allocation, and relocations.",
+            "type": "boolean"
+          },
+          "kind_a": {
+            "type": "string"
+          },
+          "kind_b": {
+            "type": "string"
+          },
+          "allocation_a": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "allocation_b": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "changed_ranges": {
+            "description": "Half-open runs of differing bytes, hunk-relative.",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "start",
+                "length"
+              ],
+              "properties": {
+                "start": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "length": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            }
+          },
+          "changed_range_total": {
+            "description": "The true number of changed ranges, whether or not they all fit.",
+            "type": "integer",
+            "minimum": 0
+          },
+          "changed_ranges_truncated": {
+            "type": "boolean"
+          },
+          "added_relocations": {
+            "$ref": "#/$defs/relocations"
+          },
+          "removed_relocations": {
+            "$ref": "#/$defs/relocations"
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "relocations": {
+      "description": "The source hunk is not repeated: it is the hunk the relocation is listed under, and a second spelling could only ever disagree with the first.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "source_offset",
+          "target_hunk"
+        ],
+        "properties": {
+          "source_offset": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "target_hunk": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    }
+  }
+}

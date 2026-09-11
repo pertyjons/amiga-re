@@ -1,0 +1,979 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/response.schema.json",
+  "title": "amiga-re operation response envelope, protocol version 1",
+  "description": "The `operation` field names which result shape `result` carries; the payload itself is not tagged a second time.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "protocol_version",
+    "operation",
+    "status",
+    "diagnostics"
+  ],
+  "properties": {
+    "protocol_version": {
+      "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/protocolVersion"
+    },
+    "request_id": {
+      "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/requestId"
+    },
+    "operation": {
+      "type": "string",
+      "enum": [
+        "source.survey",
+        "container.adf.list",
+        "graphics.bitmap.decode",
+        "container.adf.extract",
+        "container.lha.extract",
+        "graphics.bitmap.export",
+        "project.check",
+        "project.verify",
+        "analysis.hunk.diff",
+        "analysis.hunk.diff.export",
+        "source.carve",
+        "analysis.table.decode",
+        "analysis.table.summarize",
+        "audio.sample.decode",
+        "audio.sample.export",
+        "compress.powerpacker.decode",
+        "compress.powerpacker.export",
+        "compress.rle-xor.decode",
+        "compress.rle-xor.export",
+        "audio.pcm.decode",
+        "audio.pcm.export",
+        "audio.module.decode",
+        "audio.module.export",
+        "analysis.hunk.normalize",
+        "analysis.hunk.normalize.export",
+        "provenance.manifest",
+        "provenance.manifest.export",
+        "graphics.palette.decode",
+        "graphics.palette.export",
+        "env.sandbox.run",
+        "env.boot.info",
+        "env.sandbox.call",
+        "env.sandbox.call.export",
+        "env.boot.trace",
+        "env.boot.trace.export",
+        "analysis.hunk.list",
+        "analysis.strings.scan",
+        "analysis.address.resolve",
+        "analysis.pointers.scan",
+        "analysis.code.disassemble",
+        "analysis.address.references",
+        "analysis.code.callgraph",
+        "analysis.code.globals",
+        "analysis.code.fixed-point",
+        "container.lha.list",
+        "hardware.register.list",
+        "audio.pcm.scan",
+        "audio.module.scan",
+        "graphics.palette.scan",
+        "hardware.copper.scan",
+        "hardware.copper.decode",
+        "graphics.ilbm.decode",
+        "graphics.bitmap.detect",
+        "hardware.register.references",
+        "hardware.copper.references",
+        "project.describe",
+        "project.annotations",
+        "project.inventory",
+        "project.edit",
+        "project.format",
+        "project.migrate",
+        "analysis.code.facts",
+        "source.read",
+        "project.init",
+        "project.extract",
+        "project.resource.export",
+        "env.sandbox.matrix",
+        "env.sandbox.compare",
+        "env.sandbox.matrix.export",
+        "env.sandbox.timeline",
+        "analysis.state.snapshot",
+        "analysis.state.compare",
+        "env.frame.capture",
+        "env.frame.capture.export",
+        "graphics.bitmap.compare",
+        "graphics.bitmap.compare.export",
+        "env.sandbox.slice",
+        "env.sandbox.timeline.export"
+      ]
+    },
+    "status": {
+      "description": "`prepared` means a complete write plan exists and was deliberately not committed. `conflict` means an input or destination changed under an optimistic-concurrency check.",
+      "type": "string",
+      "enum": [
+        "success",
+        "prepared",
+        "cancelled",
+        "conflict",
+        "error"
+      ]
+    },
+    "diagnostics": {
+      "description": "Warnings remain present here even when they were also emitted as events.",
+      "type": "array",
+      "maxItems": 65536,
+      "items": {
+        "$ref": "https://amiga-re.invalid/schemas/operations/v1/diagnostic.schema.json"
+      }
+    },
+    "normalized_request_sha256": {
+      "description": "The digest of the request with every default materialized. Absent only when the request was refused before normalization finished.",
+      "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sha256"
+    },
+    "result": {
+      "description": "When present, the payload must match the operation. Errors may retain a verification report or an uncommitted write plan."
+    }
+  },
+  "allOf": [
+    {
+      "description": "A successful operation must carry its result.",
+      "if": {
+        "properties": {
+          "status": {
+            "const": "success"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "required": [
+          "result"
+        ]
+      }
+    },
+    {
+      "description": "A failed operation must carry at least one error diagnostic. Any retained result is still validated against its operation.",
+      "if": {
+        "properties": {
+          "status": {
+            "const": "error"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "diagnostics": {
+            "contains": {
+              "properties": {
+                "severity": {
+                  "const": "error"
+                }
+              },
+              "required": [
+                "severity"
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "Cancelled operations carry no authoritative result.",
+      "if": {
+        "properties": {
+          "status": {
+            "const": "cancelled"
+          }
+        }
+      },
+      "then": {
+        "not": {
+          "required": [
+            "result"
+          ]
+        }
+      }
+    }
+  ],
+  "oneOf": [
+    {
+      "properties": {
+        "operation": {
+          "const": "source.survey"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/source.survey.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "container.adf.list"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/container.adf.list.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "graphics.bitmap.decode"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/graphics.bitmap.decode.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "container.adf.extract"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/container.adf.extract.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "container.lha.extract"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/container.lha.extract.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "graphics.bitmap.export"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/graphics.bitmap.export.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "project.check"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/project.check.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "project.verify"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/project.verify.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "analysis.hunk.diff"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/analysis.hunk.diff.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "analysis.hunk.diff.export"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/analysis.hunk.diff.export.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "source.carve"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/source.carve.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "analysis.table.decode"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/analysis.table.decode.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "analysis.table.summarize"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/analysis.table.summarize.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "audio.sample.decode"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/audio.sample.decode.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "audio.sample.export"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/audio.sample.export.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "compress.powerpacker.decode"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/compress.powerpacker.decode.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "compress.powerpacker.export"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/compress.powerpacker.export.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "compress.rle-xor.decode"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/compress.rle-xor.decode.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "compress.rle-xor.export"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/compress.rle-xor.export.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "audio.pcm.decode"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/audio.pcm.decode.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "audio.pcm.export"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/audio.pcm.export.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "audio.module.decode"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/audio.module.decode.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "audio.module.export"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/audio.module.export.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "analysis.hunk.normalize"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/analysis.hunk.normalize.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "analysis.hunk.normalize.export"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/analysis.hunk.normalize.export.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "provenance.manifest"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/provenance.manifest.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "provenance.manifest.export"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/provenance.manifest.export.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "graphics.palette.decode"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/graphics.palette.decode.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "graphics.palette.export"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/graphics.palette.export.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "env.sandbox.run"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/env.sandbox.run.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "env.boot.info"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/env.boot.info.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "env.sandbox.call"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/env.sandbox.call.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "env.sandbox.call.export"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/env.sandbox.call.export.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "env.boot.trace"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/env.boot.trace.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "env.boot.trace.export"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/env.boot.trace.export.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "analysis.hunk.list"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/analysis.hunk.list.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "analysis.strings.scan"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/analysis.strings.scan.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "analysis.address.resolve"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/analysis.address.resolve.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "analysis.pointers.scan"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/analysis.pointers.scan.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "analysis.code.disassemble"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/analysis.code.disassemble.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "analysis.address.references"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/analysis.address.references.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "analysis.code.callgraph"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/analysis.code.callgraph.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "analysis.code.globals"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/analysis.code.globals.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "analysis.code.fixed-point"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/analysis.code.fixed-point.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "container.lha.list"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/container.lha.list.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "hardware.register.list"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/hardware.register.list.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "audio.pcm.scan"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/audio.pcm.scan.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "audio.module.scan"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/audio.module.scan.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "graphics.palette.scan"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/graphics.palette.scan.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "hardware.copper.scan"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/hardware.copper.scan.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "hardware.copper.decode"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/hardware.copper.decode.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "graphics.ilbm.decode"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/graphics.ilbm.decode.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "graphics.bitmap.detect"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/graphics.bitmap.detect.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "hardware.register.references"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/hardware.register.references.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "hardware.copper.references"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/hardware.copper.references.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "project.describe"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/project.describe.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "project.annotations"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/project.annotations.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "project.inventory"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/project.inventory.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "project.edit"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/project.edit.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "project.format"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/project.format.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "project.migrate"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/project.migrate.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "analysis.code.facts"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/analysis.code.facts.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "source.read"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/source.read.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "project.init"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/project.init.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "project.extract"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/project.extract.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "project.resource.export"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/project.resource.export.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "env.sandbox.matrix"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/env.sandbox.matrix.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "env.sandbox.compare"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/env.sandbox.compare.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "env.sandbox.matrix.export"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/env.sandbox.matrix.export.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "env.sandbox.timeline"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/env.sandbox.timeline.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "analysis.state.snapshot"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/analysis.state.snapshot.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "analysis.state.compare"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/analysis.state.compare.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "env.frame.capture"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/env.frame.capture.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "env.frame.capture.export"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/env.frame.capture.export.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "graphics.bitmap.compare"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/graphics.bitmap.compare.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "graphics.bitmap.compare.export"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/graphics.bitmap.compare.export.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "env.sandbox.slice"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/env.sandbox.slice.response.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "env.sandbox.timeline.export"
+        },
+        "result": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/operations/env.sandbox.timeline.export.response.schema.json"
+        }
+      }
+    }
+  ]
+}

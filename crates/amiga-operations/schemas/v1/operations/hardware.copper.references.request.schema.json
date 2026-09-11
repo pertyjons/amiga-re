@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/hardware.copper.references.request.schema.json",
+  "title": "hardware.copper.references request",
+  "description": "Trace the CPU writes that patch a runtime copy of a Copper list, writing nothing. `read_only`.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["operation", "arguments"],
+  "properties": {
+    "operation": { "const": "hardware.copper.references" },
+    "arguments": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "entries", "pointer_register"],
+      "properties": {
+        "source": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourceLocator"
+        },
+        "hunk": {
+          "description": "CODE hunk holding the patch routine.",
+          "type": "integer",
+          "minimum": 0,
+          "default": 0
+        },
+        "entries": {
+          "description": "The patch routine's entry, as hunk offsets. Required: the pointer register's value is read at the entry, so without one the writes have no origin to be measured from, and assuming offset zero would measure them from the wrong place.",
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "integer", "minimum": 0, "maximum": 4294967295 }
+        },
+        "origin": {
+          "description": "The address the hunk is mapped at.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "pointer_register": {
+          "description": "Address register holding the runtime copy's base.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 7
+        },
+        "template": {
+          "description": "Where the Copper list lives. Its own source, because a loader routinely copies a template out of one file and patches the copy. An absent source means the same one the code came from.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "source": {
+              "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourceLocator"
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 4294967295,
+              "default": 0
+            },
+            "address": {
+              "description": "The absolute address the list is at when the routine runs, for a routine that loads that address as a constant instead of receiving it in the pointer register. Without it such a load is an unrelated address and every store after it is dropped; with it, a constant landing in the list establishes the base at the instruction that loaded it, and each write says which base it was measured from.",
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 4294967295
+            }
+          }
+        },
+        "apply": {
+          "description": "Also apply every immediate write and report the resulting list.",
+          "type": "boolean",
+          "default": false
+        },
+        "maximum_writes": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/resultCap"
+        },
+        "maximum_instructions": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/resultCap"
+        },
+        "maximum_input_bytes": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/maximumInputBytes",
+          "default": 67108864
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "operation": "hardware.copper.references",
+      "arguments": {
+        "source": { "kind": "file", "path": "extracted/game" },
+        "entries": [1024],
+        "pointer_register": 0,
+        "template": { "offset": 8192 },
+        "apply": true
+      }
+    }
+  ]
+}

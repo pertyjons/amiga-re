@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/hardware.copper.scan.response.schema.json",
+  "title": "hardware.copper.scan result",
+  "description": "Every plausible list, with the palette runs and resolved bitplane pointers it carries.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["source", "lists", "list_total", "lists_truncated"],
+  "$defs": {
+    "offset": { "type": "integer", "minimum": 0, "maximum": 4294967295 },
+    "rgb8": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "minItems": 3,
+        "maxItems": 3,
+        "items": { "type": "integer", "minimum": 0, "maximum": 255 }
+      }
+    }
+  },
+  "properties": {
+    "source": {
+      "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourcePin"
+    },
+    "lists": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["start", "end", "instruction_count", "palettes", "bitplane_pointers"],
+        "properties": {
+          "start": { "$ref": "#/$defs/offset" },
+          "end": { "$ref": "#/$defs/offset" },
+          "instruction_count": { "type": "integer", "minimum": 0 },
+          "palettes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["start_offset", "first_colour", "rgb12", "rgb8"],
+              "properties": {
+                "start_offset": { "$ref": "#/$defs/offset" },
+                "first_colour": {
+                  "description": "The COLORnn index the run starts at.",
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 255
+                },
+                "rgb12": {
+                  "type": "array",
+                  "items": { "type": "integer", "minimum": 0, "maximum": 65535 }
+                },
+                "rgb8": { "$ref": "#/$defs/rgb8" }
+              }
+            }
+          },
+          "bitplane_pointers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "plane",
+                "high_offset",
+                "low_offset",
+                "address",
+                "points_inside_image"
+              ],
+              "properties": {
+                "plane": { "type": "integer", "minimum": 0, "maximum": 255 },
+                "high_offset": { "$ref": "#/$defs/offset" },
+                "low_offset": { "$ref": "#/$defs/offset" },
+                "address": {
+                  "description": "The address the high/low pair writes.",
+                  "$ref": "#/$defs/offset"
+                },
+                "points_inside_image": {
+                  "description": "Whether that address lands inside the scanned image, which is what says a pointer was found rather than two unrelated writes.",
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "list_total": { "type": "integer", "minimum": 0 },
+    "lists_truncated": { "type": "boolean" }
+  }
+}

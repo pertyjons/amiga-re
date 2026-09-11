@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/audio.pcm.scan.request.schema.json",
+  "title": "audio.pcm.scan request",
+  "description": "Find runs of bytes that score like raw 8-bit signed PCM, writing nothing. `read_only`.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["operation", "arguments"],
+  "properties": {
+    "operation": { "const": "audio.pcm.scan" },
+    "arguments": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source"],
+      "properties": {
+        "source": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourceLocator"
+        },
+        "block": {
+          "description": "Block size in bytes used to score the image. At least 2: a single byte has no step between samples to measure, and smoothness is the statistic that separates a waveform from noise.",
+          "type": "integer",
+          "minimum": 2,
+          "default": 1024
+        },
+        "minimum_length": {
+          "description": "Shortest merged region to report, in bytes.",
+          "type": "integer",
+          "minimum": 0,
+          "default": 2048
+        },
+        "maximum_regions": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/resultCap"
+        },
+        "maximum_input_bytes": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/maximumInputBytes",
+          "default": 67108864
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "operation": "audio.pcm.scan",
+      "arguments": { "source": { "kind": "file", "path": "extracted/samples.bin" } }
+    }
+  ]
+}

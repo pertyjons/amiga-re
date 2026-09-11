@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/project/v1/project.schema.json",
+  "title": "amiga-re project root",
+  "description": "Project identity, the documents that make up the project, and the roles of its directories. Nothing else: the root exists to be small, so that two people working on different parts of a project rarely touch it.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "document_kind",
+    "format_version",
+    "project",
+    "documents"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "document_kind": {
+      "const": "project"
+    },
+    "format_version": {
+      "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/formatVersion"
+    },
+    "project": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/id"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "notes": {
+          "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/notes"
+        }
+      }
+    },
+    "documents": {
+      "description": "Every authoritative document, listed explicitly. A loader never discovers metadata by walking `analysis/` and accepting what it finds.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sources"
+      ],
+      "properties": {
+        "sources": {
+          "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/relativePath"
+        },
+        "programs": {
+          "type": "array",
+          "items": {
+            "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/relativePath"
+          },
+          "maxItems": 4096
+        },
+        "annotations": {
+          "type": "array",
+          "items": {
+            "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/relativePath"
+          },
+          "maxItems": 4096
+        },
+        "resources": {
+          "type": "array",
+          "items": {
+            "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/relativePath"
+          },
+          "maxItems": 4096
+        },
+        "types": {
+          "type": "array",
+          "items": {
+            "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/relativePath"
+          },
+          "maxItems": 4096
+        }
+      }
+    },
+    "directories": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "original": {
+          "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/relativePath"
+        },
+        "extracted": {
+          "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/relativePath"
+        },
+        "decoded": {
+          "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/relativePath"
+        },
+        "reports": {
+          "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/relativePath"
+        },
+        "scratch": {
+          "description": "Where provisional outputs live — a sandbox export, a checkpoint, anything a run wrote that is not yet reviewed knowledge. Declaring it is what lets a later run replay such a file by name: a project that prohibits provisional outputs beside its private source media states one place they may go instead, and a tool reads from there rather than from wherever a caller points it.",
+          "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/relativePath"
+        }
+      }
+    },
+    "extensions": {
+      "$ref": "https://amiga-re.invalid/schemas/project/v1/common.schema.json#/$defs/extensions"
+    }
+  }
+}

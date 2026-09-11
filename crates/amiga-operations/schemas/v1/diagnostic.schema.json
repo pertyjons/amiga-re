@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/diagnostic.schema.json",
+  "title": "One machine-readable finding about a request or its execution",
+  "description": "The code and the structured location are the contract. The human message may be reworded without a protocol-version decision, so a consumer must never parse it.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "code",
+    "severity",
+    "message"
+  ],
+  "properties": {
+    "code": {
+      "description": "Why the diagnostic was emitted. Adding a code is additive; a consumer must tolerate one it does not know. Kept complete by `every_diagnostic_code_appears_in_the_schema`, because an enum that lags the code rejects responses this build legitimately produces.",
+      "type": "string",
+      "enum": [
+        "REQUEST_PROTOCOL_VERSION_UNSUPPORTED",
+        "REQUEST_MALFORMED",
+        "REQUEST_PROJECT_UNSUPPORTED",
+        "REQUEST_PROJECT_REQUIRED",
+        "REQUEST_EVENTS_UNSUPPORTED",
+        "REQUEST_EXECUTION_MODE_UNSUPPORTED",
+        "REQUEST_ARGUMENT_OUT_OF_RANGE",
+        "REQUEST_SOURCE_NAME_INVALID",
+        "LIMIT_REDUCED",
+        "LIMIT_EXCEEDED",
+        "SOURCE_MISSING",
+        "SOURCE_UNREADABLE",
+        "SOURCE_TOO_LARGE",
+        "SOURCE_RANGE_OUTSIDE_SOURCE",
+        "RESULT_REGIONS_TRUNCATED",
+        "RESULT_ENTRIES_TRUNCATED",
+        "CONTAINER_ADF_UNREADABLE",
+        "CONTAINER_UNREADABLE",
+        "CONTAINER_ADF_BOOT_CHECKSUM_INVALID",
+        "CONTAINER_ADF_EMPTY_FILE_WITH_DATA_POINTER",
+        "CONTAINER_MEMBER_SKIPPED",
+        "CONTAINER_MEMBER_UNREADABLE",
+        "PROJECT_UNREADABLE",
+        "LOCAL_BINDINGS_UNREADABLE",
+        "PROJECT_HAS_PROBLEMS",
+        "PROJECT_CONTRADICTED",
+        "PROJECT_RESOURCE_UNEXPORTABLE",
+        "GRAPHICS_OUTPUT_TOO_LARGE",
+        "GRAPHICS_OFFSET_OUTSIDE_SOURCE",
+        "GRAPHICS_PLANAR_UNDECODABLE",
+        "GRAPHICS_ENCODE_FAILED",
+        "GRAPHICS_PALETTE_WORD_INVALID",
+        "ANALYSIS_HUNK_UNREADABLE",
+        "ANALYSIS_REPORT_ENCODE_FAILED",
+        "ANALYSIS_RECORD_UNREADABLE",
+        "ANALYSIS_HUNK_ALREADY_NORMAL",
+        "ANALYSIS_CODE_UNDECODABLE",
+        "SANDBOX_MEMORY_UNMAPPABLE",
+        "SANDBOX_BLITTER_UNSUPPORTED",
+        "SANDBOX_BLITTER_REFUSED",
+        "SANDBOX_BLITTER_DMA_ASSUMED",
+        "AUDIO_SAMPLE_UNREADABLE",
+        "AUDIO_ENCODE_FAILED",
+        "AUDIO_MODULE_UNREADABLE",
+        "COMPRESS_STREAM_UNREADABLE",
+        "COMPRESS_DECLARED_SIZE_MISMATCH",
+        "SOURCE_DIGEST_MISMATCH",
+        "OUTPUT_DESTINATION_UNAVAILABLE",
+        "OUTPUT_DESTINATION_UNUSABLE",
+        "OUTPUT_DESTINATION_REFUSED",
+        "OUTPUT_PLAN_CHANGED"
+      ]
+    },
+    "severity": {
+      "description": "`error` means no result was produced. `warning` means a result was produced that must be read carefully.",
+      "type": "string",
+      "enum": [
+        "error",
+        "warning",
+        "note"
+      ]
+    },
+    "message": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096
+    },
+    "json_path": {
+      "description": "The place in the request document this refers to, when the subject is the request.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "entity_id": {
+      "description": "The `kind:value` identity this refers to, when the subject is a thing inside the source rather than a place in the request.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512,
+      "pattern": "^[a-z][a-z0-9_]*:[^\\s]+$"
+    }
+  },
+  "examples": [
+    {
+      "code": "CONTAINER_ADF_BOOT_CHECKSUM_INVALID",
+      "severity": "warning",
+      "message": "boot block checksum is invalid; ignored for filesystem recovery",
+      "entity_id": "block:0"
+    }
+  ]
+}

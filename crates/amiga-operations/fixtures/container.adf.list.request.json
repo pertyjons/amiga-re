@@ -1,0 +1,17 @@
+{
+  "protocol_version": 1,
+  "request_id": "request:list-volume",
+  "execution": {
+    "mode": { "kind": "read" },
+    "events": "final_only"
+  },
+  "request": {
+    "operation": "container.adf.list",
+    "arguments": {
+      "source": {
+        "kind": "file",
+        "path": "fixtures/volume.adf"
+      }
+    }
+  }
+}

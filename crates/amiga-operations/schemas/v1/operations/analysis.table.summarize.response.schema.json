@@ -1,0 +1,200 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/analysis.table.summarize.response.schema.json",
+  "title": "analysis.table.summarize result",
+  "description": "What each table's columns hold, and where the tables disagree. Every count is exact and every list beside one is capped: `this column holds three distinct values` is a fact about the table, and the same sentence under a cap that also bounded the counting would be a fact about the request.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "offset",
+    "record_size",
+    "tables",
+    "comparisons",
+    "compared_rows"
+  ],
+  "$defs": {
+    "field": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "value"
+      ],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "unsigned",
+            "signed",
+            "pointer",
+            "text",
+            "bytes"
+          ]
+        },
+        "value": {
+          "description": "A number for the scalar kinds, a string for `text`, and an array of byte values for `bytes`."
+        }
+      }
+    }
+  },
+  "properties": {
+    "offset": {
+      "description": "Byte offset of the first record, in every source: one offset, because a comparison between tables read from different places would compare columns that are not the same column.",
+      "type": "integer",
+      "minimum": 0
+    },
+    "record_size": {
+      "description": "The size of one record under the layout every table was read with.",
+      "type": "integer",
+      "minimum": 1
+    },
+    "compared_rows": {
+      "description": "Rows compared across every table: the shortest table's count, since a row one table does not have is not a disagreement about a value. A row-count difference is reported once as a warning rather than as a difference in every column.",
+      "type": "integer",
+      "minimum": 0
+    },
+    "tables": {
+      "description": "One entry per source, in the order the request named them.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "source",
+          "rows_read",
+          "row_total",
+          "columns"
+        ],
+        "properties": {
+          "source": {
+            "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourcePin"
+          },
+          "rows_read": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "row_total": {
+            "description": "Whole rows the region holds from `offset` onwards, whether or not they were all read.",
+            "type": "integer",
+            "minimum": 0
+          },
+          "columns": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "column",
+                "field_offset",
+                "distinct_total",
+                "values",
+                "values_truncated"
+              ],
+              "properties": {
+                "column": {
+                  "description": "Which value-producing field of the record this is. A `pad` consumes bytes and is not a column, so the column index and the field index part company as soon as a layout has one.",
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "field_offset": {
+                  "description": "Byte offset of the field inside one record, so a column can be found in a hex dump without recounting the layout.",
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "distinct_total": {
+                  "description": "Distinct values in this column across every row read. Always exact.",
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "values": {
+                  "description": "The most frequent values, most frequent first and then by value so the order is total. Capped by `maximum_values`.",
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "value",
+                      "count"
+                    ],
+                    "properties": {
+                      "value": {
+                        "$ref": "#/$defs/field"
+                      },
+                      "count": {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    }
+                  }
+                },
+                "values_truncated": {
+                  "type": "boolean"
+                },
+                "minimum": {
+                  "description": "The lowest value, for a column whose values are numeric. Absent for `text` and `bytes` columns, where a minimum would be a fact about an encoding rather than about the data.",
+                  "type": "integer"
+                },
+                "maximum": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "comparisons": {
+      "description": "Per column, where the tables disagree. Empty when one source was named: there is nothing to compare a table with.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "column",
+          "identical",
+          "differing_total",
+          "differences"
+        ],
+        "properties": {
+          "column": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "identical": {
+            "description": "Whether every compared row holds the same value in every table. The answer a reader wants first, and the one a capped list of differences cannot give.",
+            "type": "boolean"
+          },
+          "differing_total": {
+            "description": "Rows where at least two tables differ. Always exact.",
+            "type": "integer",
+            "minimum": 0
+          },
+          "differences": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "row",
+                "values"
+              ],
+              "properties": {
+                "row": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "values": {
+                  "description": "One value per table, in the order the request named them.",
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/field"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

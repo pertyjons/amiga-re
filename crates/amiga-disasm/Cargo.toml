@@ -1,0 +1,24 @@
+[package]
+name = "amiga-disasm"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+description = "MC68000 recursive control-flow analysis and assembly listing over the m68000 crate."
+
+[lints]
+workspace = true
+
+[dependencies]
+amiga-core.workspace = true
+# For `amiga_hw::blitter::DmaMemory`: the sandbox's `Device` hands out a DMA
+# handle, and the contract that handle satisfies is chip knowledge rather than
+# CPU knowledge. `amiga-hw` depends only on `amiga-core`, so this is one-way.
+amiga-hw.workspace = true
+m68000.workspace = true
+serde.workspace = true
+thiserror.workspace = true
+
+[dev-dependencies]
+serde_json.workspace = true

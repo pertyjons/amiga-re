@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/project.edit.response.schema.json",
+  "title": "project.edit plan",
+  "description": "The documents the edit covers and the digest that authorizes writing them. Two checks, not one: the plan digest asks whether this is the plan you reviewed, and the per-document digests ask whether the documents are still what the plan was built from. An edit made while a review was open fails the second even when the first passes.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["rebases", "documents", "plan_sha256", "committed", "written"],
+  "properties": {
+    "rebases": {
+      "description": "What each rebase in the request resolved to. Reported because the operation derives it: a caller reviewing the plan needs to see which object the annotation is being pinned to and at what digest, and that is the whole content of a rebase.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "object_id", "object_sha256"],
+        "properties": {
+          "id": { "type": "string" },
+          "object_id": { "type": "string" },
+          "object_sha256": { "type": "string" }
+        }
+      }
+    },
+    "documents": {
+      "description": "Every document the plan covers, in path order.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path", "expected_sha256", "size", "changed"],
+        "properties": {
+          "path": {
+            "description": "Path relative to the project root.",
+            "type": "string"
+          },
+          "expected_sha256": {
+            "description": "The digest the plan expects to find there, re-checked at commit.",
+            "type": "string"
+          },
+          "size": { "type": "integer", "minimum": 0 },
+          "changed": {
+            "description": "Whether the rewrite would actually change anything. A plan may touch a document without changing it — a rename to the name it already has — and that is reported rather than counted as a change.",
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "plan_sha256": {
+      "description": "Digest of the plan itself: the edits, the documents, and the digests they are expected to be at. What `commit_reviewed` authorizes against.",
+      "type": "string"
+    },
+    "committed": {
+      "description": "True once the documents have been written. False for a prepared plan, which writes nothing.",
+      "type": "boolean"
+    },
+    "written": {
+      "description": "Documents actually rewritten. Empty for a prepared plan.",
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}

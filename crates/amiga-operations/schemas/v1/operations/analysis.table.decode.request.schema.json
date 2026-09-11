@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/analysis.table.decode.request.schema.json",
+  "title": "analysis.table.decode request",
+  "description": "Read a byte region as an array of fixed-layout big-endian records. `read_only`: accepts only the `read` execution mode.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "operation",
+    "arguments"
+  ],
+  "properties": {
+    "operation": {
+      "const": "analysis.table.decode"
+    },
+    "arguments": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source",
+        "rows"
+      ],
+      "oneOf": [
+        {
+          "description": "The record spelled out in the request.",
+          "required": [
+            "layout"
+          ],
+          "not": {
+            "required": [
+              "type_id"
+            ]
+          }
+        },
+        {
+          "description": "The record named: a struct the project defines. Needs the envelope's `project` locator.",
+          "required": [
+            "type_id"
+          ],
+          "not": {
+            "required": [
+              "layout"
+            ]
+          }
+        }
+      ],
+      "properties": {
+        "source": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourceLocator"
+        },
+        "layout": {
+          "description": "Comma-separated field list, e.g. `u16,u16,ptr,char[16]`. Scalars are `u8`/`u16`/`u32` and their signed forms, `ptr` is a 32-bit pointer, `char[N]` a NUL-terminated Latin-1 string, `bytes[N]` raw bytes, and `pad[N]` skipped bytes.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        },
+        "type_id": {
+          "description": "A `type:` id naming a struct the project defines, used instead of `layout`. The struct's fields are read back as a record layout, so a table saved as a resource decodes from the stored type alone — which is what `type_id` on a table resource has always meant and nothing could act on. The struct must describe a contiguous run of fields a layout can express: a gap, an overlap, a declared size its fields do not reach, or a field of a type no layout has is refused rather than decoded as something else.",
+          "type": "string",
+          "minLength": 6,
+          "maxLength": 256,
+          "pattern": "^type:[a-z0-9][a-z0-9._/-]*$"
+        },
+        "offset": {
+          "description": "Byte offset of the first record.",
+          "type": "integer",
+          "minimum": 0,
+          "default": 0
+        },
+        "rows": {
+          "description": "How many records to decode. A region that holds fewer whole rows returns the ones that fit and reports the true count.",
+          "type": "integer",
+          "minimum": 1
+        },
+        "maximum_rows": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/resultCap",
+          "default": 65536
+        },
+        "maximum_input_bytes": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/maximumInputBytes",
+          "default": 67108864
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "operation": "analysis.table.decode",
+      "arguments": {
+        "source": {
+          "kind": "file",
+          "path": "extracted/levels.bin"
+        },
+        "layout": "u16,u16,ptr,char[16]",
+        "offset": 1024,
+        "rows": 32
+      }
+    },
+    {
+      "operation": "analysis.table.decode",
+      "arguments": {
+        "source": {
+          "kind": "file",
+          "path": "extracted/levels.bin"
+        },
+        "type_id": "type:level-header",
+        "rows": 32
+      }
+    }
+  ]
+}

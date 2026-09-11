@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/audio.pcm.decode.request.schema.json",
+  "title": "audio.pcm.decode request",
+  "description": "Read a raw 8-bit signed PCM region and summarize it, writing nothing. `read_only`.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "operation",
+    "arguments"
+  ],
+  "properties": {
+    "operation": {
+      "const": "audio.pcm.decode"
+    },
+    "arguments": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source",
+        "offset",
+        "length",
+        "sample_rate"
+      ],
+      "properties": {
+        "source": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourceLocator"
+        },
+        "offset": {
+          "description": "Byte offset of the first sample.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "length": {
+          "description": "Number of sample bytes. One byte per frame: this is 8-bit signed mono.",
+          "type": "integer",
+          "minimum": 1
+        },
+        "sample_rate": {
+          "description": "Playback rate in Hz. Required and never guessed: raw Paula PCM has no header, so nothing in the bytes states it, and every consumer divides by it.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65535
+        },
+        "maximum_buckets": {
+          "description": "How many min/max pairs the waveform envelope is reduced to.",
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/resultCap",
+          "default": 512
+        },
+        "maximum_input_bytes": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/maximumInputBytes",
+          "default": 67108864
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "operation": "audio.pcm.decode",
+      "arguments": {
+        "source": {
+          "kind": "file",
+          "path": "extracted/game.bin"
+        },
+        "offset": 4096,
+        "length": 8192,
+        "sample_rate": 8287
+      }
+    }
+  ]
+}

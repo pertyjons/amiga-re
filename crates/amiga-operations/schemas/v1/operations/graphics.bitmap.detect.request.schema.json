@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/graphics.bitmap.detect.request.schema.json",
+  "title": "graphics.bitmap.detect request",
+  "description": "Score a region's entropy and row strides to suggest a bitmap's geometry, writing nothing. `read_only`.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["operation", "arguments"],
+  "properties": {
+    "operation": { "const": "graphics.bitmap.detect" },
+    "arguments": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source"],
+      "properties": {
+        "source": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourceLocator"
+        },
+        "offset": {
+          "description": "Where the examined region starts.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295,
+          "default": 0
+        },
+        "length": {
+          "description": "How much of it to examine. Without a length the entropy map still runs, but the stride search does not: autocorrelation over an unbounded tail measures whatever follows the bitmap as much as the bitmap.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "block": {
+          "description": "Block size the entropy map scores in. At least 1: entropy over no bytes is undefined.",
+          "type": "integer",
+          "minimum": 1,
+          "default": 4096
+        },
+        "maximum_stride": {
+          "description": "Largest row stride the search considers.",
+          "type": "integer",
+          "minimum": 1,
+          "default": 512
+        },
+        "maximum_blocks": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/resultCap"
+        },
+        "maximum_strides": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/resultCap"
+        },
+        "maximum_input_bytes": {
+          "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/maximumInputBytes",
+          "default": 67108864
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "operation": "graphics.bitmap.detect",
+      "arguments": {
+        "source": { "kind": "file", "path": "extracted/screen.bin" },
+        "offset": 1024,
+        "length": 16000
+      }
+    }
+  ]
+}

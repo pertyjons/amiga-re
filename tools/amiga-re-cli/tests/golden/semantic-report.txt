@@ -1,0 +1,84 @@
+; Semantic fact report by amiga-re
+; Schema: amiga-re.semantic-report v16
+; Source SHA-256: 6f5550b914d75e92e03c9a80833e260ee6569046290a542e6f6b706eff4c695d
+; Hunk: 0 (CODE, 0x5c bytes) at file 0x20..0x7c; entry offsets: 0x0, 0x8
+; Base: none (no mapped origin, so no runtime address space)
+; Address spaces: hunk0+0x.. hunk-relative, abs 0x.. runtime, file 0x.. whole-file
+; L######## subjects and evidence sites are offsets into hunk 0
+; Anchors: h<hunk>-<kind>-<offset as 8 hex digits>; every subject has one (insn for a decoded instruction, data otherwise)
+; Coverage (whole hunk): 64/92 bytes, 19 instructions, 3 functions, 1 calls
+; References (this report): 1 resolved (0 by relocation), 4 unresolved
+; Library calls (this report): 2 sites — 1 named, 0 unnamed vector, 1 unknown base; 1 described, 0 undescribed
+; Call arguments (this report): 0/2 resolved (0.0%); 0 symbolic; 2 refused by the walk
+; Unresolved because: unresolved_flow 2
+; Hardware accesses (this report): 2 named, 0 unknown; external flow: 0; unresolved flow: 1
+; Tool: amiga-re-cli 0.1.0
+; Config: amiga-re.toml (SHA-256 f07b378e5bb70be4c720e06fd94981a9d8a914d327c4d31d196b543822db0480)
+; Options: library inferred, small-data base A5
+; Selection: whole hunk
+
+; Functions: 3
+; Columns: entry  anchor  span  instructions  callers/callees  summary
+F00000000  @h0-fn-00000000     0x0..0x3e      8  0/1  sub_0
+          prototype sub_0()
+          signature register walk incomplete
+          frameless
+          calls helper
+          library LVO-30
+          hardware interrupt
+          unresolved exits at 0x3c
+F00000008  @h0-fn-00000008     0x8..0x3e     16  0/1  init_gfx
+          prototype init_gfx()
+          signature register walk incomplete
+          frameless
+          calls helper
+          library LVO-30, exec.library/OpenLibrary
+          writes A5+0x8
+          hardware dma, interrupt
+          unresolved exits at 0x3c
+F00000042  @h0-fn-00000042     0x42..0x44      1  2/0  helper
+          prototype helper()
+          frameless
+          preserves D0/D1/D2/D3/D4/D5/D6/D7/A0/A1/A2/A3/A4/A5/A6
+          called by sub_0, init_gfx
+          leaf (calls nothing)
+
+; Entities: anchor  kind  location  name
+
+@h0-fn-00000000     fn        hunk0+0x0 (file 0x20)  sub_0
+@h0-fn-00000008     fn        hunk0+0x8 (file 0x28)  init_gfx
+@h0-sym-00000008    sym       hunk0+0x8 (file 0x28)  init_gfx
+@h0-fn-00000042     fn        hunk0+0x42 (file 0x62)  helper
+@h0-sym-00000042    sym       hunk0+0x42 (file 0x62)  helper
+@h0-data-00000044   data      hunk0+0x44 (file 0x64)  text
+
+; Columns: subject  anchor  kind  confidence  producer  description  <evidence>
+
+L00000000  @h0-fn-00000000     function          certain   control_flow       entry sub_0 @ hunk0+0x0 (file 0x20)  <L00000000>
+L00000000  @h0-fn-00000000     function_signature probable  function_analysis  sub_0() [incomplete register walk]  <L00000000,L00000004,L0000002C,L00000030,L00000036,L00000038,L0000003A,L0000003C>
+L00000000  @h0-insn-00000000   reference         certain   reference_scan     -> abs 0x4 [abs.w operand]  <L00000000>
+L00000008  @h0-fn-00000008     function          certain   control_flow       entry init_gfx @ hunk0+0x8 (file 0x28)  <L00000008>
+L00000008  @h0-fn-00000008     function_signature probable  function_analysis  init_gfx() [incomplete register walk]  <L00000008,L0000000C,L00000010,L00000014,L00000018,L0000001A,L00000020,L00000026,L00000028,L0000002A,L0000002C,L00000030,L00000036,L00000038,L0000003A,L0000003C>
+L00000008  @h0-insn-00000008   reference         certain   reference_scan     -> abs 0x4 [abs.w operand]  <L00000008>
+L00000008  @h0-sym-00000008    symbol            user      config             symbol init_gfx @ hunk0+0x8 (file 0x28)  <config@0x8>
+L0000000C  @h0-insn-0000000c   reference         certain   reference_scan     -> hunk0+0x44 (file 0x64) [pcrel operand]  <L0000000C>
+L00000010  @h0-insn-00000010   library_call      inferred  library_inference  lvo -552 via A6 = exec.library/OpenLibrary(libName=a1=?unresolved_flow, version=d0=?unresolved_flow)  <L00000008,L00000010,abi:exec.library@-552>
+L00000014  @h0-insn-00000014   memory_access     certain   global_scan        write A5+0x8 size=4  <L00000014>
+L0000001A  @h0-insn-0000001a   reference         certain   reference_scan     -> abs 0xdff000 [abs operand]  <L0000001A>
+L00000020  @h0-insn-00000020   hardware_access   inferred  hardware_scan      write DMACON (custom+$096) [base-reg operand]  <L00000020>
+L0000002C  @h0-insn-0000002c   library_call      probable  library_inference  lvo -30 via A6 = unknown library  <L0000002C>
+L0000002C  @h0-insn-0000002c   library_conflict  probable  library_inference  lvo -30 via A6: conflicting bases exec.library (via L00000000) | graphics.library (via L0000000C,L00000010,L00000018)  <L00000000,L0000000C,L00000010,L00000018,L0000002C>
+L00000030  @h0-insn-00000030   hardware_access   certain   hardware_scan      read INTENAR (custom+$01c) [abs operand]  <L00000030>
+L00000030  @h0-insn-00000030   reference         certain   reference_scan     -> abs 0xdff01c [abs operand]  <L00000030>
+L00000036  @h0-insn-00000036   fixed_point       probable  fixed_point_scan   scaled multiply D3 Q8  <L00000036,L00000038>
+L00000038  @h0-insn-00000038   q_scale           probable  fixed_point_scan   D3 = Q8  <L00000038>
+L0000003A  @h0-insn-0000003a   call              certain   control_flow       call -> helper @ hunk0+0x42 (file 0x62) [in L00000000,L00000008]  <L0000003A>
+L0000003C  @h0-insn-0000003c   unresolved_flow   certain   control_flow       unresolved control flow  <L0000003C>
+L00000042  @h0-fn-00000042     function          certain   control_flow       entry helper @ hunk0+0x42 (file 0x62)  <L0000003A>
+L00000042  @h0-fn-00000042     function_signature probable  function_analysis  helper()  <L00000042>
+L00000042  @h0-fn-00000042     referenced_by     certain   control_flow       called from L0000003A  <L0000003A>
+L00000042  @h0-fn-00000042     referenced_by     certain   relocations        relocated from L00000056  <reloc@0x56>
+L00000042  @h0-sym-00000042    symbol            user      config             symbol helper @ hunk0+0x42 (file 0x62)  <config@0x42>
+L00000044  @h0-data-00000044   referenced_by     certain   reference_scan     addressed from L0000000C  <L0000000C>
+L00000044  @h0-data-00000044   data_region       probable  data_scan          data text hunk0+0x44 (file 0x64) 17 bytes "graphics.library"  <L0000000C>
+L00000056  @h0-data-00000056   relocation        certain   relocations        reloc32 -> helper @ hunk0+0x42 (file 0x62)  <reloc@0x56>

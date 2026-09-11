@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/analysis.address.resolve.response.schema.json",
+  "title": "analysis.address.resolve result",
+  "description": "Every reading of the value, each expressed in the frames it reaches.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "value",
+    "origin",
+    "as_absolute",
+    "as_hunk_relative"
+  ],
+  "$defs": {
+    "frames": {
+      "description": "One number in every frame that reading reaches. A frame is absent when the reading has none — a value below the mapped origin is not a hunk offset, and no reading has a whole-file position without an anchor.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "absolute": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "hunk_relative": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "whole_file": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    }
+  },
+  "properties": {
+    "source": {
+      "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourcePin"
+    },
+    "value": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 4294967295
+    },
+    "origin": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 4294967295
+    },
+    "hunk": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "hunk_file_offset": {
+      "description": "Where the anchoring hunk's bytes start in the file.",
+      "type": "integer",
+      "minimum": 0
+    },
+    "hunk_bytes": {
+      "description": "How many bytes the anchoring hunk holds, so a caller can tell a reading that lands inside it from one that lands just past the end.",
+      "type": "integer",
+      "minimum": 0
+    },
+    "as_absolute": {
+      "$ref": "#/$defs/frames"
+    },
+    "as_hunk_relative": {
+      "$ref": "#/$defs/frames"
+    },
+    "as_whole_file": {
+      "description": "Present only when a hunk anchors the frame.",
+      "$ref": "#/$defs/frames"
+    }
+  }
+}

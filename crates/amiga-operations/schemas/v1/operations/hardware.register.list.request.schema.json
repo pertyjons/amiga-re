@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/hardware.register.list.request.schema.json",
+  "title": "hardware.register.list request",
+  "description": "Report the custom-chip register map this build knows, writing nothing. `read_only`.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["operation", "arguments"],
+  "properties": {
+    "operation": { "const": "hardware.register.list" },
+    "arguments": {
+      "description": "None. The register map is knowledge this build carries, not a question about any file.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {}
+    }
+  },
+  "examples": [
+    { "operation": "hardware.register.list", "arguments": {} }
+  ]
+}

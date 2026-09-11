@@ -1,0 +1,24 @@
+[package]
+name = "amiga-hw"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+description = "Amiga custom-chip knowledge: Copper lists, register map, RGB4 and planar bitplanes."
+
+[lints]
+workspace = true
+
+[dependencies]
+amiga-core.workspace = true
+png.workspace = true
+serde.workspace = true
+thiserror.workspace = true
+
+# A custom main rather than the test harness: the figure this prints is the one
+# recorded beside the blit budget, and `cargo test` has no business running it.
+[[bench]]
+name = "blit_throughput"
+harness = false
+test = false

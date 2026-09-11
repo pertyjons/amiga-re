@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/project.resource.export.response.schema.json",
+  "title": "project.resource.export plan",
+  "description": "The file this resource produces, where it goes, and the artifact record that makes it live. The path is derived from the recipe key, so a re-export never overwrites the output the current record describes — the failure that would leave an Artifact confidently pointing at bytes it does not match.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "resource_id",
+    "artifact_id",
+    "media_type",
+    "recipe_key",
+    "path",
+    "size",
+    "sha256",
+    "plan",
+    "committed"
+  ],
+  "properties": {
+    "resource_id": { "type": "string" },
+    "artifact_id": { "type": "string" },
+    "media_type": { "type": "string" },
+    "recipe_key": {
+      "description": "The artifact key this output was produced from: the object digest, the fully resolved recipe, the export profile and the tool version.",
+      "type": "string"
+    },
+    "path": {
+      "description": "Where the file goes, relative to the project root.",
+      "type": "string"
+    },
+    "size": { "type": "integer", "minimum": 0 },
+    "sha256": {
+      "description": "The digest of the produced file, which is what a verify compares against the bytes on disk.",
+      "type": "string"
+    },
+    "superseded": {
+      "description": "Artifact records this export replaces. Their files are reported and never deleted: nothing in this toolkit removes an artifact behind a person's back.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "path"],
+        "properties": {
+          "id": { "type": "string" },
+          "path": { "type": "string" }
+        }
+      }
+    },
+    "plan": {
+      "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/writePlan"
+    },
+    "committed": { "type": "boolean" }
+  }
+}

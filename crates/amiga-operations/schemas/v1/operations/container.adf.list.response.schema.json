@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amiga-re.invalid/schemas/operations/v1/operations/container.adf.list.response.schema.json",
+  "title": "container.adf.list result",
+  "description": "A volume and its directory tree. Tolerated inconsistencies do not appear here: they are reported as `warning` diagnostics on the envelope, never dropped.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "source",
+    "volume",
+    "entries",
+    "entry_total",
+    "entries_truncated"
+  ],
+  "properties": {
+    "source": {
+      "$ref": "https://amiga-re.invalid/schemas/operations/v1/common.schema.json#/$defs/sourcePin"
+    },
+    "volume": { "$ref": "#/$defs/volume" },
+    "entries": {
+      "description": "Possibly capped. `entry_total` is always the true count.",
+      "type": "array",
+      "maxItems": 16777216,
+      "items": { "$ref": "#/$defs/entry" }
+    },
+    "entry_total": { "type": "integer", "minimum": 0 },
+    "entries_truncated": { "type": "boolean" }
+  },
+  "$defs": {
+    "volume": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "filesystem", "block_size", "root_block"],
+      "properties": {
+        "name": { "type": "string", "maxLength": 256 },
+        "filesystem": {
+          "description": "Which AmigaDOS filesystem the volume declares, read from bit 0 of the boot block's flag byte. The same thing that decides how a file's contents are recovered, so a listing says which reader applies rather than leaving that to an extraction that fails.",
+          "type": "string",
+          "enum": ["ofs", "ffs"]
+        },
+        "block_size": { "type": "integer", "minimum": 1 },
+        "root_block": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "kind", "size", "header_block"],
+      "properties": {
+        "path": {
+          "description": "Volume-relative and `/`-separated, never absolute.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096,
+          "pattern": "^[^/\\\\]+(/[^/\\\\]+)*$"
+        },
+        "kind": { "type": "string", "enum": ["file", "directory"] },
+        "size": { "type": "integer", "minimum": 0 },
+        "header_block": { "type": "integer", "minimum": 0 }
+      }
+    }
+  }
+}
